@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../fonts.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Corte de Cajas - T0151 Gran Plaza Mérida</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#F5F7FA">
+
+    <!-- ============================================================================
+         GUARD DE AUTENTICACIÓN — ejecuta ANTES de cargar el resto del <head>
+         Verifica que exista token de sesión de Supabase (heredado de ../index.html).
+         Si no hay sesión previa, oculta el documento y redirige al login.
+         ============================================================================ -->
+    <script>
+        (function() {
+            const SESSION_KEY = 'sb-mifbcyxtafeacwkzqzsq-auth-token';
+            const hasSession = localStorage.getItem(SESSION_KEY) !== null;
+            if (!hasSession) {
+                document.documentElement.style.visibility = 'hidden';
+                window.location.replace('../index.html');
+            }
+        })();
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@0.468.0"></script>
+<script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Geist', 'sans-serif'],
+                },
+                colors: {
+                    app: {
+                        bg: '#F5F7FA',
+                        card: '#FFFFFF',
+                        border: '#E5EAF0',
+                        title: '#172033',
+                        sub: '#64748B',
+                        brand: '#0D9488',
+                        accent: '#E6F6F4',
+                        active: '#CCFBF1'
+                    },
+                    darkapp: {
+                        bg: '#0F172A',
+                        card: '#1E293B',
+                        border: '#334155',
+                        title: '#F8FAFC',
+                        sub: '#94A3B8'
+                    }
+                }
+            }
+        }
+    }
+</script>
+    <style>
+        /* FIX #3: -webkit-tap-highlight-color dentro del selector */
+        html, body {
+            overscroll-behavior-y: contain;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* FIX #2: .dark html → html.dark */
+        html { background-color: #F5F7FA; }
+        html.dark { background-color: #0F172A; }
+        body { user-select: none; -webkit-user-select: none; }
+        input, select { user-select: text; -webkit-user-select: text; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        @keyframes pulseScale {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        .pulse-effect {
+            animation: pulseScale 0.2s ease-in-out;
+        }
+        /* FIX #11: eliminada regla body.compact-mode .zero-row (feature abandonada) */
+        body, .card, header, input, button {
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+    </style>
+</head>
+<body class="h-full bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title flex flex-col font-sans overflow-x-hidden antialiased">
+
+    <!-- Header Minimalista -->
+    <header class="bg-app-bg dark:bg-darkapp-bg border-b border-app-border dark:border-darkapp-border px-4 py-3 flex items-center justify-between shrink-0 z-10 sticky top-0">
+        <div class="flex items-center space-x-3">
+            <a href="../index.html" class="p-2 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 rounded-lg transition-all cursor-pointer" title="Ir al Inicio">
+                <i data-lucide="house" class="w-5 h-5"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-base leading-tight text-app-title dark:text-darkapp-title">Corte de Cajas</h1>
+                <p class="text-[11px] text-app-sub dark:text-darkapp-sub flex items-center gap-1.5 font-medium mt-0.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-app-brand inline-block"></span> T0151 - Gran Plaza Mérida
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors duration-200" title="Cambiar modo">
+                <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">
+                    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>
+                    <i data-lucide="moon" class="w-3.5 h-3.5 text-slate-400 dark:text-indigo-400 opacity-100 dark:opacity-40"></i>
+                </div>
+                <div class="w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center transform transition-transform duration-200 translate-x-0 dark:translate-x-6 z-10">
+                    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 dark:hidden"></i>
+                    <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400 hidden dark:block"></i>
+                </div>
+            </button>
+
+            <button id="btnClear" onclick="mostrarConfirmacionLimpiar()" class="h-9 px-3 text-app-sub hover:text-rose-500 dark:text-darkapp-sub dark:hover:text-rose-400 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer" title="Borrar Datos">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Borrar Datos</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Contenido Principal con pb-48 para permitir scroll completo con teclado virtual -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-6 pb-48 max-w-6xl mx-auto w-full space-y-1">
+
+        <div class="flex items-center gap-2 text-xs font-medium text-app-sub dark:text-darkapp-sub justify-center pb-2">
+            <i data-lucide="triangle-exclamation-point" class="w-4 h-4"></i>
+            <span>Borra los datos antes de realizar un nuevo corte de cajas</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Columna Izquierda: Captura de Datos -->
+            <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-5 md:p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-5">
+                <div class="flex items-center gap-2 pb-2 border-b border-app-border dark:border-darkapp-border">
+                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-app-brand dark:text-teal-400"></i>
+                    <h2 class="text-sm font-bold text-app-title dark:text-darkapp-title">Ingresa los datos de cada corte</h2>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b border-app-border dark:border-darkapp-border text-app-sub dark:text-darkapp-sub">
+                                <th class="py-3 px-2 font-medium"></th>
+                                <th class="py-3 px-2 font-semibold text-center w-1/4">Caja 1</th>
+                                <th class="py-3 px-2 font-semibold text-center w-1/4">Caja 2</th>
+                                <th class="py-3 px-2 font-semibold text-center w-1/4">Caja 3</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-app-border/50 dark:divide-darkapp-border/50">
+                            <!-- FIX #9: eliminados onchange="triggerCalculate()" (redundantes con el listener global) -->
+                            <tr>
+                                <td class="py-3 px-2 font-semibold text-app-title dark:text-darkapp-title">Cajero</td>
+                                <td class="py-3 px-1 text-center">
+                                    <input type="hidden" id="cajero_c1" value="-">
+                                    <div class="dropdown relative inline-block w-full">
+                                        <button type="button" id="btn_cajero_c1" class="w-full h-8 flex items-center justify-between px-2.5 rounded-lg text-[11px] font-medium bg-app-bg hover:bg-slate-200 dark:bg-slate-800/60 dark:hover:bg-slate-700/60 text-app-title dark:text-darkapp-title transition-colors border-none" onclick="toggleDropdown(event, 'menu_cajero_c1')">
+                                            <span id="text_cajero_c1" class="truncate">-</span> <i class="fa-solid fa-chevron-down text-app-sub" style="font-size: 8px; margin-left: 2px;"></i>
+                                        </button>
+                                        <div id="menu_cajero_c1" class="dropdown-content hidden absolute left-0 mt-1 bg-app-card dark:bg-darkapp-card w-full min-w-[120px] shadow-lg border border-app-border dark:border-darkapp-border rounded-lg z-[9999] py-1 text-left"></div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-1 text-center">
+                                    <input type="hidden" id="cajero_c2" value="-">
+                                    <div class="dropdown relative inline-block w-full">
+                                        <button type="button" id="btn_cajero_c2" class="w-full h-8 flex items-center justify-between px-2.5 rounded-lg text-[11px] font-medium bg-app-bg hover:bg-slate-200 dark:bg-slate-800/60 dark:hover:bg-slate-700/60 text-app-title dark:text-darkapp-title transition-colors border-none" onclick="toggleDropdown(event, 'menu_cajero_c2')">
+                                            <span id="text_cajero_c2" class="truncate">-</span> <i class="fa-solid fa-chevron-down text-app-sub" style="font-size: 8px; margin-left: 2px;"></i>
+                                        </button>
+                                        <div id="menu_cajero_c2" class="dropdown-content hidden absolute left-0 mt-1 bg-app-card dark:bg-darkapp-card w-full min-w-[120px] shadow-lg border border-app-border dark:border-darkapp-border rounded-lg z-[9999] py-1 text-left"></div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-1 text-center">
+                                    <input type="hidden" id="cajero_c3" value="-">
+                                    <div class="dropdown relative inline-block w-full">
+                                        <button type="button" id="btn_cajero_c3" class="w-full h-8 flex items-center justify-between px-2.5 rounded-lg text-[11px] font-medium bg-app-bg hover:bg-slate-200 dark:bg-slate-800/60 dark:hover:bg-slate-700/60 text-app-title dark:text-darkapp-title transition-colors border-none" onclick="toggleDropdown(event, 'menu_cajero_c3')">
+                                            <span id="text_cajero_c3" class="truncate">-</span> <i class="fa-solid fa-chevron-down text-app-sub" style="font-size: 8px; margin-left: 2px;"></i>
+                                        </button>
+                                        <div id="menu_cajero_c3" class="dropdown-content hidden absolute left-0 mt-1 bg-app-card dark:bg-darkapp-card w-full min-w-[120px] shadow-lg border border-app-border dark:border-darkapp-border rounded-lg z-[9999] py-1 text-left"></div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr id="row_esp">
+                                <td class="py-2.5 px-2 text-app-sub dark:text-darkapp-sub">Imp. Esperado</td>
+                                <td class="py-2.5 px-1"><input type="text" id="esp_c1" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="1" data-row="1" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="esp_c2" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="2" data-row="1" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="esp_c3" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="3" data-row="1" placeholder="$0.00"></td>
+                            </tr>
+                            <tr id="row_rec">
+                                <td class="py-2.5 px-2 text-app-sub dark:text-darkapp-sub">Imp. Recogido</td>
+                                <td class="py-2.5 px-1"><input type="text" id="rec_c1" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="1" data-row="2" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="rec_c2" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="2" data-row="2" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="rec_c3" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="3" data-row="2" placeholder="$0.00"></td>
+                            </tr>
+                            <tr id="row_deb">
+                                <td class="py-2.5 px-2 text-app-sub dark:text-darkapp-sub">Débito</td>
+                                <td class="py-2.5 px-1"><input type="text" id="deb_c1" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="1" data-row="3" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="deb_c2" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="2" data-row="3" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="deb_c3" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="3" data-row="3" placeholder="$0.00"></td>
+                            </tr>
+                            <tr id="row_cred">
+                                <td class="py-2.5 px-2 text-app-sub dark:text-darkapp-sub">Crédito</td>
+                                <td class="py-2.5 px-1"><input type="text" id="cred_c1" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="1" data-row="4" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="cred_c2" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="2" data-row="4" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="cred_c3" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="3" data-row="4" placeholder="$0.00"></td>
+                            </tr>
+                            <tr id="row_amex">
+                                <td class="py-2.5 px-2 text-app-sub dark:text-darkapp-sub">AMEX</td>
+                                <td class="py-2.5 px-1"><input type="text" id="amex_c1" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="1" data-row="5" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="amex_c2" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="2" data-row="5" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="amex_c3" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="3" data-row="5" placeholder="$0.00"></td>
+                            </tr>
+                            <tr id="row_tpv_deb">
+                                <td class="py-2.5 px-2 text-app-sub dark:text-darkapp-sub">TPV Débito</td>
+                                <td class="py-2.5 px-1"><input type="text" id="tpv_deb_c1" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="1" data-row="6" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="tpv_deb_c2" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="2" data-row="6" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="tpv_deb_c3" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="3" data-row="6" placeholder="$0.00"></td>
+                            </tr>
+                            <tr id="row_tpv_cred">
+                                <td class="py-2.5 px-2 text-app-sub dark:text-darkapp-sub">TPV Crédito</td>
+                                <td class="py-2.5 px-1"><input type="text" id="tpv_cred_c1" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="1" data-row="7" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="tpv_cred_c2" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="2" data-row="7" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="tpv_cred_c3" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="3" data-row="7" placeholder="$0.00"></td>
+                            </tr>
+                            <tr id="row_rappi">
+                                <td class="py-2.5 px-2 text-app-sub dark:text-darkapp-sub">Rappi</td>
+                                <td class="py-2.5 px-1"><input type="text" id="rappi_c1" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="1" data-row="8" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="rappi_c2" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="2" data-row="8" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="rappi_c3" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="3" data-row="8" placeholder="$0.00"></td>
+                            </tr>
+                            <tr id="row_uber">
+                                <td class="py-2.5 px-2 text-app-sub dark:text-darkapp-sub">Uber</td>
+                                <td class="py-2.5 px-1"><input type="text" id="uber_c1" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="1" data-row="9" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="uber_c2" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="2" data-row="9" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="uber_c3" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="3" data-row="9" placeholder="$0.00"></td>
+                            </tr>
+                            <tr id="row_didi">
+                                <td class="py-2.5 px-2 text-app-sub dark:text-darkapp-sub">DiDi</td>
+                                <td class="py-2.5 px-1"><input type="text" id="didi_c1" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="1" data-row="10" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="didi_c2" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="2" data-row="10" placeholder="$0.00"></td>
+                                <td class="py-2.5 px-1"><input type="text" id="didi_c3" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" data-col="3" data-row="10" placeholder="$0.00"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-app-border dark:border-darkapp-border">
+                    <div class="flex flex-col justify-between">
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider text-app-sub dark:text-darkapp-sub mb-2 text-center">Número de Retiros</label>
+                        <input type="text" id="num_retiros" data-teclado inputmode="none" readonly class="input-cell raw-number-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-center outline-none transition-all focus:ring-2 focus:ring-app-brand/20" placeholder="0">
+                    </div>
+                    <div class="flex flex-col justify-between">
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider text-app-sub dark:text-darkapp-sub mb-2 text-center">Respetos de Precio</label>
+                        <input type="text" id="respeto_precio" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-center outline-none transition-all focus:ring-2 focus:ring-app-brand/20" placeholder="$0.00">
+                    </div>
+                    <div class="flex flex-col justify-between">
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider text-app-sub dark:text-darkapp-sub mb-2 text-center">Cajas Abiertas</label>
+                        <input type="text" id="cajas_abiertas" data-teclado inputmode="none" readonly class="input-cell raw-number-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-center outline-none transition-all focus:ring-2 focus:ring-app-brand/20" placeholder="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha Dividida en Dos Tarjetas -->
+            <div class="flex flex-col gap-6">
+
+                <!-- Tarjeta 1: Conciliación de Ventas -->
+                <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-5 md:p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-5">
+                    <div class="flex items-center gap-2 pb-2 border-b border-app-border dark:border-darkapp-border">
+                        <i data-lucide="clipboard-list" class="w-5 h-5 text-app-brand dark:text-teal-400"></i>
+                        <h2 class="text-sm font-bold text-app-title dark:text-darkapp-title">Conciliación de Ventas</h2>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="border-b border-app-border dark:border-darkapp-border text-app-sub dark:text-darkapp-sub font-semibold text-center">
+                                    <th class="py-3 px-3 w-1/2">TEÓRICO</th>
+                                    <th class="py-3 px-3 w-1/2">REAL</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-app-border/50 dark:divide-darkapp-border/50">
+                                <tr>
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-bold text-app-title dark:text-darkapp-title truncate min-w-0" id="t_efectivo">$0.00</span>
+                                            <span class="text-app-sub dark:text-darkapp-sub shrink-0">Efectivo</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-bold text-app-title dark:text-darkapp-title truncate min-w-0" id="r_efectivo">$0.00</span>
+                                            <span class="text-app-sub dark:text-darkapp-sub shrink-0">Efectivo</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-bold text-app-title dark:text-darkapp-title truncate min-w-0" id="t_amex">$0.00</span>
+                                            <span class="text-app-sub dark:text-darkapp-sub shrink-0">AMEX</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-bold text-app-title dark:text-darkapp-title truncate min-w-0" id="r_amex">$0.00</span>
+                                            <span class="text-app-sub dark:text-darkapp-sub shrink-0">AMEX</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-bold text-app-brand dark:text-teal-400 truncate min-w-0" id="t_debito">$0.00</span>
+                                            <span class="text-app-brand dark:text-teal-400 font-medium shrink-0">Débito</span>
+                                        </div>
+                                    </td>
+                                    <td rowspan="2" class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap h-full">
+                                            <span class="font-bold text-app-brand dark:text-teal-400 truncate min-w-0" id="r_bbva">$0.00</span>
+                                            <span class="text-app-brand dark:text-teal-400 font-medium shrink-0">BBVA</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-bold text-app-brand dark:text-teal-400 truncate min-w-0" id="t_credito">$0.00</span>
+                                            <span class="text-app-brand dark:text-teal-400 font-medium shrink-0">Crédito</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-bold text-app-title dark:text-darkapp-title truncate min-w-0" id="t_deb_mcard">$0.00</span>
+                                            <span class="text-app-sub dark:text-darkapp-sub shrink-0">Déb M Card</span>
+                                        </div>
+                                    </td>
+                                    <td rowspan="2" class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap h-full">
+                                            <span class="font-bold text-app-title dark:text-darkapp-title truncate min-w-0" id="r_total_tpv">$0.00</span>
+                                            <span class="text-app-sub dark:text-darkapp-sub shrink-0">Total TPV</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-bold text-app-title dark:text-darkapp-title truncate min-w-0" id="t_cred_mcard">$0.00</span>
+                                            <span class="text-app-sub dark:text-darkapp-sub shrink-0">Créd M Card</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-bold text-pink-600 dark:text-pink-400 truncate min-w-0" id="t_rappi">$0.00</span>
+                                            <span class="text-pink-600 dark:text-pink-400 font-medium shrink-0">Rappi</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-bold text-pink-600 dark:text-pink-400 truncate min-w-0" id="r_rappi">$0.00</span>
+                                            <span class="text-pink-600 dark:text-pink-400 font-medium shrink-0">Rappi</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="bg-app-bg dark:bg-slate-800/40 font-semibold border-t border-app-border dark:border-darkapp-border">
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-extrabold text-app-title dark:text-darkapp-title truncate min-w-0" id="t_subtotal">$0.00</span>
+                                            <span class="text-app-sub dark:text-darkapp-sub shrink-0">Subtotal</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-extrabold text-app-title dark:text-darkapp-title truncate min-w-0" id="r_subtotal">$0.00</span>
+                                            <span class="text-app-sub dark:text-darkapp-sub shrink-0">Subtotal</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-bold text-app-title dark:text-darkapp-title truncate min-w-0" id="t_menos_fondo">$0.00</span>
+                                            <span class="text-app-sub dark:text-darkapp-sub shrink-0 whitespace-nowrap">Menos Fondo</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-2">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-bold text-app-title dark:text-darkapp-title truncate min-w-0" id="r_mas_folios">$0.00</span>
+                                            <span class="text-app-sub dark:text-darkapp-sub shrink-0 whitespace-nowrap">Mas Folios</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="bg-app-bg dark:bg-slate-800/60 font-bold text-sm border-t border-app-border dark:border-darkapp-border">
+                                    <td class="p-3">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-black text-app-title dark:text-darkapp-title truncate min-w-0" id="t_total">$0.00</span>
+                                            <span class="text-app-sub dark:text-darkapp-sub shrink-0">Total</span>
+                                        </div>
+                                    </td>
+                                    <td class="p-3">
+                                        <div class="flex justify-between items-center px-1 py-1 w-full gap-2 whitespace-nowrap">
+                                            <span class="font-black text-app-title dark:text-darkapp-title truncate min-w-0" id="r_total">$0.00</span>
+                                            <span class="text-app-sub dark:text-darkapp-sub shrink-0">Total</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="box_dif_general" class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-xl p-4 text-center transition-colors duration-300 mt-2">
+                        <span id="label_dif_general" class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">Diferencia</span>
+                        <div class="text-2xl font-black text-app-title dark:text-darkapp-title mt-1" id="diferencia_general">$0.00</div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2: Sección Inferior Uniforme -->
+                <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-5 md:p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4">
+
+                    <div class="flex justify-between items-center px-1">
+                        <span class="text-xs font-medium text-app-sub dark:text-darkapp-sub">Neto Total POS:</span>
+                        <input type="text" id="total_pos" data-teclado inputmode="none" readonly class="input-cell currency-input w-32 bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2.5 py-1.5 text-xs font-semibold text-app-title dark:text-darkapp-title text-right outline-none transition-all focus:ring-2 focus:ring-app-brand/20" placeholder="$0.00">
+                    </div>
+
+                    <div class="flex justify-between items-center px-1">
+                        <span class="text-xs font-medium text-app-sub dark:text-darkapp-sub">Conciliación:</span>
+                        <span id="conciliacion_val" class="font-bold text-sm text-app-title dark:text-darkapp-title px-2.5 py-1">$0.00</span>
+                    </div>
+
+                    <div class="flex justify-between items-center px-1">
+                        <span class="text-xs font-medium text-app-sub dark:text-darkapp-sub">Dif. Archivo Presupuesto:</span>
+                        <div id="box_dif_presupuesto" class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-lg px-3 py-1.5 text-center inline-block transition-colors duration-300">
+                            <span id="dif_conciliacion_val" class="font-extrabold text-xs text-app-title dark:text-darkapp-title">$0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center px-1">
+                        <label for="responsable_cierre" class="text-xs font-medium text-app-sub dark:text-darkapp-sub">Responsable Cierre:</label>
+                        <input type="hidden" id="responsable_cierre" value="-">
+                        <div class="dropdown relative inline-block w-36">
+                            <button type="button" id="btn_responsable_cierre" class="w-full h-8 flex items-center justify-between px-2.5 rounded-lg text-[11px] font-medium bg-app-bg dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-700/60 text-app-title dark:text-darkapp-title transition-colors border-none cursor-pointer" onclick="toggleDropdown(event, 'menu_responsable_cierre')">
+                                <span id="text_responsable_cierre" class="truncate">-</span> <i class="fa-solid fa-chevron-down text-app-sub" style="font-size: 8px; margin-left: 2px;"></i>
+                            </button>
+                            <div id="menu_responsable_cierre" class="dropdown-content hidden bottom-full mb-1 right-0 bg-app-card dark:bg-darkapp-card w-full min-w-[140px] shadow-lg border border-app-border dark:border-darkapp-border rounded-lg z-[9999] py-1 text-left"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal de Confirmación Minimalista -->
+    <div id="confirmDeleteModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10005] flex items-center justify-center p-4 hidden">
+        <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-xl text-center space-y-5">
+            <div class="text-rose-500 flex justify-center mx-auto">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <p class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">
+                ¡Esta acción no se puede deshacer! <br> ¿Desea continuar?
+            </p>
+            <div class="flex justify-center items-center gap-2 w-full pt-2">
+                <button onclick="cerrarConfirmacionLimpiar()" class="py-2 px-4 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg font-semibold text-xs transition-all cursor-pointer shrink-0">
+                    Cancelar
+                </button>
+                <button onclick="limpiarTodosLosDatos()" class="py-2 px-4 bg-rose-500 hover:bg-rose-600 text-white rounded-lg font-semibold text-xs shadow-sm transition-all cursor-pointer">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GUARD DE SESIÓN (complemento al script inline del <head>) ---
+        // Detecta logout realizado en otra pestaña (p.ej. desde ../index.html)
+        (function() {
+            const SESSION_KEY = 'sb-mifbcyxtafeacwkzqzsq-auth-token';
+            window.addEventListener('storage', (e) => {
+                if (e.key === SESSION_KEY && !e.newValue) {
+                    window.location.replace('../index.html');
+                }
+            });
+        })();
+
+        // --- SERVICE WORKER ---
+        function initServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .then((registration) => console.log('[PWA] SW OK en Corte:', registration.scope))
+                    .catch((error) => console.error('[PWA] SW error:', error));
+            }
+        }
+
+        // --- TEMA (FIX #10: sin lucide.createIcons redundante) ---
+        const btnThemeToggle = document.getElementById('btn-theme-toggle');
+        const htmlElement = document.documentElement;
+
+        function setTheme(isDark) {
+            const themeMeta = document.querySelector('meta[name="theme-color"]');
+            if (isDark) {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                if (themeMeta) themeMeta.setAttribute('content', '#0f172a');
+            } else {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                if (themeMeta) themeMeta.setAttribute('content', '#F5F7FA');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        setTheme(savedTheme !== 'light');
+        lucide.createIcons(); // Render inicial de iconos (una sola vez)
+
+        btnThemeToggle.addEventListener('click', () => {
+            const isDarkActive = htmlElement.classList.contains('dark');
+            setTheme(!isDarkActive);
+        });
+
+        // --- FOCUS / BLUR para resaltado ---
+        document.addEventListener('focusin', (e) => {
+            const input = e.target.closest('input[data-teclado], .input-cell');
+            if (input) {
+                document.querySelectorAll('input[data-teclado]').forEach(i => {
+                    i.classList.remove('ring-2', 'ring-app-brand/20');
+                });
+                input.classList.add('ring-2', 'ring-app-brand/20');
+                setTimeout(() => {
+                    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    input.classList.add('ring-2', 'ring-app-brand/20');
+                }, 100);
+            }
+        });
+
+        document.addEventListener('focusout', (e) => {
+            const input = e.target.closest('input[data-teclado]');
+            if (input) {
+                input.classList.remove('ring-2', 'ring-app-brand/20');
+            }
+        });
+
+        // --- LISTAS ---
+        const listaCajeros = ["-", "Aria R.", "José M.", "Eduardo P.", "Jesús F.", "Fer I.", "Ana N.", "Apoyo"];
+        const listaCierre = ["-", "Jesús F.", "Fer I.", "Ana N.", "Apoyo"];
+
+        // --- DROPDOWNS (FIX #4: window.onclick → addEventListener) ---
+        window.addEventListener('click', (event) => {
+            if (!event.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown-content').forEach(dd => dd.classList.add('hidden'));
+            }
+        });
+
+        function toggleDropdown(event, dropdownId) {
+            event.stopPropagation();
+            document.querySelectorAll('.dropdown-content').forEach(dd => {
+                if (dd.id !== dropdownId) dd.classList.add('hidden');
+            });
+            document.getElementById(dropdownId).classList.toggle('hidden');
+        }
+
+        function seleccionarOpcionDropdown(inputId, spanId, menuId, valor) {
+            const input = document.getElementById(inputId);
+            const span = document.getElementById(spanId);
+            if (input && span) {
+                input.value = valor;
+                span.textContent = valor;
+                input.dispatchEvent(new Event('change'));
+            }
+            document.getElementById(menuId).classList.add('hidden');
+        }
+
+        // FIX #9: eliminado triggerCalculate (redundante con listener global)
+
+        function populateSelects() {
+            const c1Menu = document.getElementById('menu_cajero_c1');
+            c1Menu.innerHTML = listaCajeros.map(opt => `<button type="button" onclick="seleccionarOpcionDropdown('cajero_c1', 'text_cajero_c1', 'menu_cajero_c1', '${opt}')" class="w-full px-3 py-2 text-left text-xs font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">${opt}</button>`).join('');
+
+            const c2Menu = document.getElementById('menu_cajero_c2');
+            c2Menu.innerHTML = listaCajeros.map(opt => `<button type="button" onclick="seleccionarOpcionDropdown('cajero_c2', 'text_cajero_c2', 'menu_cajero_c2', '${opt}')" class="w-full px-3 py-2 text-left text-xs font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">${opt}</button>`).join('');
+
+            const c3Menu = document.getElementById('menu_cajero_c3');
+            c3Menu.innerHTML = listaCajeros.map(opt => `<button type="button" onclick="seleccionarOpcionDropdown('cajero_c3', 'text_cajero_c3', 'menu_cajero_c3', '${opt}')" class="w-full px-3 py-2 text-left text-xs font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">${opt}</button>`).join('');
+
+            const cierreMenu = document.getElementById('menu_responsable_cierre');
+            cierreMenu.innerHTML = listaCierre.map(opt => `<button type="button" onclick="seleccionarOpcionDropdown('responsable_cierre', 'text_responsable_cierre', 'menu_responsable_cierre', '${opt}')" class="w-full px-3 py-2 text-left text-xs font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">${opt}</button>`).join('');
+        }
+
+        // --- PARSEO Y FORMATO ---
+        function parseNumeric(valStr) {
+            if (!valStr) return 0;
+            const cleaned = valStr.toString().replace(/[^0-9.-]/g, '');
+            const val = parseFloat(cleaned);
+            return isNaN(val) ? 0 : val;
+        }
+
+        function getVal(id) {
+            const el = document.getElementById(id);
+            if (!el) return 0;
+            return parseNumeric(el.value);
+        }
+
+        function formatCurrency(amount, withSign = false) {
+            const isNeg = amount < 0;
+            const absVal = Math.abs(amount).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (withSign) {
+                if (amount > 0) return `+$${absVal}`;
+                if (amount < 0) return `-$${absVal}`;
+                return `$${absVal}`;
+            }
+            return isNeg ? `-$${absVal}` : `$${absVal}`;
+        }
+
+        // FIX #8: pulse-effect solo cuando el valor cambia
+        function setFormattedCell(id, amount, withSign = false) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const newText = formatCurrency(amount, withSign);
+            const changed = el.textContent !== newText;
+            el.textContent = newText;
+
+            if (amount < 0) {
+                el.classList.add('text-red-500', 'dark:text-red-400');
+            } else {
+                el.classList.remove('text-red-500', 'dark:text-red-400');
+            }
+
+            if (changed) {
+                el.classList.remove('pulse-effect');
+                void el.offsetWidth;
+                el.classList.add('pulse-effect');
+            }
+        }
+
+        // FIX #1: updateSemaforo con classList explícito (sin regex destructivo)
+        const SEMAFORO_ALL = [
+            'bg-emerald-50','dark:bg-emerald-950/30','border-emerald-200','dark:border-emerald-900/50','text-emerald-600','dark:text-emerald-400',
+            'bg-rose-50','dark:bg-rose-950/30','border-rose-200','dark:border-rose-900/50','text-rose-600','dark:text-rose-400',
+            'bg-sky-50','dark:bg-sky-950/30','border-sky-200','dark:border-sky-900/50','text-sky-600','dark:text-sky-400',
+            'bg-amber-50','dark:bg-amber-950/30','border-amber-200','dark:border-amber-900/50','text-amber-600','dark:text-amber-400'
+        ];
+
+        function updateSemaforo(boxId, labelId, amount) {
+            const box = document.getElementById(boxId);
+            if (!box) return;
+            const label = labelId ? document.getElementById(labelId) : null;
+
+            box.classList.remove(...SEMAFORO_ALL);
+            if (label) label.classList.remove(...SEMAFORO_ALL);
+
+            let colorClasses, textClasses;
+            if (amount === 0) {
+                colorClasses = ['bg-emerald-50','dark:bg-emerald-950/30','border-emerald-200','dark:border-emerald-900/50'];
+                textClasses = ['text-emerald-600','dark:text-emerald-400'];
+            } else if (amount < 0) {
+                colorClasses = ['bg-rose-50','dark:bg-rose-950/30','border-rose-200','dark:border-rose-900/50'];
+                textClasses = ['text-rose-600','dark:text-rose-400'];
+            } else {
+                colorClasses = ['bg-sky-50','dark:bg-sky-950/30','border-sky-200','dark:border-sky-900/50'];
+                textClasses = ['text-sky-600','dark:text-sky-400'];
+            }
+            box.classList.add(...colorClasses);
+            box.classList.add('border', 'rounded-xl');
+            if (label) label.classList.add(...textClasses);
+        }
+
+        function formatInputField(input) {
+            const num = parseNumeric(input.value);
+            if (input.value.trim() === '') {
+                input.value = '';
+                return;
+            }
+            input.value = formatCurrency(num);
+        }
+
+        function unformatInputField(input) {
+            const num = parseNumeric(input.value);
+            if (num === 0 && input.value.trim() === '') {
+                input.value = '';
+            } else {
+                input.value = num;
+            }
+        }
+
+        // --- CÁLCULO PRINCIPAL ---
+        function calculateAll() {
+            // FIX #6: retiros y cajas como enteros >= 0
+            const numRetiros = Math.max(0, Math.floor(getVal('num_retiros')));
+            const retirosMonto = numRetiros * 5000;
+            const espTotal = getVal('esp_c1') + getVal('esp_c2') + getVal('esp_c3');
+            const recTotal = getVal('rec_c1') + getVal('rec_c2') + getVal('rec_c3');
+            const amexTotal = getVal('amex_c1') + getVal('amex_c2') + getVal('amex_c3');
+            const debTotal = getVal('deb_c1') + getVal('deb_c2') + getVal('deb_c3');
+            const credTotal = getVal('cred_c1') + getVal('cred_c2') + getVal('cred_c3');
+            const tpvDebTotal = getVal('tpv_deb_c1') + getVal('tpv_deb_c2') + getVal('tpv_deb_c3');
+            const tpvCredTotal = getVal('tpv_cred_c1') + getVal('tpv_cred_c2') + getVal('tpv_cred_c3');
+            const rappiTotal = getVal('rappi_c1') + getVal('rappi_c2') + getVal('rappi_c3') +
+                               getVal('uber_c1') + getVal('uber_c2') + getVal('uber_c3') +
+                               getVal('didi_c1') + getVal('didi_c2') + getVal('didi_c3');
+
+            const respetoPrecio = getVal('respeto_precio');
+            // FIX #6: cajas abiertas como entero >= 0
+            const cajasAbiertas = Math.max(0, Math.floor(getVal('cajas_abiertas')));
+            const menosFondo = cajasAbiertas * 2000;
+
+            // FIX #11: eliminado bloque rowsToCheck/zero-row (feature abandonada)
+
+            const tEfectivo = retirosMonto + espTotal;
+            const tAmex = amexTotal;
+            const tDebito = debTotal;
+            const tCredito = credTotal;
+            const tDebMCard = tpvDebTotal;
+            const tCredMCard = tpvCredTotal;
+            const tRappi = rappiTotal;
+            const tSubtotal = tEfectivo + tAmex + tDebito + tCredito + tDebMCard + tCredMCard + tRappi;
+            const tTotal = tSubtotal - menosFondo;
+
+            setFormattedCell('t_efectivo', tEfectivo);
+            setFormattedCell('t_amex', tAmex);
+            setFormattedCell('t_debito', tDebito);
+            setFormattedCell('t_credito', tCredito);
+            setFormattedCell('t_deb_mcard', tDebMCard);
+            setFormattedCell('t_cred_mcard', tCredMCard);
+            setFormattedCell('t_rappi', tRappi);
+            setFormattedCell('t_subtotal', tSubtotal);
+            setFormattedCell('t_menos_fondo', menosFondo);
+            setFormattedCell('t_total', tTotal);
+
+            const rEfectivo = retirosMonto + recTotal;
+            const rAmex = amexTotal;
+            const rBbva = tDebito + tCredito;
+            const rTotalTpv = tDebMCard + tCredMCard;
+            const rRappi = rappiTotal;
+            const rSubtotal = rEfectivo + rAmex + rBbva + rTotalTpv + rRappi;
+            const rMasFolios = respetoPrecio;
+            const rTotal = rSubtotal + rMasFolios;
+
+            setFormattedCell('r_efectivo', rEfectivo);
+            setFormattedCell('r_amex', rAmex);
+            setFormattedCell('r_bbva', rBbva);
+            setFormattedCell('r_total_tpv', rTotalTpv);
+            setFormattedCell('r_rappi', rRappi);
+            setFormattedCell('r_subtotal', rSubtotal);
+            setFormattedCell('r_mas_folios', rMasFolios);
+            setFormattedCell('r_total', rTotal);
+
+            const difGeneral = rTotal - tTotal;
+            setFormattedCell('diferencia_general', difGeneral, true);
+            updateSemaforo('box_dif_general', 'label_dif_general', difGeneral);
+
+            const conciliacion = rTotal;
+            const totalPos = getVal('total_pos');
+            const difConciliacion = conciliacion - totalPos - respetoPrecio;
+
+            setFormattedCell('conciliacion_val', conciliacion);
+            setFormattedCell('dif_conciliacion_val', difConciliacion, true);
+            updateSemaforo('box_dif_presupuesto', null, difConciliacion);
+
+            saveData();
+        }
+
+        // --- PERSISTENCIA ---
+        // FIX #13: eliminada la segunda pasada redundante de hidden inputs
+        function saveData() {
+            const data = {};
+            document.querySelectorAll('input, select').forEach(el => {
+                if (el.id) data[el.id] = el.value;
+            });
+            localStorage.setItem('corte_cajas_t0151_data', JSON.stringify(data));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('corte_cajas_t0151_data');
+            if (!saved) return;
+            try {
+                const data = JSON.parse(saved);
+                Object.keys(data).forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.value = data[id];
+                        const spanEl = document.getElementById('text_' + id);
+                        if (spanEl) spanEl.textContent = data[id];
+                    }
+                });
+                // Re-formatear currency inputs (por datos legacy sin formato)
+                document.querySelectorAll('.currency-input').forEach(input => {
+                    if (input.value && document.activeElement !== input) {
+                        formatInputField(input);
+                    }
+                });
+            } catch (e) {
+                console.error("Error al cargar datos", e);
+            }
+        }
+
+        // --- LIMPIEZA ---
+        // FIX #15: eliminado lucide.createIcons (modal ya renderizado)
+        function mostrarConfirmacionLimpiar() {
+            document.getElementById('confirmDeleteModal').classList.remove('hidden');
+        }
+
+        function cerrarConfirmacionLimpiar() {
+            document.getElementById('confirmDeleteModal').classList.add('hidden');
+        }
+
+        function limpiarTodosLosDatos() {
+            cerrarConfirmacionLimpiar();
+            document.querySelectorAll('input').forEach(input => {
+                if (input.type !== 'hidden') input.value = '';
+            });
+            ['cajero_c1', 'cajero_c2', 'cajero_c3', 'responsable_cierre'].forEach(id => {
+                const hiddenEl = document.getElementById(id);
+                if (hiddenEl) hiddenEl.value = "-";
+                const spanEl = document.getElementById('text_' + id);
+                if (spanEl) spanEl.textContent = "-";
+            });
+            localStorage.removeItem('corte_cajas_t0151_data');
+            calculateAll();
+        }
+
+        // --- NAVEGACIÓN CON ENTER ---
+        function handleEnterNavigation(currentInput) {
+            const col = currentInput.getAttribute('data-col');
+            const row = parseInt(currentInput.getAttribute('data-row'), 10);
+            if (col && !isNaN(row)) {
+                const nextRow = row + 1;
+                const nextInput = document.querySelector(`input[data-col="${col}"][data-row="${nextRow}"]`);
+                if (nextInput) {
+                    nextInput.focus();
+                    return;
+                }
+            }
+            currentInput.blur();
+        }
+
+        // --- DETECCIÓN DE DISPOSITIVO (criterio robusto: UA mobile + touch fallback) ---
+// Debe ser IDÉNTICO al de teclado.js para mantener sincronía de estados.
+function isMobileDevice() {
+    // 1. UA mobile: indicador principal
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent)) {
+        return true;
+    }
+    // 2. Fallback: tablet/iPad moderno sin mouse/trackpad
+    const hasTouch = (navigator.maxTouchPoints > 0) || ('ontouchstart' in window);
+    if (!hasTouch) return false;
+    const hasFine = window.matchMedia && window.matchMedia('(any-pointer: fine)').matches;
+    return !hasFine;
+}
+
+        // --- INTERACCIONES ---
+        function initInteractions() {
+    // Habilitar teclado físico solo en dispositivos NO móviles.
+    // En móvil (aunque tenga mouse Bluetooth), se mantiene readonly y
+    // el teclado virtual de teclado.js se encarga de la entrada.
+    if (!isMobileDevice()) {      // ← CAMBIO
+        document.querySelectorAll('input[data-teclado]').forEach(input => {
+            input.removeAttribute('readonly');
+            input.setAttribute('inputmode', 'decimal');
+        });
+    }
+
+            // FIX #5: eliminado handler de input[type=number] (no existen en el DOM)
+
+            document.querySelectorAll('.input-cell').forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' || e.key === 'Tab' || e.key === 'Backspace' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Delete') {
+                        return;
+                    }
+                    const charCode = e.which ? e.which : e.keyCode;
+                    const charStr = String.fromCharCode(charCode);
+                    if (!/[0-9.-]/.test(charStr)) {
+                        e.preventDefault();
+                    }
+                });
+
+                input.addEventListener('input', function() {
+                    const cleanedValue = this.value.replace(/[^0-9.-]/g, '');
+                    if (this.value !== cleanedValue) {
+                        this.value = cleanedValue;
+                    }
+                });
+            });
+
+            document.querySelectorAll('input').forEach(input => {
+                const handleSelect = function() {
+                    setTimeout(() => {
+                        this.select();
+                    }, 10);
+                };
+                input.addEventListener('focus', handleSelect);
+                input.addEventListener('click', handleSelect);
+            });
+
+            document.querySelectorAll('.currency-input, .raw-number-input').forEach(input => {
+                input.addEventListener('focus', function() {
+                    unformatInputField(this);
+                });
+                input.addEventListener('blur', function() {
+                    if (this.classList.contains('currency-input')) {
+                        formatInputField(this);
+                    }
+                });
+                input.addEventListener('change', function() {
+                    if (this.classList.contains('currency-input')) {
+                        formatInputField(this);
+                    }
+                });
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (this.classList.contains('currency-input')) {
+                            formatInputField(this);
+                        }
+                        handleEnterNavigation(this);
+                    }
+                });
+            });
+
+            // Listener global de cambios para recalcular (incluye hidden inputs)
+            document.querySelectorAll('input, select').forEach(el => {
+                el.addEventListener('input', calculateAll);
+                el.addEventListener('change', calculateAll);
+            });
+        }
+
+        // --- INICIALIZACIÓN ---
+        window.addEventListener('DOMContentLoaded', () => {
+            initServiceWorker();
+            populateSelects();
+            loadData();
+            initInteractions();
+            calculateAll();
+        });
+    </script>
+    <script src="../src/teclado.js"></script>
+</body>
+</html>
