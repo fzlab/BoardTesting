@@ -1,0 +1,44 @@
+/* Fuentes */
+@font-face {
+  font-family: 'Geist';
+  src: url('./src/fonts/Geist-Regular.woff2') format('woff2'),
+       url('./src/fonts/Geist-Regular.ttf') format('truetype'); /* Fallback */
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('./src/fonts/Geist-SemiBold.woff2') format('woff2'),
+       url('./src/fonts/Geist-SemiBold.ttf') format('truetype'); /* Fallback */
+  font-weight: 600; /* Mapeado a 600 (SemiBold) */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('./src/fonts/Geist-Bold.woff2') format('woff2'),
+       url('./src/fonts/Geist-Bold.ttf') format('truetype'); /* Fallback */
+  font-weight: 700; /* Si tienes el archivo Bold, úsalo aquí */
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Aplicación Global */
+body {
+  font-family: 'Geist', sans-serif;
+  font-weight: 400;
+  /* Mejora el renderizado en pantallas */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Títulos y elementos destacados */
+h1, h2, h3, h4, h5, h6, strong, b {
+  font-family: 'Geist', sans-serif;
+  font-weight: 600; /* SemiBold suele verse más elegante que Bold en interfaces */
+  /* El toque minimalista: ajustar el interletrado en títulos */
+  letter-spacing: -0.025em; 
+}

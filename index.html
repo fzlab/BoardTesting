@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/fonts.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Nexus - T0151</title>
+    <!-- Soporte PWA e iOS -->
+    <meta name="theme-color" content="#F5F7FA">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="FZBoard TDA">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="Dashboard centralizador de proyectos web y PWAs">
+      <link rel="apple-touch-icon" href="./icon-180.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
+    <link rel="manifest" href="/manifest.json" id="manifestLink">
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Geist', 'sans-serif'],
+                },
+                colors: {
+                    app: {
+                        bg: '#F5F7FA',
+                        card: '#FFFFFF',
+                        border: '#E5EAF0',
+                        title: '#172033',
+                        sub: '#64748B',
+                        brand: '#0D9488',
+                        accent: '#E6F6F4'
+                        /* FIX #10: eliminado `active: '#CCFBF1'` (nunca se usaba) */
+                    },
+                    darkapp: {
+                        bg: '#0F172A',
+                        card: '#1E293B',
+                        border: '#334155',
+                        title: '#F8FAFC',
+                        sub: '#94A3B8'
+                    }
+                }
+            }
+        }
+    }
+</script>
+    <!-- FIX #20: Lucide con versión pineada (evita romper con `latest`) -->
+    <script src="https://unpkg.com/lucide@0.468.0"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        html, body {
+            overscroll-behavior-y: contain;
+            /* FIX #1: -webkit-tap-highlight-color estaba fuera del selector */
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+        input, select, textarea { user-select: text; -webkit-user-select: text; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+
+        /* Animación de giro para el icono cog */
+        @keyframes spinCog {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-cog {
+            animation: spinCog 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="h-full bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title flex flex-col font-sans overflow-hidden antialiased transition-colors duration-200">
+
+    <!-- Overlay de Desenfoque para el Menú de Opciones -->
+    <div id="optionsBlurOverlay" onclick="closeOptionsMenu()" class="fixed inset-0 z-40 bg-slate-900/10 dark:bg-slate-950/20 backdrop-blur-[2px] transition-opacity duration-200 hidden"></div>
+
+    <!-- Modal de Login -->
+    <div id="loginModal" class="fixed inset-0 z-[10020] flex items-center justify-center p-4 bg-slate-950/40 dark:bg-slate-950/60 backdrop-blur-sm hidden">
+        <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-xl space-y-5">
+            <div class="text-center space-y-2">
+                <div class="text-app-brand dark:text-teal-400 flex items-center justify-center mx-auto mb-2">
+                    <i data-lucide="lock" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-base font-bold text-app-title dark:text-darkapp-title">Iniciar Sesión</h3>
+                <p class="text-xs text-app-sub dark:text-darkapp-sub">Ingresa con tus credenciales asignadas</p>
+            </div>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-[11px] font-semibold text-app-sub dark:text-darkapp-sub mb-1.5">Correo electrónico</label>
+                    <input type="email" id="loginEmail" required placeholder="correo@empresa.com"
+                        class="w-full px-3 py-2.5 bg-app-bg dark:bg-slate-900/50 rounded-xl border-none text-xs text-app-title dark:text-darkapp-title placeholder-app-sub/50 focus:outline-none focus:ring-2 focus:ring-app-brand/20 font-medium transition-all">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-app-sub dark:text-darkapp-sub mb-1.5">Contraseña</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••"
+                        class="w-full px-3 py-2.5 bg-app-bg dark:bg-slate-900/50 rounded-xl border-none text-xs text-app-title dark:text-darkapp-title placeholder-app-sub/50 focus:outline-none focus:ring-2 focus:ring-app-brand/20 font-medium transition-all">
+                </div>
+                <button type="submit" class="w-full py-2.5 mt-2 bg-app-brand hover:bg-teal-700 text-white rounded-lg shadow-sm transition-colors cursor-pointer font-semibold text-xs">
+                    Ingresar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Error de Autenticación / Credenciales -->
+    <div id="errorModal" class="fixed inset-0 z-[10030] flex items-center justify-center p-4 bg-slate-950/40 dark:bg-slate-950/60 backdrop-blur-sm hidden">
+        <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-xl text-center space-y-5">
+            <div class="text-rose-500 flex justify-center mx-auto mb-1">
+                <i data-lucide="alert-circle" class="w-8 h-8"></i>
+            </div>
+            <div class="space-y-1">
+                <h3 class="text-base font-bold text-app-title dark:text-darkapp-title">Error de Acceso</h3>
+                <p id="errorMessage" class="text-xs text-app-sub dark:text-darkapp-sub leading-relaxed">
+                    Credenciales incorrectas. Verifica tu correo y contraseña e inténtalo de nuevo.
+                </p>
+            </div>
+            <button onclick="cerrarErrorModal()" class="w-full py-2.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:hover:bg-rose-900/50 font-bold text-xs transition-colors cursor-pointer">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- Header Minimalista -->
+    <header class="bg-app-bg dark:bg-darkapp-bg border-b border-app-border dark:border-darkapp-border px-4 py-3 flex items-center justify-between shrink-0 z-50 sticky top-0">
+        <div class="flex items-center space-x-3">
+            <div class="text-app-brand dark:text-teal-400 p-1">
+                <i data-lucide="waypoints" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-sm md:text-base leading-tight text-app-title dark:text-darkapp-title flex items-center gap-2">
+                    Gran Plaza Mérida
+                </h1>
+                <p class="text-[11px] text-app-sub dark:text-darkapp-sub flex items-center gap-1.5 font-medium mt-0.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-app-brand inline-block"></span>NEXUS - FZ Lab
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 relative">
+            <!-- Toggle Modo Claro / Oscuro -->
+            <button id="themeToggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors duration-200" title="Cambiar Tema">
+                <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">
+                    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>
+                    <i data-lucide="moon" class="w-3.5 h-3.5 text-slate-400 dark:text-indigo-400 opacity-100 dark:opacity-40"></i>
+                </div>
+                <div class="w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center transform transition-transform duration-200 translate-x-0 dark:translate-x-6 z-10">
+                    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 dark:hidden"></i>
+                    <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400 hidden dark:block"></i>
+                </div>
+            </button>
+
+            <!-- Botón de Opciones (Cog) - Ghost Style -->
+            <div class="relative">
+                <button id="optionsMenuBtn" onclick="toggleOptionsMenu(event)" class="p-2 rounded-lg text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 hover:bg-app-card dark:hover:bg-slate-800 transition-colors cursor-pointer relative z-50" title="Opciones">
+                    <i data-lucide="cog" id="cogIcon" class="w-5 h-5 transition-transform"></i>
+                </button>
+
+                <!-- Menú Flotante Vertical de Opciones -->
+                <div id="optionsDropdown" class="hidden absolute right-0 top-full mt-2 w-48 bg-app-card dark:bg-darkapp-card rounded-xl shadow-xl z-50 py-1.5 flex flex-col gap-1 border border-app-border dark:border-darkapp-border">
+                    <button id="openCatalogBtn" onclick="closeOptionsMenu()" class="w-full px-4 py-2.5 text-left text-xs font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 flex items-center gap-3 transition-colors cursor-pointer">
+                        <i data-lucide="layout-grid-circles" class="w-4 h-4 text-app-sub"></i> Catálogo
+                    </button>
+                    <button id="toggleReorderBtn" onclick="toggleReorderMode(); closeOptionsMenu();" class="w-full px-4 py-2.5 text-left text-xs font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 flex items-center gap-3 transition-colors cursor-pointer">
+                        <i data-lucide="move" class="w-4 h-4 text-app-sub"></i> <span id="reorderLabel">Reordenar Apps</span>
+                    </button>
+                    <div class="h-px bg-app-border dark:bg-darkapp-border my-1 mx-2"></div>
+                    <button onclick="cerrarSesionSupabase(); closeOptionsMenu();" class="w-full px-4 py-2.5 text-left text-xs font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-3 transition-colors cursor-pointer">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido principal del cuerpo -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-6 max-w-5xl mx-auto w-full space-y-6 flex flex-col">
+
+        <!-- Barra de buscar (Sin contenedor) -->
+        <div class="relative w-full sm:w-72 shrink-0">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-app-sub"></i>
+            <input type="text" id="searchInput" placeholder="Buscar en mis Apps..."
+                class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-app-card dark:bg-darkapp-card border border-transparent focus:border-app-brand/30 text-xs text-app-title dark:text-darkapp-title placeholder-app-sub/50 focus:outline-none focus:ring-2 focus:ring-app-brand/20 transition-all font-medium shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        </div>
+
+        <!-- Dashboard Grid Layout -->
+        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4" id="projectsContainer"></div>
+
+        <!-- Widget de Notas (Estilo plano) -->
+        <div class="space-y-3 pt-4 shrink-0">
+            <div class="flex items-center justify-between pb-1">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="sticky-note" class="w-4 h-4 text-app-sub"></i>
+                    <h3 class="text-xs font-bold text-app-title dark:text-darkapp-title uppercase tracking-wider">Notas Rápidas Personales</h3>
+                </div>
+                <span id="noteSavedBadge" class="text-[10px] text-app-brand dark:text-teal-400 font-semibold opacity-0 transition-opacity">Guardado ✓</span>
+            </div>
+            <textarea id="quickNotes" placeholder="Estas notas son privadas..."
+                class="w-full h-32 bg-app-card dark:bg-darkapp-card rounded-xl p-4 text-xs text-app-title dark:text-darkapp-title placeholder-app-sub/50 border border-transparent focus:border-app-brand/30 focus:ring-2 focus:ring-app-brand/20 outline-none resize-none transition-all font-medium shadow-[0_2px_10px_rgba(0,0,0,0.02)]"></textarea>
+        </div>
+    </main>
+
+    <!-- Modal: Catálogo / Tienda de Proyectos Predefinidos -->
+    <div id="catalogModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 dark:bg-slate-950/60 backdrop-blur-sm hidden">
+        <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-xl shadow-xl space-y-4 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between pb-2 shrink-0">
+                <div class="flex items-center gap-2 text-app-title dark:text-darkapp-title font-bold text-base">
+                    <i data-lucide="store" class="w-5 h-5 text-app-sub"></i>
+                    <span>Catálogo de Apps</span>
+                </div>
+                <button id="closeCatalogBtn" class="text-app-sub hover:text-app-title dark:hover:text-darkapp-title transition-colors cursor-pointer w-8 h-8 rounded-full flex items-center justify-center hover:bg-app-bg dark:hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-xs text-app-sub dark:text-darkapp-sub shrink-0">
+                Selecciona la App que deseas tener en tu pantalla principal:
+            </p>
+
+            <!-- Contenedor Lista Dividida (Ghost List) -->
+            <div id="catalogContainer" class="overflow-y-auto flex flex-col divide-y divide-app-border dark:divide-darkapp-border pr-1 flex-1"></div>
+
+            <div class="pt-4 flex justify-end shrink-0">
+                <button id="finishCatalogBtn" class="px-5 py-2.5 bg-app-brand hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-all cursor-pointer">
+                    Listo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script Logic -->
+    <script>
+        // --- REGISTRO DEL SERVICE WORKER PARA MODO OFFLINE ---
+        function initServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .then((registration) => {
+                        console.log('[PWA] Service Worker registrado correctamente, scope:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.error('[PWA] Error al registrar el Service Worker:', error);
+                    });
+            }
+        }
+
+        // --- CONFIGURACIÓN DE SUPABASE ---
+        const SUPABASE_URL = 'https://mifbcyxtafeacwkzqzsq.supabase.co';
+        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_O6EAbkSba1NQPq08k_7bHg_PZ_x4ZU5';
+        let supabaseClient = null;
+        if (window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+        }
+
+        const ROLE_PERMISSIONS = {
+            gerencial: ['ventas_diarias', 'corte_cajas', 'consultor_fases', 'consultor_existencias', 'gestor_tickets', 'notas', 'checks'],
+            promotor: ['consultor_fases', 'consultor_existencias']
+        };
+        let currentUserRole = null;
+        let isReorderMode = false;
+
+        // FIX #5: eliminado el campo `category` (nunca se usaba)
+        const PREDEFINED_CATALOG = [
+            { id: 'ventas_diarias',       title: 'Ventas Diarias',           url: 'ventas/',     icon: 'banknote',            desc: 'Seguimiento a las metas diarias y semanales.' },
+            { id: 'corte_cajas',          title: 'Corte de Cajas',           url: 'corte/',      icon: 'circle-dollar-sign',  desc: 'Corte de cajas que se realiza al cierre de tienda.' },
+            { id: 'consultor_fases',      title: 'Consultor de Fases',       url: 'fases/',      icon: 'list-ordered',        desc: 'Consulta las Fases, Fases SALE y los articulos en cada una de ellas.' },
+            { id: 'consultor_existencias',title: 'Consultor de Existencias', url: 'existencias/',icon: 'blocks',              desc: 'Búsqueda rápida de stock mediante CB o SKU.' },
+            { id: 'gestor_tickets',       title: 'Gestor de Tickets',        url: 'tickets/',    icon: 'ticket',              desc: 'Seguimiento a los Tickets generados por Mesa de Control' },
+            { id: 'notas',                title: 'Notas y Pendientes',       url: 'notas/',      icon: 'notebook-pen',        desc: 'Anotaciones operativas y pendientes del turno' },
+            { id: 'checks',               title: 'Checks Remotos',           url: 'checks/',     icon: 'copy-check',          desc: 'Registro de los Checks realizados a esta sucursal.' }
+        ];
+
+        let projects = JSON.parse(localStorage.getItem('fzboard_projects'));
+        if (!projects) {
+            projects = [...PREDEFINED_CATALOG];
+            localStorage.setItem('fzboard_projects', JSON.stringify(projects));
+        }
+
+        // FIX #13: se cachea el input una sola vez (script al final del body)
+        const searchInputEl = document.getElementById('searchInput');
+        const btnThemeToggle = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initServiceWorker();
+            initNotes();
+            initTheme();
+            initCatalogModal();
+            initLoginForm();
+
+            currentUserRole = localStorage.getItem('fzboard_user_role') || 'gerencial';
+
+            // Iconos estáticos del header/modales
+            lucide.createIcons();
+
+            // FIX #15: render controlado desde el flujo de auth (evita doble render)
+            if (supabaseClient) {
+                initAuth();
+            } else {
+                document.getElementById('loginModal').classList.add('hidden');
+                renderProjects();
+            }
+        });
+
+        // --- CONTROL DEL MENÚ FLOTANTE DE OPCIONES CON TELÓN DESENFOCADO Y ANIMACIÓN ---
+        function toggleOptionsMenu(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('optionsDropdown');
+            const overlay = document.getElementById('optionsBlurOverlay');
+            const cogIcon = document.getElementById('cogIcon');
+
+            cogIcon.classList.add('animate-spin-cog');
+            setTimeout(() => {
+                cogIcon.classList.remove('animate-spin-cog');
+            }, 400);
+
+            const isOpening = dropdown.classList.contains('hidden');
+            if (isOpening) {
+                dropdown.classList.remove('hidden');
+                overlay.classList.remove('hidden');
+            } else {
+                closeOptionsMenu();
+            }
+        }
+
+        function closeOptionsMenu() {
+            document.getElementById('optionsDropdown').classList.add('hidden');
+            document.getElementById('optionsBlurOverlay').classList.add('hidden');
+        }
+
+        window.addEventListener('click', (event) => {
+            const dropdown = document.getElementById('optionsDropdown');
+            const btn = document.getElementById('optionsMenuBtn');
+            if (!dropdown.classList.contains('hidden') && !dropdown.contains(event.target) && !btn.contains(event.target)) {
+                closeOptionsMenu();
+            }
+        });
+
+        function initLoginForm() {
+            const loginForm = document.getElementById('loginForm');
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
+                if (!supabaseClient) {
+                    mostrarErrorModal("Cliente de Supabase no inicializado.");
+                    return;
+                }
+                try {
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                    if (error) {
+                        mostrarErrorModal("Correo o contraseña incorrectos.");
+                        return;
+                    }
+                    if (data && data.session) {
+                        document.getElementById('loginModal').classList.add('hidden');
+                        await fetchUserRoleAndInit(data.session.user);
+                    }
+                } catch (err) {
+                    console.error("Error en login:", err);
+                    mostrarErrorModal("Ocurrió un error al intentar iniciar sesión.");
+                }
+            });
+        }
+
+        function mostrarErrorModal(mensaje) {
+            document.getElementById('errorMessage').textContent = mensaje;
+            // FIX redundancia: los iconos del modal ya fueron renderizados al cargar
+            document.getElementById('errorModal').classList.remove('hidden');
+        }
+        function cerrarErrorModal() {
+            document.getElementById('errorModal').classList.add('hidden');
+        }
+
+        // FIX #3: eliminada la comprobación manual `hasLocalSession` (redundante y frágil)
+        async function initAuth() {
+            try {
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (!session || sessionError) {
+                    document.getElementById('loginModal').classList.remove('hidden');
+                    renderProjects();
+                } else {
+                    await fetchUserRoleAndInit(session.user);
+                }
+            } catch (e) {
+                console.log("Sin conexión a internet, operando en modo local:", e);
+                renderProjects();
+            }
+        }
+
+        async function fetchUserRoleAndInit(user) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('user_profiles')
+                    .select('role')
+                    .eq('email', user.email)
+                    .single();
+                if (!error && data) {
+                    currentUserRole = data.role;
+                    localStorage.setItem('fzboard_user_role', currentUserRole);
+                }
+            } catch (err) {
+                console.log("Error obteniendo rol, usando rol local:", err);
+            }
+            renderProjects();
+        }
+
+        async function cerrarSesionSupabase() {
+            localStorage.removeItem('fzboard_user_role');
+            if (supabaseClient) {
+                await supabaseClient.auth.signOut();
+            }
+            document.getElementById('projectsContainer').innerHTML = '';
+            document.getElementById('loginModal').classList.remove('hidden');
+            currentUserRole = null;
+        }
+
+        // FIX #11: eliminado el guard `if (btn)` (el elemento siempre existe en el HTML)
+        function toggleReorderMode() {
+            isReorderMode = !isReorderMode;
+            const btn = document.getElementById('toggleReorderBtn');
+            const label = document.getElementById('reorderLabel');
+            if (isReorderMode) {
+                btn.classList.add('bg-app-accent', 'dark:bg-teal-950/30');
+                label.textContent = 'Terminar Reorden';
+            } else {
+                btn.classList.remove('bg-app-accent', 'dark:bg-teal-950/30');
+                label.textContent = 'Reordenar Apps';
+            }
+            renderProjects();
+        }
+
+        window.moveProjectById = (id, direction) => {
+            const index = projects.findIndex(p => p.id === id);
+            if (index === -1) return;
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= projects.length) return;
+
+            const item = projects.splice(index, 1)[0];
+            projects.splice(newIndex, 0, item);
+
+            localStorage.setItem('fzboard_projects', JSON.stringify(projects));
+            renderProjects();
+        };
+
+        function renderProjects() {
+            const container = document.getElementById('projectsContainer');
+            const searchTerm = searchInputEl ? searchInputEl.value.toLowerCase() : '';
+            // FIX #7: eliminada la rama inalcanzable `currentUserRole === null`
+            const allowedProjectIds = ROLE_PERMISSIONS[currentUserRole] || [];
+            const predefinedIds = PREDEFINED_CATALOG.map(item => item.id);
+            // FIX #5: eliminado `matchesCat` (activeCategory nunca cambiaba)
+            const filtered = projects.filter(p => {
+                const matchesRole = !predefinedIds.includes(p.id) || allowedProjectIds.includes(p.id);
+                const matchesSearch = p.title.toLowerCase().includes(searchTerm) ||
+                                     (p.desc && p.desc.toLowerCase().includes(searchTerm));
+                return matchesRole && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full p-10 text-center bg-app-card dark:bg-darkapp-card rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] select-none">
+                        <i data-lucide="folder-open" class="w-10 h-10 text-app-sub mx-auto mb-3 opacity-40"></i>
+                        <p class="text-sm font-bold text-app-title dark:text-darkapp-title">No hay aplicaciones disponibles.</p>
+                        <p class="text-xs text-app-sub dark:text-darkapp-sub mt-1">Usa el menú de Opciones ("Catálogo") para agregar Apps.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            let htmlContent = '';
+
+            if (isReorderMode) {
+                htmlContent += `
+                    <div class="col-span-full bg-app-accent dark:bg-teal-950/30 rounded-2xl p-4 flex items-center justify-between text-xs text-app-brand dark:text-teal-400 font-semibold shrink-0 select-none shadow-sm mb-2">
+                        <span class="flex items-center gap-2"><i data-lucide="move" class="w-4 h-4"></i> Modo reordenamiento activo.</span>
+                        <button onclick="toggleReorderMode()" class="px-4 py-1.5 bg-app-brand text-white rounded-lg shadow-sm hover:bg-teal-700 transition-colors cursor-pointer">Hecho</button>
+                    </div>
+                `;
+            }
+
+            htmlContent += filtered.map(p => {
+                // FIX #9: se eliminó `formatUrl` (ambas ramas devolvían lo mismo)
+                const formattedUrl = p.url || '#';
+
+                const clickAction = isReorderMode ? '' : `window.location.href='${formattedUrl}'`;
+
+                const cardClasses = isReorderMode
+                    ? 'bg-app-card dark:bg-darkapp-card rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col justify-between transition-all duration-200 relative select-none ring-2 ring-app-brand'
+                    : 'bg-app-card dark:bg-darkapp-card rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col justify-between group hover:shadow-md transition-all duration-200 cursor-pointer select-none';
+
+                const globalIndex = projects.findIndex(item => item.id === p.id);
+                const isFirst = globalIndex === 0;
+                const isLast = globalIndex === projects.length - 1;
+
+                // FIX #6: eliminado `isEmoji` (todos los iconos son Lucide, nunca emojis)
+                // FIX #2: un solo atributo `class`; se añaden las utilidades condicionales dentro del mismo
+                // FIX #12: eliminado `onclick="event.stopPropagation()"` (en modo reorder el padre no tiene handler)
+                return `
+                    <div onclick="${clickAction}" class="${cardClasses}">
+                        <div>
+                            <div class="flex items-start justify-between gap-3 mb-2">
+                                <h3 class="text-sm font-bold text-app-title dark:text-darkapp-title group-hover:text-app-brand dark:group-hover:text-teal-400 transition-colors line-clamp-2 leading-snug flex-1">${p.title}</h3>
+                                <div class="text-app-sub dark:text-darkapp-sub group-hover:text-app-brand dark:group-hover:text-teal-400 shrink-0 pt-0.5 transition-colors">
+                                    <i data-lucide="${p.icon || 'globe'}" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                            <p class="text-[10px] sm:text-[11px] text-app-sub dark:text-darkapp-sub line-clamp-2 leading-relaxed">${p.desc || 'Sin descripción'}</p>
+                        </div>
+                        ${isReorderMode ? `
+                            <div class="pt-3 mt-3 border-t border-app-border dark:border-darkapp-border flex items-center justify-between gap-2">
+                                <button onclick="moveProjectById('${p.id}', -1)" ${isFirst ? 'disabled' : ''} class="flex-1 py-1.5 px-2 rounded-lg bg-app-bg dark:bg-slate-800/50 hover:bg-app-accent dark:hover:bg-teal-900/30 text-app-brand dark:text-teal-400 text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${isFirst ? 'opacity-30 cursor-not-allowed' : ''}">
+                                    <i data-lucide="arrow-left" class="w-3 h-3"></i> <span>Mover izq</span>
+                                </button>
+                                <button onclick="moveProjectById('${p.id}', 1)" ${isLast ? 'disabled' : ''} class="flex-1 py-1.5 px-2 rounded-lg bg-app-bg dark:bg-slate-800/50 hover:bg-app-accent dark:hover:bg-teal-900/30 text-app-brand dark:text-teal-400 text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${isLast ? 'opacity-30 cursor-not-allowed' : ''}">
+                                    <span>Mover der</span> <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = htmlContent;
+            lucide.createIcons();
+        }
+
+        function initCatalogModal() {
+            const catalogModal = document.getElementById('catalogModal');
+            const openCatalogBtn = document.getElementById('openCatalogBtn');
+            const closeCatalogBtn = document.getElementById('closeCatalogBtn');
+            const finishCatalogBtn = document.getElementById('finishCatalogBtn');
+            if (openCatalogBtn) {
+                openCatalogBtn.addEventListener('click', () => {
+                    renderCatalogList();
+                    catalogModal.classList.remove('hidden');
+                });
+                closeCatalogBtn.addEventListener('click', () => catalogModal.classList.add('hidden'));
+                finishCatalogBtn.addEventListener('click', () => catalogModal.classList.add('hidden'));
+            }
+        }
+
+        function renderCatalogList() {
+            const catalogContainer = document.getElementById('catalogContainer');
+            // FIX #4 / #7: misma fuente de permisos que `renderProjects` (un solo fallback)
+            const allowedProjectIds = ROLE_PERMISSIONS[currentUserRole] || [];
+            const catalogForUser = PREDEFINED_CATALOG.filter(item => allowedProjectIds.includes(item.id));
+
+            if (catalogForUser.length === 0) {
+                catalogContainer.innerHTML = `
+                    <div class="py-8 text-center select-none">
+                        <p class="text-xs text-app-sub dark:text-darkapp-sub">
+                            No tienes aplicaciones disponibles en el catálogo para tu rol.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            // FIX #6: eliminado `isEmoji` también aquí
+            catalogContainer.innerHTML = catalogForUser.map(item => {
+                const isAdded = projects.some(p => p.id === item.id);
+
+                return `
+                    <div class="py-4 px-1 flex items-center justify-between gap-3 select-none">
+                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                            <div class="text-app-sub shrink-0">
+                                <i data-lucide="${item.icon || 'globe'}" class="w-5 h-5"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h4 class="text-sm font-bold text-app-title dark:text-darkapp-title truncate">${item.title}</h4>
+                                <p class="text-[10px] text-app-sub dark:text-darkapp-sub line-clamp-2 leading-tight mt-0.5">${item.desc}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-end gap-1.5 shrink-0">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" ${isAdded ? 'checked' : ''} onchange="toggleCatalogProject('${item.id}')" class="sr-only peer">
+                                <div class="w-10 h-5 rounded-full transition-colors duration-200 ${isAdded ? 'bg-app-brand' : 'bg-slate-300 dark:bg-slate-600'} relative shadow-inner">
+                                    <div class="absolute top-[2px] left-[2px] bg-white w-4 h-4 rounded-full transition-transform duration-200 ${isAdded ? 'translate-x-5' : 'translate-x-0'} shadow-sm"></div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        window.toggleCatalogProject = (catId) => {
+            const exists = projects.some(p => p.id === catId);
+            if (exists) {
+                projects = projects.filter(p => p.id !== catId);
+            } else {
+                const item = PREDEFINED_CATALOG.find(c => c.id === catId);
+                if (item) projects.push({...item});
+            }
+            localStorage.setItem('fzboard_projects', JSON.stringify(projects));
+            renderCatalogList();
+            renderProjects();
+        };
+
+        function initNotes() {
+            const textarea = document.getElementById('quickNotes');
+            const badge = document.getElementById('noteSavedBadge');
+            if (!textarea) return;
+            textarea.value = localStorage.getItem('fzboard_notes') || '';
+            let timeout;
+            textarea.addEventListener('input', () => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    localStorage.setItem('fzboard_notes', textarea.value);
+                    badge.classList.remove('opacity-0');
+                    setTimeout(() => badge.classList.add('opacity-0'), 1500);
+                }, 500);
+            });
+        }
+
+        function setTheme(isDark) {
+            const themeMeta = document.querySelector('meta[name="theme-color"]');
+            if (isDark) {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                if (themeMeta) themeMeta.setAttribute('content', '#0f172a');
+            } else {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                if (themeMeta) themeMeta.setAttribute('content', '#F5F7FA');
+            }
+            // FIX redundancia: se elimina `lucide.createIcons()` aquí (ningún icono cambia)
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            setTheme(savedTheme === 'dark');
+            btnThemeToggle.addEventListener('click', () => {
+                const isDarkActive = htmlElement.classList.contains('dark');
+                setTheme(!isDarkActive);
+            });
+        }
+
+        if (searchInputEl) {
+            searchInputEl.addEventListener('input', renderProjects);
+        }
+
+        // FIX #8: eliminado el handler `popstate` (nunca se hacía pushState → jamás se disparaba)
+    </script>
+</body>
+</html>
