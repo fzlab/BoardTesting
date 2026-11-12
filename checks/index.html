@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../fonts.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Checks Remotos - T0151 G.P Mérida</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#F5F7FA">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@0.468.0"></script>
+  <!-- SDK de Supabase v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- PDF.js para lectura de archivos PDF en el cliente -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
+
+  <script>
+      tailwind.config = {
+          darkMode: 'class',
+          theme: {
+              extend: {
+                  fontFamily: {
+                      sans: ['Geist', 'sans-serif'],
+                  },
+                  colors: {
+                      app: {
+                          bg: '#F5F7FA',
+                          card: '#FFFFFF',
+                          border: '#E5EAF0',
+                          title: '#172033',
+                          sub: '#64748B',
+                          brand: '#0D9488',
+                          accent: '#E6F6F4',
+                          active: '#CCFBF1'
+                      },
+                      darkapp: {
+                          bg: '#0F172A',
+                          card: '#1E293B',
+                          border: '#334155',
+                          title: '#F8FAFC',
+                          sub: '#94A3B8'
+                      }
+                  }
+              }
+          }
+      }
+  </script>
+  <style>
+      /* FIX #1: -webkit-tap-highlight-color estaba fuera del selector */
+      html, body {
+          overscroll-behavior-y: contain;
+          -webkit-tap-highlight-color: transparent;
+      }
+      body { user-select: none; -webkit-user-select: none; }
+      input, select, textarea { user-select: text; -webkit-user-select: text; }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+      .dark ::-webkit-scrollbar-thumb { background: #334155; }
+
+      body, .card, .topbar, input, button {
+          transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      }
+  </style>
+</head>
+<body class="h-full bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title flex flex-col font-sans overflow-hidden antialiased">
+
+  <div class="main-content flex-1 flex flex-col overflow-y-auto">
+
+    <!-- Topbar Minimalista -->
+    <header class="bg-app-bg dark:bg-darkapp-bg px-4 py-3 flex items-center justify-between shrink-0 z-50 sticky top-0 border-b border-app-border dark:border-darkapp-border">
+        <div class="flex items-center space-x-3">
+            <a href="../index.html" class="flex flex-col items-center justify-center p-2 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 rounded-lg transition-all cursor-pointer" title="Ir al Inicio">
+                <i data-lucide="house" class="w-5 h-5"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-base leading-tight text-app-title dark:text-darkapp-title">Checks Remotos</h1>
+                <p class="text-[11px] text-app-sub dark:text-darkapp-sub flex items-center gap-1.5 font-medium mt-0.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-app-brand inline-block"></span> T0151 - Gran Plaza Mérida
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-1">
+            <div class="flex items-center gap-0.5">
+                <button onclick="abrirHistorial()" class="w-9 h-9 flex items-center justify-center rounded-lg text-app-sub hover:text-app-brand hover:bg-app-card dark:text-darkapp-sub dark:hover:text-teal-400 dark:hover:bg-darkapp-card transition-colors cursor-pointer" title="Ver Historial de Checks">
+                    <i data-lucide="calendar-clock" class="w-5 h-5"></i>
+                </button>
+                <button onclick="confirmarBorrarTodo()" class="w-9 h-9 flex items-center justify-center rounded-lg text-app-sub hover:text-rose-500 hover:bg-rose-50 dark:text-darkapp-sub dark:hover:text-rose-400 dark:hover:bg-rose-950/30 transition-colors cursor-pointer" title="Borrar todos los datos almacenados">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <button id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-700 relative flex items-center p-1 cursor-pointer transition-colors duration-200 ml-1" title="Cambiar modo">
+                <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">
+                    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>
+                    <i data-lucide="moon" class="w-3.5 h-3.5 text-slate-400 dark:text-indigo-400 opacity-100 dark:opacity-40"></i>
+                </div>
+                <div class="w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center transform transition-transform duration-200 translate-x-0 dark:translate-x-6 z-10">
+                    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 dark:hidden"></i>
+                    <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400 hidden dark:block"></i>
+                </div>
+            </button>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal (Dashboard) -->
+    <div id="vistaPrincipal" class="p-4 md:p-6 max-w-5xl mx-auto w-full space-y-6 flex-1 relative z-10">
+
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pb-2">
+        <div class="flex items-center gap-2 text-xs font-bold w-full sm:w-auto">
+          <span id="conexionStatus" class="inline-flex items-center gap-1.5 text-[11px] text-amber-500 font-semibold"><i class="fa-solid fa-circle-dot"></i> Conectando...</span>
+          <button onclick="actualizarDatosManual()" class="py-1 px-2.5 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 rounded-lg transition-all font-medium text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+            <i id="iconActualizar" class="fa-solid fa-rotate text-[10px]"></i> Actualizar
+          </button>
+        </div>
+        <button onclick="verificarNuevoCheck()" class="w-full sm:w-auto py-2.5 px-5 bg-app-brand hover:bg-teal-700 text-white rounded-xl transition-all font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm">
+          <i class="fa-solid fa-plus"></i> Nuevo Check
+        </button>
+      </div>
+
+      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)] relative">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-[11px] uppercase font-semibold text-app-sub tracking-wider">Calificación General</p>
+            <div class="flex items-baseline gap-1.5 mt-2">
+              <h3 id="kpiCalificacion" class="text-4xl md:text-5xl font-extrabold text-app-title dark:text-darkapp-title">0.00</h3>
+            </div>
+          </div>
+          <div class="text-app-brand opacity-80">
+            <i data-lucide="award" class="w-7 h-7"></i>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-app-border dark:border-darkapp-border">
+          <span id="kpiNotaBono" class="text-xs font-semibold flex items-center gap-1.5"></span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-app-card dark:bg-darkapp-card rounded-xl p-4 flex flex-col justify-between shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <div class="text-app-brand mb-3"><i data-lucide="list-todo" class="w-5 h-5"></i></div>
+          <div>
+            <h3 id="kpiChecksRealizados" class="text-xl font-extrabold text-app-title dark:text-darkapp-title">0</h3>
+            <p class="text-[10px] font-medium text-app-sub leading-tight mt-0.5">Checks Realizados</p>
+          </div>
+        </div>
+        <div class="bg-app-card dark:bg-darkapp-card rounded-xl p-4 flex flex-col justify-between shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <div class="text-amber-500 mb-3"><i data-lucide="send" class="w-5 h-5"></i></div>
+          <div>
+            <h3 id="kpiEnviadas" class="text-xl font-extrabold text-app-title dark:text-darkapp-title">0</h3>
+            <p class="text-[10px] font-medium text-app-sub leading-tight mt-0.5">Correcciones Enviadas</p>
+          </div>
+        </div>
+        <div class="bg-app-card dark:bg-darkapp-card rounded-xl p-4 flex flex-col justify-between shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <div class="text-emerald-500 mb-3"><i data-lucide="square-check-big" class="w-5 h-5"></i></div>
+          <div>
+            <h3 id="kpiAceptadas" class="text-xl font-extrabold text-app-title dark:text-darkapp-title">0</h3>
+            <p class="text-[10px] font-medium text-app-sub leading-tight mt-0.5">Correcciones Aceptadas</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <div class="flex items-center justify-between pb-3 border-b border-app-border dark:border-darkapp-border">
+          <h2 class="text-sm font-bold text-app-title dark:text-darkapp-title">Checks registrados</h2>
+          <span id="contadorRegistros" class="text-[11px] font-medium text-app-sub">0 registros</span>
+        </div>
+        <div id="checksContainer" class="flex flex-col"></div>
+      </div>
+
+    </div>
+
+    <!-- Vista Historial -->
+    <div id="vistaHistorial" class="p-4 md:p-6 max-w-5xl mx-auto w-full space-y-4 flex-1 relative z-10 hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
+        <div class="flex items-center gap-2">
+          <button onclick="cerrarHistorial()" class="p-2 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title rounded-lg transition-all cursor-pointer hover:bg-app-card dark:hover:bg-darkapp-card" title="Regresar">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+          </button>
+          <h2 class="text-base font-bold text-app-title dark:text-darkapp-title">Historial de Checks</h2>
+        </div>
+        <button onclick="confirmarBorrarTodoHistorial()" class="py-1.5 px-3 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="trash-2" class="w-4 h-4 shrink-0"></i>
+          <span>Borrar historial</span>
+        </button>
+      </div>
+      <div id="historialContainer" class="flex flex-col gap-2"></div>
+    </div>
+
+  </div>
+
+  <!-- Modal Nuevo / Editar Check -->
+  <div class="modal fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10000] flex items-center justify-center p-4" id="modalCheck" style="display: none;">
+    <div class="modal-content bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-2">
+        <h3 id="modalCheckTitulo" class="text-base font-bold text-app-title dark:text-darkapp-title">Registrar Nuevo Check</h3>
+        <span class="close-modal text-app-sub hover:text-app-title dark:hover:text-darkapp-title cursor-pointer text-xl font-bold" onclick="cerrarModalCheck()">&times;</span>
+      </div>
+
+      <input type="hidden" id="editCheckId">
+
+      <div class="space-y-4 text-xs">
+        <div id="seccionNumeroCheck">
+          <label class="font-semibold text-app-sub block mb-2">Número de Check</label>
+          <div id="opcionesNumeroCheck" class="grid grid-cols-2 gap-2"></div>
+        </div>
+
+        <div>
+          <label class="font-semibold text-app-sub block mb-2">Subir PDF?</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+              <input type="radio" name="subirPdf" value="si" onclick="togglePdfOpciones(true)" class="text-app-brand focus:ring-app-brand">
+              <span class="font-semibold text-app-title dark:text-darkapp-title">Sí</span>
+            </label>
+            <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+              <input type="radio" name="subirPdf" value="no" checked onclick="togglePdfOpciones(false)" class="text-app-brand focus:ring-app-brand">
+              <span class="font-semibold text-app-title dark:text-darkapp-title">No</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="containerArchivoPdf" class="hidden space-y-2">
+          <label class="font-semibold text-app-sub block">Seleccionar Archivo PDF</label>
+          <input type="file" id="inputPdfFile" accept="application/pdf" class="w-full text-xs text-app-sub file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-app-accent file:text-app-brand hover:file:bg-app-active cursor-pointer bg-app-bg dark:bg-slate-900/50 rounded-lg">
+          <p class="text-[10px] text-app-sub mt-1">Sube el archivo PDF del Check Remoto realizado.</p>
+        </div>
+
+        <div id="containerManual" class="space-y-4">
+          <div>
+            <label class="font-semibold text-app-sub block mb-2">Calificación obtenida (ej. 8.7)</label>
+            <input type="number" id="inputCalificacion" placeholder="Ej. 8.7" step="0.1" min="0" max="10" class="w-full bg-app-bg dark:bg-slate-900/50 border border-transparent rounded-xl px-3 py-2.5 font-bold text-app-title dark:text-darkapp-title outline-none focus:ring-2 focus:ring-app-brand/30 transition-all">
+          </div>
+          <div>
+            <label class="font-semibold text-app-sub block mb-2">Fecha en que se realizó el check</label>
+            <input type="date" id="inputFecha" class="w-full bg-app-bg dark:bg-slate-900/50 border border-transparent rounded-xl px-3 py-2.5 font-bold text-app-title dark:text-darkapp-title outline-none focus:ring-2 focus:ring-app-brand/30 transition-all">
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 pt-4 flex justify-end gap-2">
+        <button onclick="cerrarModalCheck()" class="px-4 py-2 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg font-semibold text-xs cursor-pointer transition-all">Cancelar</button>
+        <button onclick="guardarCheck()" class="px-4 py-2 bg-app-brand hover:bg-teal-700 text-white rounded-lg shadow-sm font-semibold text-xs cursor-pointer transition-all">Guardar Check</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay de Carga -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[10030] flex items-center justify-center p-4 hidden">
+      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-xs shadow-2xl text-center space-y-4">
+          <div class="text-app-brand flex items-center justify-center mx-auto">
+              <i class="fa-solid fa-spinner fa-spin text-3xl"></i>
+          </div>
+          <div class="space-y-1">
+              <h4 class="text-sm font-bold text-app-title dark:text-darkapp-title">Procesando Check Remoto</h4>
+              <p id="loadingOverlayText" class="text-xs text-app-sub leading-relaxed">Analizando PDF y subiendo archivo al servidor...</p>
+          </div>
+      </div>
+  </div>
+
+  <!-- Modal Past Check Historial -->
+  <div id="modalPastCheckHistorial" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10025] flex items-center justify-center p-4 hidden">
+      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-5">
+          <div class="text-amber-500 flex justify-center mx-auto"><i data-lucide="bookmark-plus" class="w-8 h-8"></i></div>
+          <p class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed text-center">
+              La fecha del check no corresponde al mes actual, este check se agregará al historial.
+          </p>
+          <div class="space-y-3 bg-app-bg dark:bg-slate-900/50 p-4 rounded-xl text-xs">
+              <p class="font-bold text-app-title dark:text-darkapp-title text-center">Seleccione el estado de las correcciones</p>
+              <div class="flex items-center justify-between">
+                  <span class="font-semibold text-app-sub">Enviadas:</span>
+                  <div class="inline-flex rounded-lg p-0.5 bg-slate-200 dark:bg-slate-800">
+                      <button type="button" onclick="setPastCheckEnv('si')" id="pastEnvSi" class="px-2.5 py-1 rounded-md font-semibold text-xs transition-all cursor-pointer bg-amber-500 text-white shadow-sm">Sí</button>
+                      <button type="button" onclick="setPastCheckEnv('no')" id="pastEnvNo" class="px-2.5 py-1 rounded-md font-semibold text-xs transition-all cursor-pointer text-app-sub">No</button>
+                  </div>
+              </div>
+              <div class="flex items-center justify-between">
+                  <span class="font-semibold text-app-sub">Aceptadas:</span>
+                  <div class="inline-flex rounded-lg p-0.5 bg-slate-200 dark:bg-slate-800">
+                      <button type="button" onclick="setPastCheckAcep('si')" id="pastAcepSi" class="px-2.5 py-1 rounded-md font-semibold text-xs transition-all cursor-pointer text-app-sub">Sí</button>
+                      <button type="button" onclick="setPastCheckAcep('no')" id="pastAcepNo" class="px-2.5 py-1 rounded-md font-semibold text-xs transition-all cursor-pointer bg-slate-300 dark:bg-slate-700 text-app-title dark:text-darkapp-title shadow-sm">No</button>
+                  </div>
+              </div>
+          </div>
+          <div class="flex justify-center items-center gap-2 w-full pt-2">
+              <button onclick="cancelarPastCheckHistorial()" class="py-2 px-4 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Cancelar</button>
+              <button onclick="confirmarPastCheckHistorial()" class="py-2 px-4 bg-app-brand hover:bg-teal-700 text-white rounded-lg shadow-sm transition-all font-semibold text-xs cursor-pointer shrink-0">Confirmar</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Modal Aviso Extra -->
+  <div id="modalAvisoExtra" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10015] flex items-center justify-center p-4 hidden">
+      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
+          <div class="text-amber-500 flex justify-center mx-auto"><i data-lucide="alert-circle" class="w-8 h-8"></i></div>
+          <p class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">
+              Ya se tienen registrados los 2 checks del mes, ¿deseas agregar otro check?
+          </p>
+          <div class="flex justify-center items-center gap-2 w-full pt-2">
+              <button onclick="cerrarModalAvisoExtra()" class="py-2 px-4 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Cancelar</button>
+              <button onclick="continuarCheckExtra()" class="py-2 px-4 bg-app-brand hover:bg-teal-700 text-white rounded-lg shadow-sm transition-all font-semibold text-xs cursor-pointer shrink-0">Continuar</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Modal Eliminar Check -->
+  <div id="confirmModalEliminar" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10012] flex items-center justify-center p-4 hidden">
+      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
+          <div class="text-rose-500 flex justify-center mx-auto"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
+          <p class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">
+              ¿Desea eliminar este check?<br>Esta acción no se puede deshacer.
+          </p>
+          <div class="flex justify-center items-center gap-2 w-full pt-2">
+              <button onclick="cerrarModalEliminar(false)" class="py-2 px-4 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Cancelar</button>
+              <button onclick="cerrarModalEliminar(true)" class="py-2 px-4 bg-rose-500 hover:bg-rose-600 text-white rounded-lg shadow-sm transition-all font-semibold text-xs cursor-pointer shrink-0">Confirmar</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Modal Eliminar Mes Historial -->
+  <div id="confirmModalMesHistorial" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10022] flex items-center justify-center p-4 hidden">
+      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
+          <div class="text-rose-500 flex justify-center mx-auto"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
+          <p class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">
+              ¿Desea eliminar este mes del historial?<br>Esta acción no se puede deshacer.
+          </p>
+          <div class="flex justify-center items-center gap-2 w-full pt-2">
+              <button onclick="cerrarModalMesHistorialConfirm(false)" class="py-2 px-4 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Cancelar</button>
+              <button onclick="cerrarModalMesHistorialConfirm(true)" class="py-2 px-4 bg-rose-500 hover:bg-rose-600 text-white rounded-lg shadow-sm transition-all font-semibold text-xs cursor-pointer shrink-0">Sí, eliminar</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Modal Confirmar Todo -->
+  <div id="confirmModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10010] flex items-center justify-center p-4 hidden">
+      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
+          <div class="text-rose-500 flex justify-center mx-auto"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
+          <p id="confirmModalText" class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">
+              ¿Desea eliminar todos los datos almacenados?<br>Esta acción eliminará todos los checks registrados.
+          </p>
+          <div class="flex flex-col gap-2 w-full pt-2">
+              <button onclick="guardarEnHistorialPrompt()" class="py-2.5 px-4 bg-app-accent hover:bg-app-active text-app-brand rounded-lg transition-all font-semibold text-xs cursor-pointer w-full flex items-center justify-center gap-1.5">
+                  <i data-lucide="bookmark-plus" class="w-4 h-4"></i> Guardar en historial
+              </button>
+              <div class="flex justify-center items-center gap-2 w-full mt-1">
+                  <button onclick="cerrarModalConfirmacion(false)" class="py-2 px-3 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg transition-all font-semibold text-xs cursor-pointer flex-1">Cancelar</button>
+                  <button onclick="cerrarModalConfirmacion(true)" class="py-2 px-3 bg-rose-500 hover:bg-rose-600 text-white rounded-lg shadow-sm transition-all font-semibold text-xs cursor-pointer flex-1">Sí, borrar todo</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Modal Guardar en Historial -->
+  <div id="modalGuardarHistorial" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10018] flex items-center justify-center p-4 hidden">
+      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
+          <div class="text-app-brand flex justify-center mx-auto"><i data-lucide="help-circle" class="w-8 h-8"></i></div>
+          <p class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">
+              La información de los checks se guardará en el historial, ¿desea continuar?
+          </p>
+          <div class="flex justify-center items-center gap-2 w-full pt-2">
+              <button onclick="cancelarGuardarHistorial()" class="py-2 px-4 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">No</button>
+              <button onclick="confirmarGuardarHistorial()" class="py-2 px-4 bg-app-brand hover:bg-teal-700 text-white rounded-lg shadow-sm transition-all font-semibold text-xs cursor-pointer shrink-0">Confirmar</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Modal Confirmar Borrar Todo Historial -->
+  <div id="confirmModalHistorial" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10019] flex items-center justify-center p-4 hidden">
+      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
+          <div class="text-rose-500 flex justify-center mx-auto"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
+          <p class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">
+              ¿Desea eliminar todo el historial de checks?<br>Esta acción no se puede deshacer.
+          </p>
+          <div class="flex justify-center items-center gap-2 w-full pt-2">
+              <button onclick="cerrarModalHistorialConfirm(false)" class="py-2 px-4 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Cancelar</button>
+              <button onclick="cerrarModalHistorialConfirm(true)" class="py-2 px-4 bg-rose-500 hover:bg-rose-600 text-white rounded-lg shadow-sm transition-all font-semibold text-xs cursor-pointer shrink-0">Sí, borrar todo</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Modal Alerta Genérico -->
+  <div id="alertModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10020] flex items-center justify-center p-4 hidden">
+      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
+          <div class="text-app-brand flex justify-center mx-auto"><i data-lucide="check-circle-2" class="w-8 h-8"></i></div>
+          <p id="alertModalText" class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">Mensaje</p>
+          <div class="flex justify-center gap-2 pt-2">
+              <button onclick="cerrarModalAlerta()" class="py-2.5 px-6 rounded-lg bg-app-brand hover:bg-teal-700 text-white text-xs shadow-sm font-semibold cursor-pointer transition-all">Aceptar</button>
+          </div>
+      </div>
+  </div>
+
+  <script>
+    // ============================================================================
+    // SERVICE WORKER
+    // ============================================================================
+    function initServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                .then((registration) => console.log('[PWA] SW OK:', registration.scope))
+                .catch((error) => console.error('[PWA] SW error:', error));
+        }
+    }
+
+    // ============================================================================
+    // SUPABASE (FIX #2: guard si el SDK no cargó)
+    // ============================================================================
+    const SUPABASE_URL = "https://mifbcyxtafeacwkzqzsq.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_O6EAbkSba1NQPq08k_7bHg_PZ_x4ZU5";
+
+    if (!window.supabase) {
+        console.error('[Supabase] SDK no disponible, redirigiendo al login.');
+        window.location.replace('../index.html');
+        throw new Error('Supabase SDK no disponible');
+    }
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ============================================================================
+    // GUARD DE SESIÓN (P0-A) + listener de logout
+    // ============================================================================
+    async function verificarSesion() {
+        try {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.replace('../index.html');
+                return false;
+            }
+            return true;
+        } catch (e) {
+            console.error('[Auth] Error verificando sesión:', e);
+            window.location.replace('../index.html');
+            return false;
+        }
+    }
+
+    // Escucha logout en otra pestaña o expiración de token
+    supabaseClient.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_OUT') {
+            window.location.replace('../index.html');
+        }
+    });
+
+    // ============================================================================
+    // CONFIGURACIÓN IndexedDB
+    // ============================================================================
+    const DB_NAME = 'ChecksRemotosDB';
+    const DB_VERSION = 1;
+    const STORE_CHECKS = 'checks';
+    const STORE_HISTORIAL = 'historial';
+
+    const CHECKS_STORAGE_KEY = 'checks_remotos_master_data';
+    const HISTORIAL_STORAGE_KEY = 'checks_remotos_historial_data';
+
+    // ============================================================================
+    // ESTADO GLOBAL
+    // ============================================================================
+    let checksData = [];
+    let historialData = [];
+    let checkIdParaEliminar = null;
+    let mesIdParaEliminar = null;
+    let pendingPastCheck = null;
+
+    let pastCheckEnviadas = 'si';
+    let pastCheckAceptadas = 'no';
+    let expandedMeses = {};
+
+    // ============================================================================
+    // HELPERS DE REFACTOR
+    // ============================================================================
+
+    // Helper #16: orden descendente por id, usado en 8+ lugares
+    function sortNewest(arr) {
+        return arr.sort((a, b) => b.id.localeCompare(a.id));
+    }
+
+    // Helper #18: color según calificación, usado en 2 lugares
+    function colorForScore(val) {
+        return val >= 8.5
+            ? 'text-emerald-600 dark:text-emerald-400'
+            : 'text-rose-600 dark:text-rose-400';
+    }
+
+    // Helper #21: centraliza online/offline/error con cola (FIX #7)
+    async function runOrQueue(action, payload) {
+        if (!navigator.onLine) {
+            agregarAColaOffline(action, payload);
+            return { queued: true };
+        }
+        try {
+            let result;
+            if (action === 'CREAR') {
+                result = await supabaseClient.from('checks_remotos').insert([payload]);
+            } else if (action === 'EDITAR') {
+                result = await supabaseClient.from('checks_remotos').update(payload).eq('id', payload.id);
+            } else if (action === 'ELIMINAR') {
+                result = await supabaseClient.from('checks_remotos').delete().eq('id', payload.id);
+            } else if (action === 'CREAR_HISTORIAL' || action === 'EDITAR_HISTORIAL') {
+                // Upsert para soportar merges por mes (FIX #6)
+                result = await supabaseClient.from('historial_checks').upsert([payload]);
+            } else if (action === 'ELIMINAR_HISTORIAL') {
+                result = await supabaseClient.from('historial_checks').delete().eq('id', payload.id);
+            }
+            if (result && result.error) {
+                console.error('[Supabase] Error, encolando:', result.error);
+                agregarAColaOffline(action, payload);
+                return { queued: true, error: result.error };
+            }
+            return { queued: false };
+        } catch (err) {
+            console.error('[Red/Supabase] Error, encolando:', err);
+            agregarAColaOffline(action, payload);
+            return { queued: true, error: err };
+        }
+    }
+
+    // Mapeos BD -> objeto local (usados en cargarDatosRemotos y Realtime)
+    function mapCheckFromDb(row) {
+        return {
+            id: row.id,
+            numeroCheck: row.numero_check,
+            fecha: row.fecha,
+            calificacion: row.calificacion,
+            pdfName: row.pdf_name || '',
+            pdfPath: row.pdf_path || '',
+            enviadas: row.enviadas || 'no',
+            aceptadas: row.aceptadas || 'no',
+            updated_at: row.updated_at
+        };
+    }
+
+    function mapHistorialFromDb(row) {
+        return {
+            id: row.id,
+            titulo: row.titulo,
+            fechaGuardado: row.fecha_guardado,
+            checks: row.checks,
+            calificacionFinal: row.calificacion_final,
+            aplicaBono: row.aplica_bono
+        };
+    }
+
+    // ============================================================================
+    // TOGGLES (Sí/No) — mantener consistencia visual
+    // ============================================================================
+    function setPastCheckEnv(val) {
+        pastCheckEnviadas = val;
+        const btnSi = document.getElementById('pastEnvSi');
+        const btnNo = document.getElementById('pastEnvNo');
+        if (val === 'si') {
+            btnSi.className = "px-2.5 py-1 rounded-md font-semibold text-xs transition-all cursor-pointer bg-amber-500 text-white shadow-sm";
+            btnNo.className = "px-2.5 py-1 rounded-md font-semibold text-xs transition-all cursor-pointer text-app-sub";
+        } else {
+            btnNo.className = "px-2.5 py-1 rounded-md font-semibold text-xs transition-all cursor-pointer bg-slate-300 dark:bg-slate-700 text-app-title dark:text-darkapp-title shadow-sm";
+            btnSi.className = "px-2.5 py-1 rounded-md font-semibold text-xs transition-all cursor-pointer text-app-sub";
+            setPastCheckAcep('no');
+        }
+    }
+
+    function setPastCheckAcep(val) {
+        if (pastCheckEnviadas === 'no' && val === 'si') return;
+        pastCheckAceptadas = val;
+        const btnSi = document.getElementById('pastAcepSi');
+        const btnNo = document.getElementById('pastAcepNo');
+        if (val === 'si') {
+            btnSi.className = "px-2.5 py-1 rounded-md font-semibold text-xs transition-all cursor-pointer bg-emerald-500 text-white shadow-sm";
+            btnNo.className = "px-2.5 py-1 rounded-md font-semibold text-xs transition-all cursor-pointer text-app-sub";
+        } else {
+            btnNo.className = "px-2.5 py-1 rounded-md font-semibold text-xs transition-all cursor-pointer bg-slate-300 dark:bg-slate-700 text-app-title dark:text-darkapp-title shadow-sm";
+            btnSi.className = "px-2.5 py-1 rounded-md font-semibold text-xs transition-all cursor-pointer text-app-sub";
+        }
+    }
+
+    // ============================================================================
+    // OVERLAY DE CARGA
+    // ============================================================================
+    function mostrarCarga(mensaje = "Analizando PDF y subiendo archivo al servidor...") {
+        document.getElementById('loadingOverlayText').textContent = mensaje;
+        document.getElementById('loadingOverlay').classList.remove('hidden');
+    }
+    function ocultarCarga() {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+
+    // ============================================================================
+    // COLA OFFLINE (localStorage: pequeños payloads, correcto para este uso)
+    // ============================================================================
+    function obtenerColaPendiente() { return JSON.parse(localStorage.getItem('cola_checks_offline') || '[]'); }
+    function guardarColaPendiente(cola) { localStorage.setItem('cola_checks_offline', JSON.stringify(cola)); }
+
+    function agregarAColaOffline(accion, payload) {
+        const cola = obtenerColaPendiente();
+        cola.push({ idTemp: Date.now(), accion, payload });
+        guardarColaPendiente(cola);
+        actualizarEstadoConexionUI();
+    }
+
+    function actualizarEstadoConexionUI() {
+        const statusEl = document.getElementById('conexionStatus');
+        const cola = obtenerColaPendiente();
+        if (!statusEl) return;
+        if (!navigator.onLine) {
+            statusEl.className = "inline-flex items-center gap-1.5 text-[11px] text-amber-500 font-semibold";
+            statusEl.innerHTML = `<i class="fa-solid fa-wifi text-[10px]"></i> Sin Conexión (${cola.length})`;
+        } else if (cola.length > 0) {
+            statusEl.className = "inline-flex items-center gap-1.5 text-[11px] text-amber-500 font-semibold animate-pulse";
+            statusEl.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-[10px]"></i> Sincronizando (${cola.length})...`;
+        } else {
+            statusEl.className = "inline-flex items-center gap-1.5 text-[11px] text-emerald-500 font-semibold";
+            statusEl.innerHTML = `<i class="fa-solid fa-circle-check text-[10px]"></i> Base de Datos: En Línea`;
+        }
+    }
+
+    // FIX #4: procesarSincronizacionOffline YA NO llama cargarDatosRemotos internamente.
+    // Los callers deciden cuándo recargar.
+    async function procesarSincronizacionOffline() {
+        const cola = obtenerColaPendiente();
+        if (cola.length === 0 || !navigator.onLine) return;
+        const colaFallida = [];
+
+        for (const item of cola) {
+            let error = null;
+            try {
+                if (item.accion === 'CREAR') {
+                    const { error: err } = await supabaseClient.from('checks_remotos').insert([item.payload]);
+                    error = err;
+                } else if (item.accion === 'EDITAR') {
+                    const { error: err } = await supabaseClient.from('checks_remotos').update(item.payload).eq('id', item.payload.id);
+                    error = err;
+                } else if (item.accion === 'ELIMINAR') {
+                    const { error: err } = await supabaseClient.from('checks_remotos').delete().eq('id', item.payload.id);
+                    error = err;
+                } else if (item.accion === 'CREAR_HISTORIAL' || item.accion === 'EDITAR_HISTORIAL') {
+                    const { error: err } = await supabaseClient.from('historial_checks').upsert([item.payload]);
+                    error = err;
+                } else if (item.accion === 'ELIMINAR_HISTORIAL') {
+                    const { error: err } = await supabaseClient.from('historial_checks').delete().eq('id', item.payload.id);
+                    error = err;
+                }
+            } catch (e) {
+                error = e;
+            }
+            if (error) colaFallida.push(item);
+        }
+        guardarColaPendiente(colaFallida);
+        actualizarEstadoConexionUI();
+    }
+
+    window.addEventListener('online', async () => {
+        await procesarSincronizacionOffline();
+        await cargarDatosRemotos();
+    });
+    window.addEventListener('offline', () => { actualizarEstadoConexionUI(); });
+
+    // ============================================================================
+    // INDEXEDDB
+    // ============================================================================
+    function abrirDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve(request.result);
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(STORE_CHECKS)) {
+                    db.createObjectStore(STORE_CHECKS, { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains(STORE_HISTORIAL)) {
+                    db.createObjectStore(STORE_HISTORIAL, { keyPath: 'id' });
+                }
+            };
+        });
+    }
+
+    async function dbGetAll(storeName) {
+        const db = await abrirDB();
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(storeName, 'readonly');
+            const store = transaction.objectStore(storeName);
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function dbPut(storeName, item) {
+        const db = await abrirDB();
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(storeName, 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.put(item);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function dbDelete(storeName, id) {
+        const db = await abrirDB();
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(storeName, 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.delete(id);
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function dbClearStore(storeName) {
+        const db = await abrirDB();
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(storeName, 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.clear();
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // ============================================================================
+    // SERIALIZACIÓN DE ESCRITURAS A IndexedDB (FIX #5: race condition Realtime)
+    // ============================================================================
+    let dbWriteChain = Promise.resolve();
+    function enqueueDbWrite(fn) {
+        dbWriteChain = dbWriteChain.then(fn).catch(err => console.error('[DB Queue]', err));
+        return dbWriteChain;
+    }
+
+    // ============================================================================
+    // MIGRACIÓN localStorage -> IndexedDB (one-shot, legacy)
+    // ============================================================================
+    async function migrarLocalStorageAIndexedDB() {
+        try {
+            const oldChecks = localStorage.getItem(CHECKS_STORAGE_KEY);
+            if (oldChecks) {
+                const parsed = JSON.parse(oldChecks);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    for (const item of parsed) await dbPut(STORE_CHECKS, item);
+                }
+                localStorage.removeItem(CHECKS_STORAGE_KEY);
+            }
+            const oldHistorial = localStorage.getItem(HISTORIAL_STORAGE_KEY);
+            if (oldHistorial) {
+                const parsedH = JSON.parse(oldHistorial);
+                if (Array.isArray(parsedH) && parsedH.length > 0) {
+                    for (const item of parsedH) await dbPut(STORE_HISTORIAL, item);
+                }
+                localStorage.removeItem(HISTORIAL_STORAGE_KEY);
+            }
+        } catch (e) {
+            console.error("Error en migración:", e);
+        }
+    }
+
+    // ============================================================================
+    // FORMATEO DE FECHAS
+    // ============================================================================
+    function formatearFechaDDMMMYYYY(fechaIso) {
+        if (!fechaIso) return '';
+        const partes = fechaIso.split('-');
+        if (partes.length !== 3) return fechaIso;
+        const [anio, mesNum, dia] = partes;
+        const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+        const mesNombre = meses[parseInt(mesNum, 10) - 1] || mesNum;
+        return `${dia}/${mesNombre}/${anio}`;
+    }
+
+    // ============================================================================
+    // TEMA
+    // ============================================================================
+    const btnThemeToggle = document.getElementById('btn-theme-toggle');
+    const htmlElement = document.documentElement;
+
+    function setTheme(isDark) {
+        const themeMeta = document.querySelector('meta[name="theme-color"]');
+        if (isDark) {
+            htmlElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#0F172A');
+        } else {
+            htmlElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            if (themeMeta) themeMeta.setAttribute('content', '#F5F7FA');
+        }
+        // Nota: no se re-crean iconos aquí (no cambian con el tema)
+    }
+
+    const savedTheme = localStorage.getItem('theme');
+    setTheme(savedTheme !== 'light');
+
+    btnThemeToggle.addEventListener('click', () => {
+        const isDarkActive = htmlElement.classList.contains('dark');
+        setTheme(!isDarkActive);
+    });
+
+    // ============================================================================
+    // MODALES DE ALERTA
+    // ============================================================================
+    function mostrarAlerta(texto) {
+        document.getElementById('alertModalText').innerText = texto;
+        document.getElementById('alertModal').classList.remove('hidden');
+        // Iconos del modal se renderizaron en el primer createIcons; no se requiere re-render.
+    }
+    function cerrarModalAlerta() {
+        document.getElementById('alertModal').classList.add('hidden');
+    }
+
+    // ============================================================================
+    // BORRAR TODO
+    // ============================================================================
+    function confirmarBorrarTodo() {
+        document.getElementById('confirmModal').classList.remove('hidden');
+    }
+
+    async function cerrarModalConfirmacion(resultado) {
+        document.getElementById('confirmModal').classList.add('hidden');
+        if (!resultado) return;
+        try {
+            for (const c of checksData) {
+                await runOrQueue('ELIMINAR', { id: c.id });
+                if (c.pdfPath && navigator.onLine) {
+                    try {
+                        await supabaseClient.storage.from('checks-pdfs').remove([c.pdfPath]);
+                    } catch (e) { console.error('Error borrando PDF:', e); }
+                }
+            }
+            await dbClearStore(STORE_CHECKS);
+            checksData = [];
+            renderizarApp();
+            mostrarAlerta('Se han borrado todos los datos y liberado la memoria correctamente.');
+        } catch (e) {
+            console.error("Error al borrar datos:", e);
+            mostrarAlerta('Ocurrió un error al limpiar la base de datos.');
+        }
+    }
+
+    // ============================================================================
+    // GUARDAR EN HISTORIAL (desde modal de borrar todo)
+    // ============================================================================
+    function guardarEnHistorialPrompt() {
+        if (checksData.length === 0) {
+            mostrarAlerta('No hay checks registrados para guardar en el historial.');
+            return;
+        }
+        document.getElementById('confirmModal').classList.add('hidden');
+        document.getElementById('modalGuardarHistorial').classList.remove('hidden');
+    }
+
+    function cancelarGuardarHistorial() {
+        document.getElementById('modalGuardarHistorial').classList.add('hidden');
+        // FIX #10: no se oculta confirmModal, ya estaba oculto al entrar aquí.
+    }
+
+    // FIX #6: usar ID consistente mes_YYYY_MM; si ya existe, mergear en vez de duplicar
+    async function confirmarGuardarHistorial() {
+        document.getElementById('modalGuardarHistorial').classList.add('hidden');
+
+        const fechaActual = new Date();
+        const idMes = `mes_${fechaActual.getFullYear()}_${String(fechaActual.getMonth() + 1).padStart(2, '0')}`;
+        const mesesNombre = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        const nombreMesAnio = `${mesesNombre[fechaActual.getMonth()]} ${fechaActual.getFullYear()}`;
+
+        const checksLimpios = checksData.map((c, idx) => ({
+            id: c.id,
+            numeroCheck: String(idx + 1),
+            fecha: c.fecha,
+            calificacion: c.calificacion,
+            enviadas: c.enviadas,
+            aceptadas: c.aceptadas
+        }));
+
+        const existingIdx = historialData.findIndex(h => h.id === idMes);
+        let registroHistorial;
+
+        if (existingIdx !== -1) {
+            // Merge con el mes existente
+            const existing = historialData[existingIdx];
+            const mergedChecks = [...(existing.checks || []), ...checksLimpios];
+            const total = mergedChecks.length;
+            const suma = mergedChecks.reduce((acc, c) => acc + parseFloat(c.calificacion || 0), 0);
+            const promedio = total > 0 ? suma / total : 0;
+            const aplicaBono = total > 0 && mergedChecks.every(c => c.aceptadas === 'si');
+            const calificacionFinal = aplicaBono ? Math.min(10.00, promedio + 0.5) : promedio;
+
+            registroHistorial = {
+                ...existing,
+                checks: mergedChecks,
+                calificacionFinal: calificacionFinal.toFixed(2),
+                aplicaBono: aplicaBono
+            };
+            historialData[existingIdx] = registroHistorial;
+        } else {
+            const total = checksData.length;
+            const suma = checksData.reduce((acc, c) => acc + parseFloat(c.calificacion || 0), 0);
+            const promedio = total > 0 ? suma / total : 0;
+            const aplicaBono = total > 0 && checksData.every(c => c.aceptadas === 'si');
+            const calificacionFinal = aplicaBono ? Math.min(10.00, promedio + 0.5) : promedio;
+
+            registroHistorial = {
+                id: idMes,
+                titulo: nombreMesAnio,
+                fechaGuardado: fechaActual.toISOString(),
+                checks: checksLimpios,
+                calificacionFinal: calificacionFinal.toFixed(2),
+                aplicaBono: aplicaBono
+            };
+            historialData.unshift(registroHistorial);
+        }
+
+        sortNewest(historialData);
+
+        try {
+            await dbPut(STORE_HISTORIAL, registroHistorial);
+
+            const payloadHistorialDB = {
+                id: registroHistorial.id,
+                titulo: registroHistorial.titulo,
+                fecha_guardado: registroHistorial.fechaGuardado,
+                checks: registroHistorial.checks,
+                calificacion_final: parseFloat(registroHistorial.calificacionFinal),
+                aplica_bono: registroHistorial.aplicaBono
+            };
+
+            await runOrQueue('EDITAR_HISTORIAL', payloadHistorialDB);
+
+            for (const c of checksData) {
+                await runOrQueue('ELIMINAR', { id: c.id });
+            }
+
+            await dbClearStore(STORE_CHECKS);
+            checksData = [];
+            renderizarApp();
+            mostrarAlerta('La información se ha guardado en el historial y se han limpiado los datos actuales.');
+        } catch (e) {
+            console.error("Error al guardar en historial:", e);
+            mostrarAlerta('No se pudo guardar el historial en la base de datos.');
+        }
+    }
+
+    // ============================================================================
+    // HISTORIAL
+    // ============================================================================
+    function abrirHistorial() {
+        document.getElementById('vistaPrincipal').classList.add('hidden');
+        document.getElementById('vistaHistorial').classList.remove('hidden');
+        renderizarHistorial();
+    }
+
+    function cerrarHistorial() {
+        document.getElementById('vistaHistorial').classList.add('hidden');
+        document.getElementById('vistaPrincipal').classList.remove('hidden');
+        renderizarApp();
+    }
+
+    async function eliminarMesHistorial(idMes) {
+        historialData = historialData.filter(h => h.id !== idMes);
+        try {
+            await dbDelete(STORE_HISTORIAL, idMes);
+            await runOrQueue('ELIMINAR_HISTORIAL', { id: idMes });
+            renderizarHistorial();
+        } catch (e) {
+            console.error("Error al eliminar del historial:", e);
+        }
+    }
+
+    function pedirEliminarMesHistorial(idMes) {
+        mesIdParaEliminar = idMes;
+        document.getElementById('confirmModalMesHistorial').classList.remove('hidden');
+    }
+
+    async function cerrarModalMesHistorialConfirm(confirmado) {
+        document.getElementById('confirmModalMesHistorial').classList.add('hidden');
+        if (confirmado && mesIdParaEliminar) {
+            await eliminarMesHistorial(mesIdParaEliminar);
+        }
+        mesIdParaEliminar = null;
+    }
+
+    function confirmarBorrarTodoHistorial() {
+        if (historialData.length === 0) {
+            mostrarAlerta('El historial ya está vacío.');
+            return;
+        }
+        document.getElementById('confirmModalHistorial').classList.remove('hidden');
+    }
+
+    async function cerrarModalHistorialConfirm(confirmado) {
+        document.getElementById('confirmModalHistorial').classList.add('hidden');
+        if (!confirmado) return;
+        try {
+            for (const h of historialData) {
+                await runOrQueue('ELIMINAR_HISTORIAL', { id: h.id });
+            }
+            await dbClearStore(STORE_HISTORIAL);
+            historialData = [];
+            renderizarHistorial();
+            mostrarAlerta('Se ha borrado todo el historial y liberado la memoria correctamente.');
+        } catch (e) {
+            console.error("Error al borrar historial:", e);
+            mostrarAlerta('Ocurrió un error al limpiar el historial.');
+        }
+    }
+
+    // ============================================================================
+    // CARGA DE DATOS
+    // ============================================================================
+    async function actualizarDatosManual() {
+        const icono = document.getElementById('iconActualizar');
+        if (icono) icono.classList.add('fa-spin');
+
+        if (navigator.onLine) {
+            // FIX #4: procesar la cola y recargar SOLO una vez
+            await procesarSincronizacionOffline();
+            await cargarDatosRemotos();
+        } else {
+            try {
+                checksData = await dbGetAll(STORE_CHECKS);
+                sortNewest(checksData);
+                historialData = await dbGetAll(STORE_HISTORIAL);
+                sortNewest(historialData);
+            } catch (e) {
+                console.error("Error al actualizar datos locales:", e);
+            }
+            renderizarApp();
+            actualizarEstadoConexionUI();
+        }
+
+        if (icono) {
+            setTimeout(() => icono.classList.remove('fa-spin'), 500);
+        }
+    }
+
+    async function cargarDatosRemotos() {
+        if (!navigator.onLine) return;
+
+        try {
+            const resChecks = await supabaseClient.from('checks_remotos').select('*').order('created_at', { ascending: false });
+            if (!resChecks.error && resChecks.data) {
+                checksData = resChecks.data.map(mapCheckFromDb);
+                await dbClearStore(STORE_CHECKS);
+                for (const c of checksData) await dbPut(STORE_CHECKS, c);
+            }
+
+            const resHistorial = await supabaseClient.from('historial_checks').select('*').order('created_at', { ascending: false });
+            if (!resHistorial.error && resHistorial.data) {
+                historialData = resHistorial.data.map(mapHistorialFromDb);
+                sortNewest(historialData);
+                await dbClearStore(STORE_HISTORIAL);
+                for (const h of historialData) await dbPut(STORE_HISTORIAL, h);
+            }
+        } catch (e) {
+            console.error("Error al cargar datos remotos:", e);
+        }
+
+        renderizarApp();
+        actualizarEstadoConexionUI();
+    }
+
+    // ============================================================================
+    // REALTIME — FIX #5: escritura por item + serialización
+    // ============================================================================
+    function inicializarRealtime() {
+        supabaseClient
+            .channel('checks_realtime_channel')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'checks_remotos' }, payload => {
+                const { eventType, new: newRec, old: oldRec } = payload;
+
+                if (eventType === 'INSERT' || eventType === 'UPDATE') {
+                    const item = mapCheckFromDb(newRec);
+                    const idx = checksData.findIndex(c => c.id === item.id);
+                    if (idx !== -1) checksData[idx] = item;
+                    else checksData.unshift(item);
+                    enqueueDbWrite(() => dbPut(STORE_CHECKS, item));
+                } else if (eventType === 'DELETE') {
+                    checksData = checksData.filter(c => c.id !== oldRec.id);
+                    enqueueDbWrite(() => dbDelete(STORE_CHECKS, oldRec.id));
+                }
+
+                sortNewest(checksData);
+                renderizarApp();
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'historial_checks' }, payload => {
+                const { eventType, new: newRec, old: oldRec } = payload;
+
+                if (eventType === 'INSERT' || eventType === 'UPDATE') {
+                    const item = mapHistorialFromDb(newRec);
+                    const idx = historialData.findIndex(h => h.id === item.id);
+                    if (idx !== -1) historialData[idx] = item;
+                    else historialData.unshift(item);
+                    enqueueDbWrite(() => dbPut(STORE_HISTORIAL, item));
+                } else if (eventType === 'DELETE') {
+                    historialData = historialData.filter(h => h.id !== oldRec.id);
+                    enqueueDbWrite(() => dbDelete(STORE_HISTORIAL, oldRec.id));
+                }
+
+                sortNewest(historialData);
+                if (!document.getElementById('vistaHistorial').classList.contains('hidden')) {
+                    renderizarHistorial();
+                }
+            })
+            .subscribe();
+    }
+
+    // ============================================================================
+    // UI MODAL NUEVO / EDITAR CHECK
+    // ============================================================================
+    function togglePdfOpciones(esSi) {
+        const containerPdf = document.getElementById('containerArchivoPdf');
+        const containerManual = document.getElementById('containerManual');
+        if (esSi) {
+            containerPdf.classList.remove('hidden');
+            containerManual.classList.add('hidden');
+        } else {
+            containerPdf.classList.add('hidden');
+            containerManual.classList.remove('hidden');
+        }
+    }
+
+    function verificarNuevoCheck() {
+        const tiene1 = checksData.some(c => c.numeroCheck === '1');
+        const tiene2 = checksData.some(c => c.numeroCheck === '2');
+        if (tiene1 && tiene2) {
+            document.getElementById('modalAvisoExtra').classList.remove('hidden');
+        } else {
+            abrirModalCheck();
+        }
+    }
+
+    function cerrarModalAvisoExtra() {
+        document.getElementById('modalAvisoExtra').classList.add('hidden');
+    }
+
+    function continuarCheckExtra() {
+        document.getElementById('modalAvisoExtra').classList.add('hidden');
+        abrirModalCheck(null, true);
+    }
+
+    function abrirModalCheck(id = null, esExtra = false) {
+        document.getElementById('modalCheck').style.display = 'flex';
+        document.getElementById('editCheckId').value = '';
+
+        document.querySelector('input[name="subirPdf"][value="no"]').checked = true;
+        togglePdfOpciones(false);
+        document.getElementById('inputPdfFile').value = '';
+        document.getElementById('inputCalificacion').value = '';
+        document.getElementById('inputFecha').value = new Date().toISOString().slice(0, 10);
+
+        const tiene1 = checksData.some(c => c.numeroCheck === '1');
+        const tiene2 = checksData.some(c => c.numeroCheck === '2');
+        const opcionesContainer = document.getElementById('opcionesNumeroCheck');
+        const seccionNum = document.getElementById('seccionNumeroCheck');
+
+        if (id !== null) {
+            const check = checksData.find(c => c.id == id);
+            if (check) {
+                document.getElementById('modalCheckTitulo').innerText = 'Editar Check';
+                document.getElementById('editCheckId').value = check.id;
+
+                if (check.numeroCheck === 'Extra') {
+                    seccionNum.style.display = 'none';
+                } else {
+                    seccionNum.style.display = 'block';
+                    opcionesContainer.innerHTML = `
+                        <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+                          <input type="radio" name="numeroCheck" value="${check.numeroCheck}" checked class="text-app-brand focus:ring-app-brand">
+                          <span class="font-semibold text-app-title dark:text-darkapp-title">Check ${check.numeroCheck}</span>
+                        </label>
+                    `;
+                }
+
+                if (check.pdfPath || check.pdfName) {
+                    document.querySelector('input[name="subirPdf"][value="si"]').checked = true;
+                    togglePdfOpciones(true);
+                } else {
+                    document.querySelector('input[name="subirPdf"][value="no"]').checked = true;
+                    togglePdfOpciones(false);
+                    document.getElementById('inputCalificacion').value = check.calificacion || '';
+                }
+                document.getElementById('inputFecha').value = check.fecha || '';
+            }
+        } else {
+            document.getElementById('modalCheckTitulo').innerText = 'Registrar Nuevo Check';
+            seccionNum.style.display = 'block';
+
+            if (esExtra) {
+                seccionNum.style.display = 'none';
+            } else if (!tiene1 && !tiene2) {
+                opcionesContainer.innerHTML = `
+                    <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+                      <input type="radio" name="numeroCheck" value="1" checked class="text-app-brand focus:ring-app-brand">
+                      <span class="font-semibold text-app-title dark:text-darkapp-title">Check 1</span>
+                    </label>
+                    <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+                      <input type="radio" name="numeroCheck" value="2" class="text-app-brand focus:ring-app-brand">
+                      <span class="font-semibold text-app-title dark:text-darkapp-title">Check 2</span>
+                    </label>
+                `;
+            } else if (tiene1 && !tiene2) {
+                opcionesContainer.innerHTML = `
+                    <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+                      <input type="radio" name="numeroCheck" value="2" checked class="text-app-brand focus:ring-app-brand">
+                      <span class="font-semibold text-app-title dark:text-darkapp-title">Check 2</span>
+                    </label>
+                `;
+            } else if (!tiene1 && tiene2) {
+                opcionesContainer.innerHTML = `
+                    <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+                      <input type="radio" name="numeroCheck" value="1" checked class="text-app-brand focus:ring-app-brand">
+                      <span class="font-semibold text-app-title dark:text-darkapp-title">Check 1</span>
+                    </label>
+                `;
+            }
+        }
+    }
+
+    function cerrarModalCheck() {
+        document.getElementById('modalCheck').style.display = 'none';
+    }
+
+    // ============================================================================
+    // GUARDAR CHECK
+    // ============================================================================
+    async function guardarCheck() {
+        const editId = document.getElementById('editCheckId').value;
+        const seccionNumVisible = document.getElementById('seccionNumeroCheck').style.display !== 'none';
+
+        let numeroCheck = 'Extra';
+        if (seccionNumVisible) {
+            const radioSel = document.querySelector('input[name="numeroCheck"]:checked');
+            if (radioSel) numeroCheck = radioSel.value;
+        }
+
+        const subirPdf = document.querySelector('input[name="subirPdf"]:checked').value;
+
+        if (subirPdf === 'si') {
+            const fileInput = document.getElementById('inputPdfFile');
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                mostrarCarga("Analizando PDF y extrayendo datos...");
+                await procesarPdfYGuardar(file, editId, numeroCheck);
+                return;
+            } else {
+                if (editId) {
+                    const checkExistente = checksData.find(c => c.id == editId);
+                    if (checkExistente) {
+                        mostrarCarga("Guardando cambios...");
+                        await verificarMesYGuardar({
+                            editId, numeroCheck,
+                            fecha: checkExistente.fecha,
+                            calificacion: checkExistente.calificacion,
+                            pdfName: checkExistente.pdfName,
+                            pdfPath: checkExistente.pdfPath
+                        });
+                        return;
+                    }
+                }
+                mostrarAlerta('Por favor seleccione un archivo PDF.');
+                return;
+            }
+        } else {
+            const fecha = document.getElementById('inputFecha').value;
+            const calificacion = parseFloat(document.getElementById('inputCalificacion').value);
+
+            if (isNaN(calificacion) || calificacion < 0 || calificacion > 10) {
+                mostrarAlerta('Por favor ingrese una calificación válida entre 0 y 10 (ej. 8.7).');
+                return;
+            }
+            if (!fecha) {
+                mostrarAlerta('Por favor seleccione la fecha en que se realizó el check.');
+                return;
+            }
+
+            mostrarCarga("Guardando registro...");
+            await verificarMesYGuardar({ editId, numeroCheck, fecha, calificacion, pdfName: '', pdfPath: '' });
+        }
+    }
+
+    async function verificarMesYGuardar({ editId, numeroCheck, fecha, calificacion, pdfName, pdfPath }) {
+        const partes = fecha.split('-');
+        if (partes.length !== 3) {
+            await finalizarGuardadoCheck(editId, numeroCheck, fecha, calificacion, pdfName, pdfPath);
+            return;
+        }
+
+        const cYear = parseInt(partes[0], 10);
+        const cMonth = parseInt(partes[1], 10);
+        const now = new Date();
+        const curYear = now.getFullYear();
+        const curMonth = now.getMonth() + 1;
+
+        if (cYear > curYear || (cYear === curYear && cMonth > curMonth)) {
+            ocultarCarga();
+            mostrarAlerta("No se puede registrar un check en el futuro. Verifique la fecha seleccionada.");
+            return;
+        }
+
+        if (cYear < curYear || (cYear === curYear && cMonth < curMonth)) {
+            ocultarCarga();
+            pendingPastCheck = { editId, numeroCheck, fecha, calificacion, pdfName };
+            pastCheckEnviadas = 'si';
+            pastCheckAceptadas = 'no';
+            setPastCheckEnv('si');
+            setPastCheckAcep('no');
+            document.getElementById('modalPastCheckHistorial').classList.remove('hidden');
+            return;
+        }
+
+        await finalizarGuardadoCheck(editId, numeroCheck, fecha, calificacion, pdfName, pdfPath);
+    }
+
+    function cancelarPastCheckHistorial() {
+        document.getElementById('modalPastCheckHistorial').classList.add('hidden');
+        pendingPastCheck = null;
+    }
+
+    // FIX #6: usar mes_YYYY_MM para consistencia y merge
+    async function confirmarPastCheckHistorial() {
+        document.getElementById('modalPastCheckHistorial').classList.add('hidden');
+        if (!pendingPastCheck) return;
+
+        mostrarCarga("Guardando check en el historial...");
+
+        const { fecha, calificacion } = pendingPastCheck;
+        const parts = fecha.split('-');
+        const cYear = parseInt(parts[0], 10);
+        const cMonthNum = parseInt(parts[1], 10);
+        const mesesNombre = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        const nombreMesAnio = `${mesesNombre[cMonthNum - 1]} ${cYear}`;
+        const idMes = `mes_${cYear}_${String(cMonthNum).padStart(2, '0')}`;
+
+        let mesRegistro = historialData.find(h => h.id === idMes);
+        let nextNum = 1;
+        if (mesRegistro && mesRegistro.checks && Array.isArray(mesRegistro.checks)) {
+            nextNum = mesRegistro.checks.length + 1;
+        }
+
+        const nuevoCheckHistorico = {
+            id: 'check_' + Date.now(),
+            numeroCheck: String(nextNum),
+            fecha: fecha,
+            calificacion: calificacion,
+            enviadas: pastCheckEnviadas,
+            aceptadas: pastCheckAceptadas
+        };
+
+        if (mesRegistro) {
+            mesRegistro.checks.push(nuevoCheckHistorico);
+        } else {
+            mesRegistro = {
+                id: idMes,
+                titulo: nombreMesAnio,
+                fechaGuardado: new Date().toISOString(),
+                checks: [nuevoCheckHistorico],
+                calificacionFinal: '0.00',
+                aplicaBono: false
+            };
+            historialData.unshift(mesRegistro);
+        }
+
+        const totalChecks = mesRegistro.checks.length;
+        const suma = mesRegistro.checks.reduce((acc, c) => acc + parseFloat(c.calificacion || 0), 0);
+        const promedio = totalChecks > 0 ? suma / totalChecks : 0;
+        const aplicaBono = totalChecks > 0 && mesRegistro.checks.every(c => c.aceptadas === 'si');
+        const califFinal = aplicaBono ? Math.min(10.00, promedio + 0.5) : promedio;
+        mesRegistro.calificacionFinal = califFinal.toFixed(2);
+        mesRegistro.aplicaBono = aplicaBono;
+
+        sortNewest(historialData);
+
+        try {
+            await dbPut(STORE_HISTORIAL, mesRegistro);
+            const payloadHistorialDB = {
+                id: mesRegistro.id,
+                titulo: mesRegistro.titulo,
+                fecha_guardado: mesRegistro.fechaGuardado,
+                checks: mesRegistro.checks,
+                calificacion_final: parseFloat(mesRegistro.calificacionFinal),
+                aplica_bono: mesRegistro.aplicaBono
+            };
+            await runOrQueue('EDITAR_HISTORIAL', payloadHistorialDB);
+
+            ocultarCarga();
+            cerrarModalCheck();
+            pendingPastCheck = null;
+            renderizarHistorial();
+            mostrarAlerta('El check fue guardado exitosamente en el historial correspondiente.');
+        } catch (e) {
+            ocultarCarga();
+            console.error("Error al guardar check en historial:", e);
+            mostrarAlerta('Ocurrió un error al guardar el check en el historial.');
+        }
+    }
+
+    // ============================================================================
+    // PROCESAR PDF — FIX #3: soportar MM/YYYY sin perder la fecha
+    // ============================================================================
+    async function procesarPdfYGuardar(file, editId, numeroCheck) {
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+            const pdfDoc = await loadingTask.promise;
+            const page = await pdfDoc.getPage(1);
+            const textContent = await page.getTextContent();
+            const textItems = textContent.items.map(item => item.str);
+            const fullText = textItems.join(' ');
+
+            let calificacion = 8.5;
+            const scoreMatch = fullText.match(/\b(\d{2,3}[.,]\d{2})\b/);
+            if (scoreMatch) {
+                const rawScore = parseFloat(scoreMatch[1].replace(',', '.'));
+                calificacion = Math.floor((rawScore / 10) * 10) / 10;
+            }
+
+            let fechaIso = new Date().toISOString().slice(0, 10);
+            const dateMatch = fullText.match(/(?:Finalizado(?:\s+en)?:?)\s*(\d{2}\/\d{2}\/\d{4})/i)
+                            || fullText.match(/\b(\d{2}\/\d{4})\b/)
+                            || fullText.match(/\b(\d{2}\/\d{2}\/\d{4})\b/);
+            if (dateMatch) {
+                const parts = dateMatch[1].split('/');
+                if (parts.length === 3) {
+                    fechaIso = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                } else if (parts.length === 2) {
+                    // FIX #3: MM/YYYY — usar día 1 (nunca futuro, siempre dentro del mes correcto)
+                    fechaIso = `${parts[1]}-${parts[0]}-01`;
+                }
+            }
+
+            const pdfName = file.name;
+            let pdfPath = '';
+
+            const partsF = fechaIso.split('-');
+            const cYear = parseInt(partsF[0], 10);
+            const cMonth = parseInt(partsF[1], 10);
+            const now = new Date();
+            const curYear = now.getFullYear();
+            const curMonth = now.getMonth() + 1;
+            const esMesActual = (cYear === curYear && cMonth === curMonth);
+
+            if (esMesActual) {
+                if (navigator.onLine) {
+                    mostrarCarga("Subiendo archivo PDF al servidor...");
+                    const nombreSeguro = pdfName.replace(/[^\w.\-]+/g, '_');
+                    const filePath = `${Date.now()}_${nombreSeguro}`;
+                    const { error } = await supabaseClient.storage
+                        .from('checks-pdfs')
+                        .upload(filePath, file);
+                    if (error) {
+                        ocultarCarga();
+                        console.error("Error al subir PDF:", error);
+                        mostrarAlerta("Error al subir el PDF al bucket: " + (error.message || JSON.stringify(error)));
+                        return;
+                    }
+                    pdfPath = filePath;
+                } else {
+                    ocultarCarga();
+                    mostrarAlerta("No hay conexión a internet. No se puede subir el archivo PDF al bucket en modo offline.");
+                    return;
+                }
+            } else {
+                pdfPath = '';
+            }
+
+            mostrarCarga("Verificando fecha y guardando...");
+            await verificarMesYGuardar({ editId, numeroCheck, fecha: fechaIso, calificacion, pdfName, pdfPath });
+        } catch (err) {
+            ocultarCarga();
+            console.error("Error al procesar el archivo PDF:", err);
+            mostrarAlerta('No se pudo procesar el archivo PDF. Asegúrese de que sea un documento válido.');
+        }
+    }
+
+    // ============================================================================
+    // GUARDADO FINAL — FIX #8: eliminar PDF antiguo si se reemplaza
+    // ============================================================================
+    async function finalizarGuardadoCheck(editId, numeroCheck, fecha, calificacion, pdfName, pdfPath) {
+        // Detección de conflicto (delegada al servidor)
+        if (editId && navigator.onLine) {
+            const { data: serverRecord } = await supabaseClient.from('checks_remotos').select('updated_at').eq('id', editId).single();
+            const localCheck = checksData.find(c => c.id == editId);
+            if (serverRecord && localCheck && localCheck.updated_at && serverRecord.updated_at > localCheck.updated_at) {
+                ocultarCarga();
+                const continuar = confirm("⚠️ Conflicto detectado: Este check fue modificado recientemente en otro dispositivo. ¿Deseas sobrescribir los cambios con tu versión?");
+                if (!continuar) return;
+                mostrarCarga("Guardando registro...");
+            }
+        }
+
+        let registro;
+        const nowIso = new Date().toISOString();
+
+        if (editId) {
+            const index = checksData.findIndex(c => c.id == editId);
+            if (index !== -1) {
+                const oldPdfPath = checksData[index].pdfPath;
+                // FIX #8: si se reemplaza el PDF, borrar el anterior del bucket
+                if (pdfPath && oldPdfPath && pdfPath !== oldPdfPath && navigator.onLine) {
+                    try {
+                        await supabaseClient.storage.from('checks-pdfs').remove([oldPdfPath]);
+                    } catch (e) {
+                        console.error('Error al eliminar PDF anterior:', e);
+                    }
+                }
+                checksData[index] = {
+                    ...checksData[index],
+                    numeroCheck,
+                    fecha,
+                    calificacion,
+                    pdfName: pdfName || checksData[index].pdfName,
+                    pdfPath: pdfPath || checksData[index].pdfPath,
+                    updated_at: nowIso
+                };
+                registro = checksData[index];
+            }
+        } else {
+            registro = {
+                id: 'check_' + Date.now(),
+                numeroCheck,
+                fecha,
+                calificacion,
+                pdfName: pdfName || '',
+                pdfPath: pdfPath || '',
+                enviadas: 'no',
+                aceptadas: 'no',
+                updated_at: nowIso
+            };
+            checksData.unshift(registro);
+        }
+
+        try {
+            if (registro) await dbPut(STORE_CHECKS, registro);
+        } catch (e) {
+            console.error("Error al guardar en IndexedDB:", e);
+        }
+
+        const dbPayload = {
+            id: registro.id,
+            numero_check: registro.numeroCheck,
+            fecha: registro.fecha,
+            calificacion: registro.calificacion,
+            pdf_name: registro.pdfName,
+            pdf_path: registro.pdfPath,
+            enviadas: registro.enviadas,
+            aceptadas: registro.aceptadas,
+            updated_at: registro.updated_at
+        };
+
+        // FIX #7: encolar si falla (online con error, o offline)
+        await runOrQueue(editId ? 'EDITAR' : 'CREAR', dbPayload);
+
+        ocultarCarga();
+        cerrarModalCheck();
+        renderizarApp();
+    }
+
+    // ============================================================================
+    // DESCARGAR PDF
+    // ============================================================================
+    async function descargarPdfCheck(id) {
+        const check = checksData.find(c => c.id == id);
+        if (!check || !check.pdfPath) {
+            mostrarAlerta('Este check no cuenta con un PDF adjunto en la nube.');
+            return;
+        }
+        try {
+            const { data, error } = await supabaseClient.storage.from('checks-pdfs').download(check.pdfPath);
+            if (error) {
+                console.error("Error al descargar:", error);
+                mostrarAlerta("No se pudo descargar el archivo: " + (error.message || JSON.stringify(error)));
+                return;
+            }
+            const blob = new Blob([data], { type: 'application/pdf' });
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = check.pdfName || 'Check_Remoto.pdf';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+            }, 200);
+        } catch (e) {
+            console.error('Error inesperado al descargar PDF:', e);
+            mostrarAlerta('Ocurrió un error al intentar descargar el PDF.');
+        }
+    }
+
+    // ============================================================================
+    // CAMBIAR ESTADO (enviadas / aceptadas) — FIX #7: encolar en error
+    // ============================================================================
+    async function cambiarEstadoCheck(id, campo, valor) {
+        const check = checksData.find(c => c.id == id);
+        if (!check) return;
+
+        check[campo] = valor;
+        if (campo === 'enviadas' && valor === 'no') {
+            check.aceptadas = 'no';
+        }
+        check.updated_at = new Date().toISOString();
+
+        try {
+            await dbPut(STORE_CHECKS, check);
+        } catch (e) {
+            console.error("Error al actualizar estado local:", e);
+        }
+        renderizarApp();
+
+        await runOrQueue('EDITAR', {
+            id: check.id,
+            enviadas: check.enviadas,
+            aceptadas: check.aceptadas,
+            updated_at: check.updated_at
+        });
+    }
+
+    // ============================================================================
+    // ELIMINAR CHECK
+    // ============================================================================
+    function pedirConfirmacionEliminar(id) {
+        checkIdParaEliminar = id;
+        document.getElementById('confirmModalEliminar').classList.remove('hidden');
+    }
+
+    async function cerrarModalEliminar(confirmado) {
+        document.getElementById('confirmModalEliminar').classList.add('hidden');
+        if (!confirmado || !checkIdParaEliminar) {
+            checkIdParaEliminar = null;
+            return;
+        }
+
+        const check = checksData.find(c => c.id == checkIdParaEliminar);
+        const idToDelete = checkIdParaEliminar;
+        checksData = checksData.filter(c => c.id !== idToDelete);
+
+        try {
+            await dbDelete(STORE_CHECKS, idToDelete);
+        } catch (e) {
+            console.error("Error al eliminar de IndexedDB:", e);
+        }
+
+        renderizarApp();
+        await runOrQueue('ELIMINAR', { id: idToDelete });
+
+        if (check && check.pdfPath && navigator.onLine) {
+            try {
+                await supabaseClient.storage.from('checks-pdfs').remove([check.pdfPath]);
+            } catch (e) {
+                console.error("Error al eliminar PDF:", e);
+            }
+        }
+
+        checkIdParaEliminar = null;
+    }
+
+    // ============================================================================
+    // EXPANDIR HISTORIAL
+    // ============================================================================
+    function toggleExpandirMes(idMes) {
+        expandedMeses[idMes] = !expandedMeses[idMes];
+        renderizarHistorial();
+    }
+
+    // ============================================================================
+    // INICIALIZACIÓN — con guard de sesión
+    // ============================================================================
+    window.onload = async function() {
+        initServiceWorker();
+
+        // P0-A: Guard de sesión
+        if (!(await verificarSesion())) return;
+
+        try {
+            await migrarLocalStorageAIndexedDB();
+            checksData = await dbGetAll(STORE_CHECKS);
+            sortNewest(checksData);
+            historialData = await dbGetAll(STORE_HISTORIAL);
+            sortNewest(historialData);
+        } catch (e) {
+            console.error("Error al cargar datos locales:", e);
+        }
+
+        renderizarApp();
+
+        if (navigator.onLine) {
+            await procesarSincronizacionOffline();
+            await cargarDatosRemotos();
+        } else {
+            actualizarEstadoConexionUI();
+        }
+
+        inicializarRealtime();
+    };
+
+    // ============================================================================
+    // RENDERIZAR APP
+    // ============================================================================
+    function renderizarApp() {
+        const container = document.getElementById('checksContainer');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const totalChecks = checksData.length;
+        const enviadasSi = checksData.filter(c => c.enviadas === 'si').length;
+        const aceptadasSi = checksData.filter(c => c.aceptadas === 'si').length;
+
+        document.getElementById('contadorRegistros').textContent = `${totalChecks} ${totalChecks === 1 ? 'registro' : 'registros'}`;
+
+        let promedioCalificacion = 0;
+        if (totalChecks > 0) {
+            const suma = checksData.reduce((acc, c) => acc + parseFloat(c.calificacion || 0), 0);
+            promedioCalificacion = suma / totalChecks;
+        }
+
+        const aplicaBono = totalChecks > 0 && checksData.every(c => c.aceptadas === 'si');
+        const calificacionFinal = aplicaBono ? Math.min(10.00, promedioCalificacion + 0.5) : promedioCalificacion;
+
+        document.getElementById('kpiChecksRealizados').textContent = totalChecks;
+        document.getElementById('kpiEnviadas').textContent = enviadasSi;
+        document.getElementById('kpiAceptadas').textContent = aceptadasSi;
+
+        const elCalificacion = document.getElementById('kpiCalificacion');
+        const elNotaBono = document.getElementById('kpiNotaBono');
+
+        elCalificacion.textContent = calificacionFinal.toFixed(2);
+        elCalificacion.className = `text-4xl md:text-5xl font-extrabold ${colorForScore(calificacionFinal)}`;
+
+        // Helper #20: ramas simplificadas con ternario
+        elNotaBono.innerHTML = aplicaBono
+            ? `<i class="fa-solid fa-arrow-trend-up text-[10px]"></i> +.5 agregado`
+            : `<i class="fa-solid fa-arrow-trend-down text-[10px]"></i> Sin .5 extra`;
+        elNotaBono.className = `text-xs font-bold flex items-center gap-1 ${aplicaBono ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`;
+
+        if (totalChecks === 0) {
+            container.innerHTML = `
+                <div class="py-12 text-center space-y-3 border-b border-app-border dark:border-darkapp-border">
+                    <div class="text-app-sub flex justify-center opacity-50">
+                        <i data-lucide="inbox" class="w-10 h-10"></i>
+                    </div>
+                    <p class="text-sm font-medium text-app-sub">No hay checks registrados</p>
+                </div>
+            `;
+            lucide.createIcons();
+            return;
+        }
+
+        checksData.forEach(c => {
+            const fechaFormateada = formatearFechaDDMMMYYYY(c.fecha);
+            const tituloCheck = c.numeroCheck === 'Extra' ? 'Check Extra' : `Check ${c.numeroCheck}`;
+            const tienePdf = Boolean(c.pdfPath || c.pdfName);
+            const valCalif = parseFloat(c.calificacion || 0);
+            const colorCalifClass = colorForScore(valCalif);
+
+            const card = document.createElement('div');
+            card.className = "border-b border-app-border dark:border-darkapp-border py-4 flex flex-col gap-3 last:border-0";
+
+            card.innerHTML = `
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-app-title dark:text-darkapp-title text-sm">${tituloCheck}</span>
+                        ${c.pdfName ? `<span class="px-2 py-0.5 rounded text-[10px] bg-app-accent text-app-brand font-semibold"><i class="fa-solid fa-file-pdf"></i> PDF</span>` : ''}
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-app-sub text-[10px] uppercase font-semibold mb-0.5">Calificación</p>
+                        <p class="text-2xl font-extrabold ${colorCalifClass}">${valCalif.toFixed(1)}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-app-sub text-[10px] uppercase font-semibold mb-0.5">Fecha</p>
+                        <p class="text-app-title dark:text-darkapp-title font-semibold text-[11px] flex items-center gap-1.5 justify-end">
+                            <i data-lucide="calendar" class="w-3 h-3 text-app-sub"></i> ${fechaFormateada}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="pt-1">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold text-app-sub text-[11px]">Enviadas:</span>
+                            <div class="inline-flex rounded-md p-0.5 bg-slate-100 dark:bg-slate-800">
+                                <button onclick="cambiarEstadoCheck('${c.id}', 'enviadas', 'si')" class="px-2.5 py-1 rounded font-semibold text-[11px] transition-all cursor-pointer ${c.enviadas === 'si' ? 'bg-amber-500 text-white shadow-sm' : 'text-app-sub hover:text-app-title'}">Sí</button>
+                                <button onclick="cambiarEstadoCheck('${c.id}', 'enviadas', 'no')" class="px-2.5 py-1 rounded font-semibold text-[11px] transition-all cursor-pointer ${c.enviadas === 'no' ? 'bg-white dark:bg-slate-700 text-app-title dark:text-darkapp-title shadow-sm' : 'text-app-sub hover:text-app-title'}">No</button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold text-app-sub text-[11px]">Aceptadas:</span>
+                            <div class="inline-flex rounded-md p-0.5 bg-slate-100 dark:bg-slate-800">
+                                <button ${c.enviadas === 'no' ? 'disabled' : ''} onclick="cambiarEstadoCheck('${c.id}', 'aceptadas', 'si')" class="px-2.5 py-1 rounded font-semibold text-[11px] transition-all ${c.enviadas === 'no' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'} ${c.aceptadas === 'si' ? 'bg-emerald-500 text-white shadow-sm' : 'text-app-sub hover:text-app-title'}">Sí</button>
+                                <button ${c.enviadas === 'no' ? 'disabled' : ''} onclick="cambiarEstadoCheck('${c.id}', 'aceptadas', 'no')" class="px-2.5 py-1 rounded font-semibold text-[11px] transition-all ${c.enviadas === 'no' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'} ${c.aceptadas === 'no' ? 'bg-white dark:bg-slate-700 text-app-title dark:text-darkapp-title shadow-sm' : 'text-app-sub hover:text-app-title'}">No</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-1 pt-2 mt-1">
+                    <button onclick="abrirModalCheck('${c.id}')" class="py-1.5 px-3 text-app-sub hover:text-app-brand hover:bg-app-accent dark:hover:bg-slate-800 rounded-md font-semibold transition-all text-[11px] cursor-pointer flex items-center gap-1.5">
+                        <i data-lucide="square-pen" class="w-3.5 h-3.5"></i> Editar
+                    </button>
+                    ${tienePdf ? `
+                        <button onclick="descargarPdfCheck('${c.id}')" class="py-1.5 px-3 text-app-sub hover:text-app-brand hover:bg-app-accent dark:hover:bg-slate-800 rounded-md font-semibold transition-all text-[11px] cursor-pointer flex items-center gap-1.5" title="Descargar PDF adjunto">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> PDF
+                        </button>
+                    ` : `
+                        <button disabled class="py-1.5 px-3 text-app-sub opacity-40 cursor-not-allowed rounded-md font-semibold text-[11px] flex items-center gap-1.5" title="No hay PDF adjunto">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> PDF
+                        </button>
+                    `}
+                    <button onclick="pedirConfirmacionEliminar('${c.id}')" class="py-1.5 px-3 text-app-sub hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-md font-semibold transition-all text-[11px] cursor-pointer flex items-center gap-1.5 ml-auto">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Borrar
+                    </button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        lucide.createIcons();
+    }
+
+    // ============================================================================
+    // RENDERIZAR HISTORIAL
+    // ============================================================================
+    function renderizarHistorial() {
+        const container = document.getElementById('historialContainer');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (historialData.length === 0) {
+            container.innerHTML = `
+                <div class="py-12 text-center space-y-3">
+                    <div class="text-app-sub flex justify-center opacity-50">
+                        <i data-lucide="folder-open" class="w-10 h-10"></i>
+                    </div>
+                    <p class="text-sm font-medium text-app-sub">No hay registros en el historial</p>
+                </div>
+            `;
+            lucide.createIcons();
+            return;
+        }
+
+        sortNewest(historialData);
+
+        historialData.forEach(h => {
+            const isExpanded = Boolean(expandedMeses[h.id]);
+            const cardMes = document.createElement('div');
+            cardMes.className = "border-b border-app-border dark:border-darkapp-border py-4 last:border-0";
+
+            let checksHtml = '';
+            if (isExpanded) {
+                h.checks.forEach((c, index) => {
+                    const nombreCheck = `Check ${c.numeroCheck || (index + 1)}`;
+                    const fechaFmt = formatearFechaDDMMMYYYY(c.fecha);
+                    const enviadasText = c.enviadas === 'si' ? 'Sí' : 'No';
+                    const aceptadasText = c.aceptadas === 'si' ? 'Sí' : 'No';
+                    const valCalif = parseFloat(c.calificacion || 0);
+                    const colorCalifClass = colorForScore(valCalif);
+
+                    checksHtml += `
+                        <div class="py-3 border-b border-app-border/50 dark:border-darkapp-border/50 last:border-0 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="font-bold text-app-title dark:text-darkapp-title text-sm block">${nombreCheck}</span>
+                                    <span class="text-[11px] text-app-sub block">${fechaFmt}</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] text-app-sub uppercase block font-semibold">Calificación</span>
+                                    <span class="text-xl font-extrabold ${colorCalifClass}">${valCalif.toFixed(1)}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-[11px] pt-1">
+                                <span class="font-semibold text-app-sub">Correcciones:</span>
+                                <div class="flex items-center gap-3 text-app-title dark:text-darkapp-title">
+                                    <span>Enviadas: <strong>${enviadasText}</strong></span>
+                                    <span>Aceptadas: <strong>${aceptadasText}</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            const valFinalMes = parseFloat(h.calificacionFinal || 0);
+            const badgeFinalClass = colorForScore(valFinalMes);
+
+            cardMes.innerHTML = `
+                <div onclick="toggleExpandirMes('${h.id}')" class="cursor-pointer space-y-2 select-none group">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-bold text-app-title dark:text-darkapp-title uppercase tracking-wide group-hover:text-app-brand transition-colors">${h.titulo}</h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-base font-extrabold ${badgeFinalClass}">${h.calificacionFinal}</span>
+                            <button onclick="event.stopPropagation(); pedirEliminarMesHistorial('${h.id}')" class="p-1.5 text-app-sub hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-md transition-colors cursor-pointer" title="Eliminar mes">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-center text-app-sub py-1">
+                        <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4 inline-block"></i>
+                    </div>
+                </div>
+                ${isExpanded ? `<div class="space-y-1 pt-2 animate-fadeIn">${checksHtml}</div>` : ''}
+            `;
+            container.appendChild(cardMes);
+        });
+        lucide.createIcons();
+    }
+  </script>
+</body>
+</html>
