@@ -1,1 +1,567 @@
-<!DOCTYPE html><html lang="es" class="h-full"><head>  <meta charset="UTF-8">  <link rel="stylesheet" href="../fonts.css">  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">  <title>Consultor de Existencias Interno - T0151 Gran Plaza Mérida</title>    <!-- SEGURIDAD: Content Security Policy + Referrer -->  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none';">  <meta name="referrer" content="strict-origin-when-cross-origin">  <!-- Soporte PWA e iOS / Barra de Estado -->  <meta name="theme-color" content="#F5F7FA">  <meta name="apple-mobile-web-app-capable" content="yes">  <meta name="apple-mobile-web-app-status-bar-style" content="default">  <!-- GUARD DE SESIÓN (1ª capa) -->  <script>      (function() {          const SESSION_KEY = 'sb-mifbcyxtafeacwkzqzsq-auth-token';          if (localStorage.getItem(SESSION_KEY) === null) {              document.documentElement.style.visibility = 'hidden';              window.location.replace('../index.html');          }      })();  </script>  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>  <script src="https://cdn.tailwindcss.com"></script>  <!-- Lucide v1.72.0 pineada -->  <script src="https://unpkg.com/lucide@1.72.0"></script>  <script>    tailwind.config = {        darkMode: 'class',        theme: {            extend: {                fontFamily: {                    sans: ['Geist', 'sans-serif'],                 },                colors: {                    app: {                        bg: '#F5F7FA',                        card: '#FFFFFF',                        border: '#E5EAF0',                        title: '#172033',                        sub: '#64748B',                        brand: '#0D9488',                        accent: '#E6F6F4',                        active: '#CCFBF1'                    },                    darkapp: {                        bg: '#0F172A',                        card: '#1E293B',                        border: '#334155',                        title: '#F8FAFC',                        sub: '#94A3B8'                    }                }            }        }    }</script>  <style>      html, body {          overscroll-behavior-y: contain;          -webkit-tap-highlight-color: transparent;      }      body { user-select: none; -webkit-user-select: none; }      input, select { user-select: text; -webkit-user-select: text; }      ::-webkit-scrollbar { width: 6px; height: 6px; }      ::-webkit-scrollbar-track { background: transparent; }      ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }      .dark ::-webkit-scrollbar-thumb { background: #334155; }      /* Estilos para las entradas de texto minimalistas (Efecto Ghost) */      .input-ghost {          background-color: rgba(255, 255, 255, 0.4);          border: 1px solid transparent;      }      .dark .input-ghost {          background-color: rgba(30, 41, 59, 0.4);      }      .input-ghost:focus {          background-color: rgba(255, 255, 255, 0.8);          border-color: #0D9488;          outline: none;          box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);      }      .dark .input-ghost:focus {          background-color: rgba(15, 23, 42, 0.8);      }  </style></head><body class="h-full bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title flex flex-col font-sans overflow-hidden antialiased transition-colors duration-200">    <!-- Header Minimalista -->    <header class="bg-app-bg dark:bg-darkapp-bg border-b border-app-border dark:border-darkapp-border px-4 py-3 flex items-center justify-between shrink-0 z-10 sticky top-0">        <div class="flex items-center space-x-3">            <a href="../index.html" class="p-2 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 rounded-lg transition-all cursor-pointer" title="Ir al Inicio">                <i data-lucide="house" class="w-5 h-5"></i>            </a>            <div>                <h1 class="font-bold text-base leading-tight text-app-title dark:text-darkapp-title">Consultor de Existencias</h1>                <p class="text-[11px] text-app-sub dark:text-darkapp-sub flex items-center gap-1.5 font-medium mt-0.5">                    <span class="w-1.5 h-1.5 rounded-full bg-app-brand inline-block"></span> T0151 - Gran Plaza Mérida                </p>            </div>        </div>                <div class="flex items-center gap-2">            <button id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors duration-200" title="Cambiar modo">                <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">                    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>                    <i data-lucide="moon" class="w-3.5 h-3.5 text-slate-400 dark:text-indigo-400 opacity-100 dark:opacity-40"></i>                </div>                <div class="w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center transform transition-transform duration-200 translate-x-0 dark:translate-x-6 z-10">                    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 dark:hidden"></i>                    <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400 hidden dark:block"></i>                    </div>            </button>                        <button id="btnClear" onclick="mostrarConfirmacionEliminar()" class="h-9 px-3 text-app-sub hover:text-rose-500 dark:text-darkapp-sub dark:hover:text-rose-400 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer" title="Borrar datos">                <i data-lucide="trash-2" class="w-4 h-4"></i>                <span class="hidden sm:inline">Borrar Datos</span>            </button>        </div>    </header>    <main class="flex-1 overflow-y-auto p-4 md:p-6 max-w-5xl mx-auto w-full space-y-6 flex flex-col justify-start">                <!-- Sección Actualizar archivo -->        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pb-4 border-b border-app-border dark:border-darkapp-border">            <div class="flex items-center gap-2 text-xs font-medium text-app-sub dark:text-darkapp-sub">                <div id="statusDot" class="w-2 h-2 rounded-full bg-red-500 inline-block"></div>                <span>Archivo:</span>                <span id="statusMemoria" class="text-app-title dark:text-darkapp-title font-semibold">Sin base de datos</span>            </div>                        <label for="excelFile" class="py-2 px-4 bg-app-accent hover:bg-app-active text-app-brand rounded-lg transition-all font-semibold text-xs flex items-center shadow-sm gap-1.5 cursor-pointer shrink-0">                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>                Actualizar archivo            </label>            <input type="file" id="excelFile" accept=".xlsx, .xls, .ods" class="hidden" />        </div>        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">                        <!-- Columna Izquierda: Búsqueda y Detalles -->            <div class="space-y-6">                                <!-- Buscador (Estilo Ghost) -->                <div class="space-y-3">                    <div class="flex items-center gap-2">                        <i data-lucide="search" class="w-4 h-4 text-app-brand"></i>                        <h2 class="text-xs font-bold text-app-title dark:text-darkapp-title uppercase tracking-wider">Consultar Artículo</h2>                    </div>                    <div class="relative flex items-center">                        <input type="text" id="codigo" class="w-full input-ghost rounded-xl pl-4 pr-12 py-3.5 text-sm font-semibold text-app-title dark:text-darkapp-title outline-none transition-all placeholder:text-app-sub/50" placeholder="Ingrese o escanee el código..." autofocus inputmode="numeric" pattern="[0-9]*" enterkeyhint="search" />                        <button type="button" class="absolute right-2 p-2 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 transition-colors rounded-lg" onclick="abrirEscaner()" title="Escanear código de barras">                            <i data-lucide="camera" class="w-5 h-5"></i>                        </button>                    </div>                </div>                <!-- Detalles del Artículo (Tarjetas sin fondo para estilo minimalista) -->                <div class="space-y-3">                    <div class="flex items-center gap-2">                        <i data-lucide="clipboard-list" class="w-4 h-4 text-app-brand"></i>                        <h2 class="text-xs font-bold text-app-title dark:text-darkapp-title uppercase tracking-wider">Detalles</h2>                    </div>                    <div class="grid grid-cols-2 gap-3">                        <div class="bg-app-card/40 dark:bg-slate-800/30 rounded-xl p-3 border border-transparent">                            <span class="text-[10px] font-semibold uppercase tracking-wider text-app-sub block mb-1" id="labelSkuOrBar">SKU / CÓDIGO</span>                            <div class="text-sm font-bold text-app-title dark:text-darkapp-title truncate" id="sku">-</div>                        </div>                        <div class="bg-app-card/40 dark:bg-slate-800/30 rounded-xl p-3 border border-transparent">                            <span class="text-[10px] font-semibold uppercase tracking-wider text-app-sub block mb-1">Familia</span>                            <div class="text-sm font-bold text-app-title dark:text-darkapp-title truncate" id="familia">-</div>                        </div>                        <div class="bg-app-card/40 dark:bg-slate-800/30 rounded-xl p-3 border border-transparent">                            <span class="text-[10px] font-semibold uppercase tracking-wider text-app-sub block mb-1">Sub Familia</span>                            <div class="text-sm font-bold text-app-title dark:text-darkapp-title truncate" id="subfamilia">-</div>                        </div>                        <div class="bg-app-card/40 dark:bg-slate-800/30 rounded-xl p-3 border border-transparent">                            <span class="text-[10px] font-semibold uppercase tracking-wider text-app-sub block mb-1">Sub Sub Familia</span>                            <div class="text-sm font-bold text-app-title dark:text-darkapp-title truncate" id="subsubfamilia">-</div>                        </div>                    </div>                </div>                <!-- Descripción -->                <div class="space-y-3">                    <div class="flex items-center gap-2">                        <i data-lucide="file-text" class="w-4 h-4 text-app-brand"></i>                        <h2 class="text-xs font-bold text-app-title dark:text-darkapp-title uppercase tracking-wider">Descripción</h2>                    </div>                    <div class="bg-app-card/40 dark:bg-slate-800/30 rounded-xl p-4 min-h-[60px] flex items-center justify-center border border-transparent">                        <div class="text-sm font-medium text-app-title dark:text-darkapp-title text-center leading-relaxed" id="descripcion">-</div>                    </div>                </div>            </div>            <!-- Columna Derecha: INVENTARIO (El apartado más importante) -->            <div class="flex flex-col">                <div class="flex items-center gap-2 mb-3">                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-app-brand"></i>                    <h2 class="text-xs font-bold text-app-title dark:text-darkapp-title uppercase tracking-wider">Inventario Disponible</h2>                </div>                                <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-8 flex flex-col items-center justify-center flex-1 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">                    <span class="text-xs font-semibold uppercase tracking-wider text-app-sub mb-2">Stock en Sistema</span>                    <div class="text-7xl font-black text-app-brand dark:text-teal-400 leading-none" id="inventario">-</div>                </div>            </div>        </div>    </main>    <!-- Modal de Confirmación para Eliminar Base de Datos -->    <div id="confirmDeleteModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">        <div class="bg-white/80 dark:bg-slate-900/85 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-2xl p-6 w-full max-w-sm shadow-xl text-center space-y-5">            <div class="text-rose-500 flex justify-center mx-auto">                <i data-lucide="alert-triangle" class="w-8 h-8"></i>            </div>            <p class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">                Esta acción no se puede deshacer. ¿Desea continuar?            </p>            <div class="flex gap-2 w-full pt-2">                <button onclick="cerrarConfirmacionEliminar()" class="flex-1 py-2 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg/50 dark:hover:bg-slate-800/50 font-semibold rounded-xl text-xs transition-colors">                    Cancelar                </button>                <button onclick="eliminarBaseDatos()" class="flex-1 py-2 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-xl text-xs shadow-sm transition-colors">                    Confirmar                </button>            </div>        </div>    </div>    <!-- Modal Alerta Genérico (Éxito/Eliminación/Errores) -->    <div id="alertModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">        <div class="bg-white/80 dark:bg-slate-900/85 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-2xl p-6 w-full max-w-sm shadow-xl text-center space-y-5">            <div id="alertIconContainer" class="text-app-brand flex justify-center mx-auto">                <i data-lucide="check-circle-2" id="alertIcon" class="w-8 h-8"></i>            </div>            <p id="alertText" class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">Mensaje</p>            <button onclick="cerrarModalAlerta()" class="w-full py-2.5 bg-app-brand hover:bg-teal-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-sm">                Aceptar            </button>        </div>    </div>    <!-- Modal Escáner de Cámara -->    <div class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-[100] flex flex-col items-center justify-center p-4 hidden" id="scannerModal">      <div class="w-full max-w-md bg-black rounded-2xl overflow-hidden relative shadow-2xl">        <div id="reader" class="w-full"></div>      </div>      <button type="button" class="mt-6 bg-app-card text-app-title hover:bg-app-bg font-bold px-8 py-3 rounded-full text-sm transition-colors shadow-lg" onclick="cerrarEscaner()">Cerrar Cámara</button>    </div><script>  // --- REGISTRO DEL SERVICE WORKER ---  function initServiceWorker() {      if ('serviceWorker' in navigator) {          navigator.serviceWorker.register('/sw.js', { scope: '/' })              .then((registration) => console.log('[PWA] SW OK en Existencias:', registration.scope))              .catch((error) => console.error('[PWA] SW error:', error));      }  }  // --- VARIABLES GLOBALES ---  let baseDatosMatriz = [];  let indexMap = new Map(); // Índice para búsquedas O(1)  let html5QrCode = null;  let audioCtx = null;  // --- TEMA ---  const btnThemeToggle = document.getElementById('btn-theme-toggle');  const htmlElement = document.documentElement;    function setTheme(isDark) {      const themeMeta = document.querySelector('meta[name="theme-color"]');      if (isDark) {          htmlElement.classList.add('dark');          localStorage.setItem('theme', 'dark');          if (themeMeta) themeMeta.setAttribute('content', '#0f172a');      } else {          htmlElement.classList.remove('dark');          localStorage.setItem('theme', 'light');          if (themeMeta) themeMeta.setAttribute('content', '#F5F7FA');      }  }  // --- MODALES ---  function mostrarAlerta(mensaje, tipo = 'success') {      document.getElementById('alertText').textContent = mensaje;      const iconContainer = document.getElementById('alertIconContainer');      const icon = document.getElementById('alertIcon');            if (tipo === 'error') {          iconContainer.className = "text-rose-500 flex justify-center mx-auto";          icon.setAttribute('data-lucide', 'alert-circle');      } else {          iconContainer.className = "text-app-brand flex justify-center mx-auto";          icon.setAttribute('data-lucide', 'check-circle-2');      }            document.getElementById('alertModal').classList.remove('hidden');      lucide.createIcons();  }  function cerrarModalAlerta() {      document.getElementById('alertModal').classList.add('hidden');  }  function mostrarConfirmacionEliminar() {      document.getElementById('confirmDeleteModal').classList.remove('hidden');  }  function cerrarConfirmacionEliminar() {      document.getElementById('confirmDeleteModal').classList.add('hidden');  }  // --- LÓGICA DE BASE DE DATOS ---  function procesarYGuardarDatos(matriz, nombreArchivo) {      baseDatosMatriz = matriz;      indexMap.clear(); // Limpiar índice      // Construir índice para búsquedas O(1)      for (let i = 1; i < baseDatosMatriz.length; i++) {          const fila = baseDatosMatriz[i];          if (!fila) continue;          const numArticulo = String(fila[1] || '').replace(/^'/, '').trim();          const codBarras = String(fila[2] || '').replace(/^'/, '').trim();                    if (numArticulo) indexMap.set(numArticulo, fila);          if (codBarras) indexMap.set(codBarras, fila);      }      try {          localStorage.setItem('baseDatosConsultor', JSON.stringify(baseDatosMatriz));          localStorage.setItem('nombreArchivoConsultor', nombreArchivo);          document.getElementById('statusMemoria').textContent = removerExtension(nombreArchivo);          document.getElementById('statusDot').classList.remove('bg-red-500');          document.getElementById('statusDot').classList.add('bg-app-brand');          mostrarAlerta('Base de datos cargada con éxito.', 'success');      } catch (err) {          console.warn("LocalStorage lleno:", err);          document.getElementById('statusMemoria').textContent = removerExtension(nombreArchivo);          document.getElementById('statusDot').classList.remove('bg-red-500');          document.getElementById('statusDot').classList.add('bg-app-brand');          mostrarAlerta("El archivo es muy grande para guardarse permanentemente. Funcionará en esta sesión.", "error");      }  }  function eliminarBaseDatos() {      cerrarConfirmacionEliminar();      baseDatosMatriz = [];      indexMap.clear();      localStorage.removeItem('baseDatosConsultor');      localStorage.removeItem('nombreArchivoConsultor');      document.getElementById('statusMemoria').textContent = 'Sin base de datos';      document.getElementById('statusDot').classList.remove('bg-app-brand');      document.getElementById('statusDot').classList.add('bg-red-500');      limpiarCampos();      document.getElementById('excelFile').value = '';      mostrarAlerta('Base de datos eliminada correctamente.', 'success');  }  function removerExtension(nombre) {    if (!nombre) return "";    return nombre.replace(/\.[^/.]+$/, "");  }  // --- BÚSQUEDA Y RENDERIZADO ---  function ejecutarBusqueda(busqueda) {      if (!busqueda) {          limpiarCampos();          return;      }            // Búsqueda instantánea usando el índice Map      const resultado = indexMap.get(busqueda);            if (resultado) {          const numArticulo = String(resultado[1] || '').trim();          const codBarras = String(resultado[2] || '').trim();          const coincidioEnBarras = (codBarras === busqueda);                    const labelElem = document.getElementById('labelSkuOrBar');          const valElem = document.getElementById('sku');                    if (coincidioEnBarras) {              labelElem.textContent = 'SKU';              valElem.textContent = numArticulo || '-';          } else {              labelElem.textContent = 'Código de barras';              valElem.textContent = codBarras || '-';          }                    document.getElementById('familia').textContent = resultado[4] || '-';          document.getElementById('subfamilia').textContent = resultado[5] || '-';          document.getElementById('subsubfamilia').textContent = resultado[6] || '-';          document.getElementById('descripcion').textContent = resultado[3] || '-';          document.getElementById('inventario').textContent = resultado[7] !== undefined ? resultado[7] : '0';      } else {          limpiarCampos();      }  }  function limpiarCampos() {      document.getElementById('labelSkuOrBar').textContent = 'SKU / CÓDIGO';      document.getElementById('sku').textContent = '-';      document.getElementById('familia').textContent = '-';      document.getElementById('subfamilia').textContent = '-';      document.getElementById('subsubfamilia').textContent = '-';      document.getElementById('descripcion').textContent = '-';      document.getElementById('inventario').textContent = '-';  }  // --- ESCÁNER DE CÁMARA ---  function reproducirFeedbackEscaneo() {    if ("vibrate" in navigator) navigator.vibrate(150);    try {      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();      if (audioCtx.state === 'suspended') audioCtx.resume();            const osc = audioCtx.createOscillator();      const gain = audioCtx.createGain();      osc.type = "sine";      osc.frequency.setValueAtTime(1800, audioCtx.currentTime);      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);      gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.12);      osc.connect(gain);      gain.connect(audioCtx.destination);      osc.start(audioCtx.currentTime);      osc.stop(audioCtx.currentTime + 0.12);    } catch (e) {}  }  function abrirEscaner() {    const modal = document.getElementById('scannerModal');    modal.classList.remove('hidden');    modal.classList.add('flex');        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();        if (!html5QrCode) {      html5QrCode = new Html5Qrcode("reader", {        formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ],        verbose: false      });    }        const config = {       fps: 25,      qrbox: { width: 300, height: 160 },      aspectRatio: 1.0,      experimentalFeatures: { useBarCodeDetectorIfSupported: true },      videoConstraints: {        facingMode: "environment",        width: { min: 640, ideal: 1280, max: 1920 },        height: { min: 480, ideal: 720, max: 1080 },        focusMode: "continuous"      }    };        html5QrCode.start(      { facingMode: "environment" },      config,      (decodedText) => {        reproducirFeedbackEscaneo();        const inputCodigo = document.getElementById('codigo');        inputCodigo.value = decodedText.replace(/\D/g, '');        ejecutarBusqueda(inputCodigo.value);        cerrarEscaner();      },      () => {}    ).catch(err => {      console.error("Error al iniciar cámara:", err);      mostrarAlerta("No se pudo acceder a la cámara.", "error");      cerrarEscaner();    });  }  function cerrarEscaner() {    const modal = document.getElementById('scannerModal');    if (html5QrCode && html5QrCode.isScanning) {      html5QrCode.stop().then(() => {        modal.classList.remove('flex');        modal.classList.add('hidden');      }).catch(err => {        console.error(err);        modal.classList.remove('flex');        modal.classList.add('hidden');      });    } else {      modal.classList.remove('flex');      modal.classList.add('hidden');    }  }  // --- INICIALIZACIÓN ---  window.addEventListener('DOMContentLoaded', () => {    initServiceWorker();    setTheme(localStorage.getItem('theme') !== 'light');    lucide.createIcons();    btnThemeToggle.addEventListener('click', () => {        setTheme(!htmlElement.classList.contains('dark'));    });    // Cargar datos guardados si existen    const datosGuardados = localStorage.getItem('baseDatosConsultor');    const nombreGuardado = localStorage.getItem('nombreArchivoConsultor');    if (datosGuardados) {      try {        const parsed = JSON.parse(datosGuardados);        procesarYGuardarDatos(parsed, nombreGuardado || "Archivo guardado");      } catch (e) {        console.error("Error al cargar la base de datos local:", e);      }    }  });  // Listener del Input de archivo  document.getElementById('excelFile').addEventListener('change', function(e) {    const file = e.target.files[0];    if (!file) return;        baseDatosMatriz = [];    indexMap.clear();    localStorage.removeItem('baseDatosConsultor');    localStorage.removeItem('nombreArchivoConsultor');    limpiarCampos();        const reader = new FileReader();    reader.onload = function(evt) {      const data = new Uint8Array(evt.target.result);      const workbook = XLSX.read(data, { type: 'array' });      const firstSheet = workbook.SheetNames[0];      const worksheet = workbook.Sheets[firstSheet];      const matriz = XLSX.utils.sheet_to_json(worksheet, { header: 1 });            procesarYGuardarDatos(matriz, file.name);    };    reader.readAsArrayBuffer(file);  });  // Listener del Input de búsqueda  document.getElementById('codigo').addEventListener('input', function() {    const valorLimpio = this.value.replace(/\D/g, '');    if (this.value !== valorLimpio) {      this.value = valorLimpio;    }    // Debounce implícito: solo busca si tiene al menos 2 caracteres    if (this.value.trim().length > 0) {      ejecutarBusqueda(this.value.trim());    } else {      limpiarCampos();    }  });</script></body></html>
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../fonts.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Existencias</title>
+  <link rel="icon" type="image/svg+xml" href="./existencias.svg">  
+  <!-- SEGURIDAD: Content Security Policy + Referrer -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none';">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+
+  <!-- Soporte PWA e iOS / Barra de Estado -->
+  <meta name="theme-color" content="#F5F7FA">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <!-- GUARD DE SESIÓN (1ª capa) -->
+  <script>
+      (function() {
+          const SESSION_KEY = 'sb-mifbcyxtafeacwkzqzsq-auth-token';
+          if (localStorage.getItem(SESSION_KEY) === null) {
+              document.documentElement.style.visibility = 'hidden';
+              window.location.replace('../index.html');
+          }
+      })();
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide v1.72.0 pineada -->
+  <script src="https://unpkg.com/lucide@1.72.0"></script>
+  
+<script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Geist', 'sans-serif'], 
+                },
+                colors: {
+                    app: {
+                        bg: '#F5F7FA',
+                        card: '#FFFFFF',
+                        border: '#E5EAF0',
+                        title: '#172033',
+                        sub: '#64748B',
+                        brand: '#0D9488',
+                        accent: '#E6F6F4',
+                        active: '#CCFBF1'
+                    },
+                    darkapp: {
+                        bg: '#0F172A',
+                        card: '#1E293B',
+                        border: '#334155',
+                        title: '#F8FAFC',
+                        sub: '#94A3B8'
+                    }
+                }
+            }
+        }
+    }
+</script>
+  <style>
+      html, body {
+          overscroll-behavior-y: contain;
+          -webkit-tap-highlight-color: transparent;
+      }
+      body { user-select: none; -webkit-user-select: none; }
+      input, select { user-select: text; -webkit-user-select: text; }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+      .dark ::-webkit-scrollbar-thumb { background: #334155; }
+
+      /* Estilos para las entradas de texto minimalistas (Efecto Ghost) */
+      .input-ghost {
+          background-color: rgba(255, 255, 255, 0.4);
+          border: 1px solid transparent;
+      }
+      .dark .input-ghost {
+          background-color: rgba(30, 41, 59, 0.4);
+      }
+      .input-ghost:focus {
+          background-color: rgba(255, 255, 255, 0.8);
+          border-color: #0D9488;
+          outline: none;
+          box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
+      }
+      .dark .input-ghost:focus {
+          background-color: rgba(15, 23, 42, 0.8);
+      }
+  </style>
+</head>
+<body class="h-full bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title flex flex-col font-sans overflow-hidden antialiased transition-colors duration-200">
+
+    <!-- Header Minimalista -->
+    <header class="bg-app-bg dark:bg-darkapp-bg border-b border-app-border dark:border-darkapp-border px-4 py-3 flex items-center justify-between shrink-0 z-10 sticky top-0">
+        <div class="flex items-center space-x-3">
+            <a href="../index.html" class="p-2 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 rounded-lg transition-all cursor-pointer" title="Ir al Inicio">
+                <i data-lucide="house" class="w-5 h-5"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-base leading-tight text-app-title dark:text-darkapp-title">Consultor de Existencias</h1>
+                <p class="text-[11px] text-app-sub dark:text-darkapp-sub flex items-center gap-1.5 font-medium mt-0.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-app-brand inline-block"></span> T0151 - Gran Plaza Mérida
+                </p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <button id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors duration-200" title="Cambiar modo">
+                <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">
+                    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>
+                    <i data-lucide="moon" class="w-3.5 h-3.5 text-slate-400 dark:text-indigo-400 opacity-100 dark:opacity-40"></i>
+                </div>
+                <div class="w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center transform transition-transform duration-200 translate-x-0 dark:translate-x-6 z-10">
+                    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 dark:hidden"></i>
+                    <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400 hidden dark:block"></i>    
+                </div>
+            </button>
+            
+            <button id="btnClear" onclick="mostrarConfirmacionEliminar()" class="h-9 px-3 text-app-sub hover:text-rose-500 dark:text-darkapp-sub dark:hover:text-rose-400 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer" title="Borrar datos">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Borrar Datos</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-4 md:p-6 max-w-5xl mx-auto w-full space-y-6 flex flex-col justify-start">
+        
+        <!-- Sección Actualizar archivo -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pb-4 border-b border-app-border dark:border-darkapp-border">
+            <div class="flex items-center gap-2 text-xs font-medium text-app-sub dark:text-darkapp-sub">
+                <div id="statusDot" class="w-2 h-2 rounded-full bg-red-500 inline-block"></div>
+                <span>Archivo:</span>
+                <span id="statusMemoria" class="text-app-title dark:text-darkapp-title font-semibold">Sin base de datos</span>
+            </div>
+            
+            <label for="excelFile" class="py-2 px-4 bg-app-accent hover:bg-app-active text-app-brand rounded-lg transition-all font-semibold text-xs flex items-center shadow-sm gap-1.5 cursor-pointer shrink-0">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                Actualizar archivo
+            </label>
+            <input type="file" id="excelFile" accept=".xlsx, .xls, .ods" class="hidden" />
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Columna Izquierda: Búsqueda y Detalles -->
+            <div class="space-y-6">
+                
+                <!-- Buscador (Estilo Ghost) -->
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="search" class="w-4 h-4 text-app-brand"></i>
+                        <h2 class="text-xs font-bold text-app-title dark:text-darkapp-title uppercase tracking-wider">Consultar Artículo</h2>
+                    </div>
+                    <div class="relative flex items-center">
+                        <input type="text" id="codigo" class="w-full input-ghost rounded-xl pl-4 pr-12 py-3.5 text-sm font-semibold text-app-title dark:text-darkapp-title outline-none transition-all placeholder:text-app-sub/50" placeholder="Ingrese o escanee el código..." autofocus inputmode="numeric" pattern="[0-9]*" enterkeyhint="search" />
+                        <button type="button" class="absolute right-2 p-2 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 transition-colors rounded-lg" onclick="abrirEscaner()" title="Escanear código de barras">
+                            <i data-lucide="camera" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Detalles del Artículo (Tarjetas sin fondo para estilo minimalista) -->
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="clipboard-list" class="w-4 h-4 text-app-brand"></i>
+                        <h2 class="text-xs font-bold text-app-title dark:text-darkapp-title uppercase tracking-wider">Detalles</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-app-card/40 dark:bg-slate-800/30 rounded-xl p-3 border border-transparent">
+                            <span class="text-[10px] font-semibold uppercase tracking-wider text-app-sub block mb-1" id="labelSkuOrBar">SKU / CÓDIGO</span>
+                            <div class="text-sm font-bold text-app-title dark:text-darkapp-title truncate" id="sku">-</div>
+                        </div>
+                        <div class="bg-app-card/40 dark:bg-slate-800/30 rounded-xl p-3 border border-transparent">
+                            <span class="text-[10px] font-semibold uppercase tracking-wider text-app-sub block mb-1">Familia</span>
+                            <div class="text-sm font-bold text-app-title dark:text-darkapp-title truncate" id="familia">-</div>
+                        </div>
+                        <div class="bg-app-card/40 dark:bg-slate-800/30 rounded-xl p-3 border border-transparent">
+                            <span class="text-[10px] font-semibold uppercase tracking-wider text-app-sub block mb-1">Sub Familia</span>
+                            <div class="text-sm font-bold text-app-title dark:text-darkapp-title truncate" id="subfamilia">-</div>
+                        </div>
+                        <div class="bg-app-card/40 dark:bg-slate-800/30 rounded-xl p-3 border border-transparent">
+                            <span class="text-[10px] font-semibold uppercase tracking-wider text-app-sub block mb-1">Sub Sub Familia</span>
+                            <div class="text-sm font-bold text-app-title dark:text-darkapp-title truncate" id="subsubfamilia">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Descripción -->
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="file-text" class="w-4 h-4 text-app-brand"></i>
+                        <h2 class="text-xs font-bold text-app-title dark:text-darkapp-title uppercase tracking-wider">Descripción</h2>
+                    </div>
+                    <div class="bg-app-card/40 dark:bg-slate-800/30 rounded-xl p-4 min-h-[60px] flex items-center justify-center border border-transparent">
+                        <div class="text-sm font-medium text-app-title dark:text-darkapp-title text-center leading-relaxed" id="descripcion">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: INVENTARIO (El apartado más importante) -->
+            <div class="flex flex-col">
+                <div class="flex items-center gap-2 mb-3">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-app-brand"></i>
+                    <h2 class="text-xs font-bold text-app-title dark:text-darkapp-title uppercase tracking-wider">Inventario Disponible</h2>
+                </div>
+                
+                <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-8 flex flex-col items-center justify-center flex-1 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-app-sub mb-2">Stock en Sistema</span>
+                    <div class="text-7xl font-black text-app-brand dark:text-teal-400 leading-none" id="inventario">-</div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal de Confirmación para Eliminar Base de Datos -->
+    <div id="confirmDeleteModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-white/80 dark:bg-slate-900/85 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-2xl p-6 w-full max-w-sm shadow-xl text-center space-y-5">
+            <div class="text-rose-500 flex justify-center mx-auto">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <p class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">
+                Esta acción no se puede deshacer. ¿Desea continuar?
+            </p>
+            <div class="flex gap-2 w-full pt-2">
+                <button onclick="cerrarConfirmacionEliminar()" class="flex-1 py-2 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg/50 dark:hover:bg-slate-800/50 font-semibold rounded-xl text-xs transition-colors">
+                    Cancelar
+                </button>
+                <button onclick="eliminarBaseDatos()" class="flex-1 py-2 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-xl text-xs shadow-sm transition-colors">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Alerta Genérico (Éxito/Eliminación/Errores) -->
+    <div id="alertModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-white/80 dark:bg-slate-900/85 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-2xl p-6 w-full max-w-sm shadow-xl text-center space-y-5">
+            <div id="alertIconContainer" class="text-app-brand flex justify-center mx-auto">
+                <i data-lucide="check-circle-2" id="alertIcon" class="w-8 h-8"></i>
+            </div>
+            <p id="alertText" class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">Mensaje</p>
+            <button onclick="cerrarModalAlerta()" class="w-full py-2.5 bg-app-brand hover:bg-teal-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-sm">
+                Aceptar
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Escáner de Cámara -->
+    <div class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-[100] flex flex-col items-center justify-center p-4 hidden" id="scannerModal">
+      <div class="w-full max-w-md bg-black rounded-2xl overflow-hidden relative shadow-2xl">
+        <div id="reader" class="w-full"></div>
+      </div>
+      <button type="button" class="mt-6 bg-app-card text-app-title hover:bg-app-bg font-bold px-8 py-3 rounded-full text-sm transition-colors shadow-lg" onclick="cerrarEscaner()">Cerrar Cámara</button>
+    </div>
+
+<script>
+  // --- REGISTRO DEL SERVICE WORKER ---
+  function initServiceWorker() {
+      if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/sw.js', { scope: '/' })
+              .then((registration) => console.log('[PWA] SW OK en Existencias:', registration.scope))
+              .catch((error) => console.error('[PWA] SW error:', error));
+      }
+  }
+
+  // --- VARIABLES GLOBALES ---
+  let baseDatosMatriz = [];
+  let indexMap = new Map(); // Índice para búsquedas O(1)
+  let html5QrCode = null;
+  let audioCtx = null;
+
+  // --- TEMA ---
+  const btnThemeToggle = document.getElementById('btn-theme-toggle');
+  const htmlElement = document.documentElement;
+  
+  function setTheme(isDark) {
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (isDark) {
+          htmlElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+          if (themeMeta) themeMeta.setAttribute('content', '#0f172a');
+      } else {
+          htmlElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+          if (themeMeta) themeMeta.setAttribute('content', '#F5F7FA');
+      }
+  }
+
+  // --- MODALES ---
+  function mostrarAlerta(mensaje, tipo = 'success') {
+      document.getElementById('alertText').textContent = mensaje;
+      const iconContainer = document.getElementById('alertIconContainer');
+      const icon = document.getElementById('alertIcon');
+      
+      if (tipo === 'error') {
+          iconContainer.className = "text-rose-500 flex justify-center mx-auto";
+          icon.setAttribute('data-lucide', 'alert-circle');
+      } else {
+          iconContainer.className = "text-app-brand flex justify-center mx-auto";
+          icon.setAttribute('data-lucide', 'check-circle-2');
+      }
+      
+      document.getElementById('alertModal').classList.remove('hidden');
+      lucide.createIcons();
+  }
+
+  function cerrarModalAlerta() {
+      document.getElementById('alertModal').classList.add('hidden');
+  }
+
+  function mostrarConfirmacionEliminar() {
+      document.getElementById('confirmDeleteModal').classList.remove('hidden');
+  }
+
+  function cerrarConfirmacionEliminar() {
+      document.getElementById('confirmDeleteModal').classList.add('hidden');
+  }
+
+  // --- LÓGICA DE BASE DE DATOS ---
+  function procesarYGuardarDatos(matriz, nombreArchivo) {
+      baseDatosMatriz = matriz;
+      indexMap.clear(); // Limpiar índice
+
+      // Construir índice para búsquedas O(1)
+      for (let i = 1; i < baseDatosMatriz.length; i++) {
+          const fila = baseDatosMatriz[i];
+          if (!fila) continue;
+          const numArticulo = String(fila[1] || '').replace(/^'/, '').trim();
+          const codBarras = String(fila[2] || '').replace(/^'/, '').trim();
+          
+          if (numArticulo) indexMap.set(numArticulo, fila);
+          if (codBarras) indexMap.set(codBarras, fila);
+      }
+
+      try {
+          localStorage.setItem('baseDatosConsultor', JSON.stringify(baseDatosMatriz));
+          localStorage.setItem('nombreArchivoConsultor', nombreArchivo);
+          document.getElementById('statusMemoria').textContent = removerExtension(nombreArchivo);
+          document.getElementById('statusDot').classList.remove('bg-red-500');
+          document.getElementById('statusDot').classList.add('bg-app-brand');
+          mostrarAlerta('Base de datos cargada con éxito.', 'success');
+      } catch (err) {
+          console.warn("LocalStorage lleno:", err);
+          document.getElementById('statusMemoria').textContent = removerExtension(nombreArchivo);
+          document.getElementById('statusDot').classList.remove('bg-red-500');
+          document.getElementById('statusDot').classList.add('bg-app-brand');
+          mostrarAlerta("El archivo es muy grande para guardarse permanentemente. Funcionará en esta sesión.", "error");
+      }
+  }
+
+  function eliminarBaseDatos() {
+      cerrarConfirmacionEliminar();
+      baseDatosMatriz = [];
+      indexMap.clear();
+      localStorage.removeItem('baseDatosConsultor');
+      localStorage.removeItem('nombreArchivoConsultor');
+      document.getElementById('statusMemoria').textContent = 'Sin base de datos';
+      document.getElementById('statusDot').classList.remove('bg-app-brand');
+      document.getElementById('statusDot').classList.add('bg-red-500');
+      limpiarCampos();
+      document.getElementById('excelFile').value = '';
+      mostrarAlerta('Base de datos eliminada correctamente.', 'success');
+  }
+
+  function removerExtension(nombre) {
+    if (!nombre) return "";
+    return nombre.replace(/\.[^/.]+$/, "");
+  }
+
+  // --- BÚSQUEDA Y RENDERIZADO ---
+  function ejecutarBusqueda(busqueda) {
+      if (!busqueda) {
+          limpiarCampos();
+          return;
+      }
+      
+      // Búsqueda instantánea usando el índice Map
+      const resultado = indexMap.get(busqueda);
+      
+      if (resultado) {
+          const numArticulo = String(resultado[1] || '').trim();
+          const codBarras = String(resultado[2] || '').trim();
+          const coincidioEnBarras = (codBarras === busqueda);
+          
+          const labelElem = document.getElementById('labelSkuOrBar');
+          const valElem = document.getElementById('sku');
+          
+          if (coincidioEnBarras) {
+              labelElem.textContent = 'SKU';
+              valElem.textContent = numArticulo || '-';
+          } else {
+              labelElem.textContent = 'Código de barras';
+              valElem.textContent = codBarras || '-';
+          }
+          
+          document.getElementById('familia').textContent = resultado[4] || '-';
+          document.getElementById('subfamilia').textContent = resultado[5] || '-';
+          document.getElementById('subsubfamilia').textContent = resultado[6] || '-';
+          document.getElementById('descripcion').textContent = resultado[3] || '-';
+          document.getElementById('inventario').textContent = resultado[7] !== undefined ? resultado[7] : '0';
+      } else {
+          limpiarCampos();
+      }
+  }
+
+  function limpiarCampos() {
+      document.getElementById('labelSkuOrBar').textContent = 'SKU / CÓDIGO';
+      document.getElementById('sku').textContent = '-';
+      document.getElementById('familia').textContent = '-';
+      document.getElementById('subfamilia').textContent = '-';
+      document.getElementById('subsubfamilia').textContent = '-';
+      document.getElementById('descripcion').textContent = '-';
+      document.getElementById('inventario').textContent = '-';
+  }
+
+  // --- ESCÁNER DE CÁMARA ---
+  function reproducirFeedbackEscaneo() {
+    if ("vibrate" in navigator) navigator.vibrate(150);
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(1800, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.12);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.12);
+    } catch (e) {}
+  }
+
+  function abrirEscaner() {
+    const modal = document.getElementById('scannerModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    if (!html5QrCode) {
+      html5QrCode = new Html5Qrcode("reader", {
+        formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ],
+        verbose: false
+      });
+    }
+    
+    const config = { 
+      fps: 25,
+      qrbox: { width: 300, height: 160 },
+      aspectRatio: 1.0,
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+      videoConstraints: {
+        facingMode: "environment",
+        width: { min: 640, ideal: 1280, max: 1920 },
+        height: { min: 480, ideal: 720, max: 1080 },
+        focusMode: "continuous"
+      }
+    };
+    
+    html5QrCode.start(
+      { facingMode: "environment" },
+      config,
+      (decodedText) => {
+        reproducirFeedbackEscaneo();
+        const inputCodigo = document.getElementById('codigo');
+        inputCodigo.value = decodedText.replace(/\D/g, '');
+        ejecutarBusqueda(inputCodigo.value);
+        cerrarEscaner();
+      },
+      () => {}
+    ).catch(err => {
+      console.error("Error al iniciar cámara:", err);
+      mostrarAlerta("No se pudo acceder a la cámara.", "error");
+      cerrarEscaner();
+    });
+  }
+
+  function cerrarEscaner() {
+    const modal = document.getElementById('scannerModal');
+    if (html5QrCode && html5QrCode.isScanning) {
+      html5QrCode.stop().then(() => {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+      }).catch(err => {
+        console.error(err);
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+      });
+    } else {
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    }
+  }
+
+  // --- INICIALIZACIÓN ---
+  window.addEventListener('DOMContentLoaded', () => {
+    initServiceWorker();
+    setTheme(localStorage.getItem('theme') !== 'light');
+    lucide.createIcons();
+
+    btnThemeToggle.addEventListener('click', () => {
+        setTheme(!htmlElement.classList.contains('dark'));
+    });
+
+    // Cargar datos guardados si existen
+    const datosGuardados = localStorage.getItem('baseDatosConsultor');
+    const nombreGuardado = localStorage.getItem('nombreArchivoConsultor');
+    if (datosGuardados) {
+      try {
+        const parsed = JSON.parse(datosGuardados);
+        procesarYGuardarDatos(parsed, nombreGuardado || "Archivo guardado");
+      } catch (e) {
+        console.error("Error al cargar la base de datos local:", e);
+      }
+    }
+  });
+
+  // Listener del Input de archivo
+  document.getElementById('excelFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    baseDatosMatriz = [];
+    indexMap.clear();
+    localStorage.removeItem('baseDatosConsultor');
+    localStorage.removeItem('nombreArchivoConsultor');
+    limpiarCampos();
+    
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const data = new Uint8Array(evt.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheet = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheet];
+      const matriz = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      
+      procesarYGuardarDatos(matriz, file.name);
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+  // Listener del Input de búsqueda
+  document.getElementById('codigo').addEventListener('input', function() {
+    const valorLimpio = this.value.replace(/\D/g, '');
+    if (this.value !== valorLimpio) {
+      this.value = valorLimpio;
+    }
+    // Debounce implícito: solo busca si tiene al menos 2 caracteres
+    if (this.value.trim().length > 0) {
+      ejecutarBusqueda(this.value.trim());
+    } else {
+      limpiarCampos();
+    }
+  });
+</script>
+</body>
+</html>
