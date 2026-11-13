@@ -4,18 +4,16 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="../fonts.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Checks Remotos - T0151 G.P Mérida</title>
+  <title>Checks</title>
+  <link rel="icon" type="image/svg+xml" href="./checks.svg">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#F5F7FA">
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@1.72.0"></script>
   <!-- SDK de Supabase v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- PDF.js para lectura de archivos PDF en el cliente -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -113,55 +111,60 @@
     <!-- Contenedor Principal (Dashboard) -->
     <div id="vistaPrincipal" class="p-4 md:p-6 max-w-5xl mx-auto w-full space-y-6 flex-1 relative z-10">
 
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pb-2">
-        <div class="flex items-center gap-2 text-xs font-bold w-full sm:w-auto">
-          <span id="conexionStatus" class="inline-flex items-center gap-1.5 text-[11px] text-amber-500 font-semibold"><i class="fa-solid fa-circle-dot"></i> Conectando...</span>
+      <!-- Controles Superiores Modificados -->
+      <div class="flex flex-col gap-3 pb-2">
+        <!-- Fila Superior: Estado y Botón Actualizar alineado a la derecha -->
+        <div class="flex items-center justify-between w-full">
+          <div class="flex items-center gap-2 text-xs font-bold">
+            <span id="conexionStatus" class="inline-flex items-center gap-1.5 text-[11px] text-amber-500 font-semibold"><i class="fa-solid fa-circle-dot"></i> Conectando...</span>
+          </div>
           <button onclick="actualizarDatosManual()" class="py-1 px-2.5 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 rounded-lg transition-all font-medium text-xs flex items-center justify-center gap-1.5 cursor-pointer">
             <i id="iconActualizar" class="fa-solid fa-rotate text-[10px]"></i> Actualizar
           </button>
         </div>
-        <button onclick="verificarNuevoCheck()" class="w-full sm:w-auto py-2.5 px-5 bg-app-brand hover:bg-teal-700 text-white rounded-xl transition-all font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm">
+        
+        <!-- Fila Inferior: Botón Nuevo Check -->
+        <button onclick="verificarNuevoCheck()" class="w-full py-2.5 px-5 bg-app-brand hover:bg-teal-700 text-white rounded-xl transition-all font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm">
           <i class="fa-solid fa-plus"></i> Nuevo Check
         </button>
       </div>
 
-      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)] relative">
-        <div class="flex items-start justify-between">
-          <div>
-            <p class="text-[11px] uppercase font-semibold text-app-sub tracking-wider">Calificación General</p>
-            <div class="flex items-baseline gap-1.5 mt-2">
-              <h3 id="kpiCalificacion" class="text-4xl md:text-5xl font-extrabold text-app-title dark:text-darkapp-title">0.00</h3>
-            </div>
+      <!-- Tarjeta de Calificación General (Estilo Ghost, Centrado, sin icono) -->
+      <div class="relative flex flex-col items-center justify-center pt-2 pb-2 w-full">
+        <p class="text-[11px] uppercase font-semibold text-app-sub tracking-wider text-center w-full mb-1">Calificación General</p>
+        
+        <!-- CORRECCIÓN: Grid de 3 columnas para alinear a la base (baseline) -->
+        <div class="grid grid-cols-[1fr_auto_1fr] items-end w-full">
+          <div></div> <!-- Espaciador izquierdo para mantener el centrado -->
+          <h3 id="kpiCalificacion" class="text-5xl md:text-6xl font-extrabold text-app-title dark:text-darkapp-title text-center leading-none">0.00</h3>
+          <div class="flex justify-end pb-1">
+            <!-- Nota bono alineada a la derecha en la misma línea base que el número -->
+            <span id="kpiNotaBono" class="text-xs font-semibold flex items-center gap-1.5"></span>
           </div>
-          <div class="text-app-brand opacity-80">
-            <i data-lucide="award" class="w-7 h-7"></i>
-          </div>
-        </div>
-        <div class="mt-4 pt-4 border-t border-app-border dark:border-darkapp-border">
-          <span id="kpiNotaBono" class="text-xs font-semibold flex items-center gap-1.5"></span>
         </div>
       </div>
 
-      <div class="grid grid-cols-3 gap-3">
-        <div class="bg-app-card dark:bg-darkapp-card rounded-xl p-4 flex flex-col justify-between shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-          <div class="text-app-brand mb-3"><i data-lucide="list-todo" class="w-5 h-5"></i></div>
-          <div>
-            <h3 id="kpiChecksRealizados" class="text-xl font-extrabold text-app-title dark:text-darkapp-title">0</h3>
-            <p class="text-[10px] font-medium text-app-sub leading-tight mt-0.5">Checks Realizados</p>
+      <!-- KPIs Secundarios (Estilo Ghost, Centrados) -->
+      <div class="grid grid-cols-3 gap-3 py-2">
+        <div class="flex flex-col items-center justify-center">
+          <div class="text-app-brand mb-2"><i data-lucide="list-todo" class="w-6 h-6"></i></div>
+          <div class="text-center">
+            <h3 id="kpiChecksRealizados" class="text-2xl font-extrabold text-app-title dark:text-darkapp-title">0</h3>
+            <p class="text-[10px] font-medium text-app-sub leading-tight mt-1">Checks<br>Realizados</p>
           </div>
         </div>
-        <div class="bg-app-card dark:bg-darkapp-card rounded-xl p-4 flex flex-col justify-between shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-          <div class="text-amber-500 mb-3"><i data-lucide="send" class="w-5 h-5"></i></div>
-          <div>
-            <h3 id="kpiEnviadas" class="text-xl font-extrabold text-app-title dark:text-darkapp-title">0</h3>
-            <p class="text-[10px] font-medium text-app-sub leading-tight mt-0.5">Correcciones Enviadas</p>
+        <div class="flex flex-col items-center justify-center">
+          <div class="text-amber-500 mb-2"><i data-lucide="send" class="w-6 h-6"></i></div>
+          <div class="text-center">
+            <h3 id="kpiEnviadas" class="text-2xl font-extrabold text-app-title dark:text-darkapp-title">0</h3>
+            <p class="text-[10px] font-medium text-app-sub leading-tight mt-1">Correcciones<br>Enviadas</p>
           </div>
         </div>
-        <div class="bg-app-card dark:bg-darkapp-card rounded-xl p-4 flex flex-col justify-between shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-          <div class="text-emerald-500 mb-3"><i data-lucide="square-check-big" class="w-5 h-5"></i></div>
-          <div>
-            <h3 id="kpiAceptadas" class="text-xl font-extrabold text-app-title dark:text-darkapp-title">0</h3>
-            <p class="text-[10px] font-medium text-app-sub leading-tight mt-0.5">Correcciones Aceptadas</p>
+        <div class="flex flex-col items-center justify-center">
+          <div class="text-emerald-500 mb-2"><i data-lucide="square-check-big" class="w-6 h-6"></i></div>
+          <div class="text-center">
+            <h3 id="kpiAceptadas" class="text-2xl font-extrabold text-app-title dark:text-darkapp-title">0</h3>
+            <p class="text-[10px] font-medium text-app-sub leading-tight mt-1">Correcciones<br>Aceptadas</p>
           </div>
         </div>
       </div>
@@ -178,18 +181,22 @@
 
     <!-- Vista Historial -->
     <div id="vistaHistorial" class="p-4 md:p-6 max-w-5xl mx-auto w-full space-y-4 flex-1 relative z-10 hidden">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
-        <div class="flex items-center gap-2">
-          <button onclick="cerrarHistorial()" class="p-2 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title rounded-lg transition-all cursor-pointer hover:bg-app-card dark:hover:bg-darkapp-card" title="Regresar">
-            <i data-lucide="arrow-left" class="w-5 h-5"></i>
-          </button>
-          <h2 class="text-base font-bold text-app-title dark:text-darkapp-title">Historial de Checks</h2>
-        </div>
+      <!-- Título centrado con botón regresar a la izquierda -->
+      <div class="relative flex items-center justify-center pb-2">
+        <button onclick="cerrarHistorial()" class="absolute left-0 p-2 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title rounded-lg transition-all cursor-pointer hover:bg-app-card dark:hover:bg-darkapp-card" title="Regresar">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h2 class="text-base font-bold text-app-title dark:text-darkapp-title text-center">Historial de Checks</h2>
+      </div>
+      
+      <!-- Botón borrar historial alineado a la derecha -->
+      <div class="flex justify-end pb-2">
         <button onclick="confirmarBorrarTodoHistorial()" class="py-1.5 px-3 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer">
           <i data-lucide="trash-2" class="w-4 h-4 shrink-0"></i>
           <span>Borrar historial</span>
         </button>
       </div>
+      
       <div id="historialContainer" class="flex flex-col gap-2"></div>
     </div>
 
@@ -197,7 +204,7 @@
 
   <!-- Modal Nuevo / Editar Check -->
   <div class="modal fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10000] flex items-center justify-center p-4" id="modalCheck" style="display: none;">
-    <div class="modal-content bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+    <div class="modal-content bg-app-bg dark:bg-darkapp-bg border border-app-border dark:border-darkapp-border rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-2">
         <h3 id="modalCheckTitulo" class="text-base font-bold text-app-title dark:text-darkapp-title">Registrar Nuevo Check</h3>
         <span class="close-modal text-app-sub hover:text-app-title dark:hover:text-darkapp-title cursor-pointer text-xl font-bold" onclick="cerrarModalCheck()">&times;</span>
@@ -214,11 +221,11 @@
         <div>
           <label class="font-semibold text-app-sub block mb-2">Subir PDF?</label>
           <div class="grid grid-cols-2 gap-2">
-            <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+            <label class="flex items-center justify-center gap-2 p-2 cursor-pointer hover:bg-app-card dark:hover:bg-slate-800/50 rounded-lg transition-colors">
               <input type="radio" name="subirPdf" value="si" onclick="togglePdfOpciones(true)" class="text-app-brand focus:ring-app-brand">
               <span class="font-semibold text-app-title dark:text-darkapp-title">Sí</span>
             </label>
-            <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+            <label class="flex items-center justify-center gap-2 p-2 cursor-pointer hover:bg-app-card dark:hover:bg-slate-800/50 rounded-lg transition-colors">
               <input type="radio" name="subirPdf" value="no" checked onclick="togglePdfOpciones(false)" class="text-app-brand focus:ring-app-brand">
               <span class="font-semibold text-app-title dark:text-darkapp-title">No</span>
             </label>
@@ -227,25 +234,25 @@
 
         <div id="containerArchivoPdf" class="hidden space-y-2">
           <label class="font-semibold text-app-sub block">Seleccionar Archivo PDF</label>
-          <input type="file" id="inputPdfFile" accept="application/pdf" class="w-full text-xs text-app-sub file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-app-accent file:text-app-brand hover:file:bg-app-active cursor-pointer bg-app-bg dark:bg-slate-900/50 rounded-lg">
+          <input type="file" id="inputPdfFile" accept="application/pdf" class="w-full text-xs text-app-sub file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-app-accent file:text-app-brand hover:file:bg-app-active cursor-pointer bg-app-card dark:bg-slate-900/50 rounded-lg">
           <p class="text-[10px] text-app-sub mt-1">Sube el archivo PDF del Check Remoto realizado.</p>
         </div>
 
         <div id="containerManual" class="space-y-4">
           <div>
             <label class="font-semibold text-app-sub block mb-2">Calificación obtenida (ej. 8.7)</label>
-            <input type="number" id="inputCalificacion" placeholder="Ej. 8.7" step="0.1" min="0" max="10" class="w-full bg-app-bg dark:bg-slate-900/50 border border-transparent rounded-xl px-3 py-2.5 font-bold text-app-title dark:text-darkapp-title outline-none focus:ring-2 focus:ring-app-brand/30 transition-all">
+            <input type="number" id="inputCalificacion" placeholder="Ej. 8.7" step="0.1" min="0" max="10" class="w-full bg-app-card dark:bg-slate-900/50 border border-transparent rounded-xl px-3 py-2.5 font-bold text-app-title dark:text-darkapp-title outline-none focus:ring-2 focus:ring-app-brand/30 transition-all">
           </div>
           <div>
             <label class="font-semibold text-app-sub block mb-2">Fecha en que se realizó el check</label>
-            <input type="date" id="inputFecha" class="w-full bg-app-bg dark:bg-slate-900/50 border border-transparent rounded-xl px-3 py-2.5 font-bold text-app-title dark:text-darkapp-title outline-none focus:ring-2 focus:ring-app-brand/30 transition-all">
+            <input type="date" id="inputFecha" class="w-full bg-app-card dark:bg-slate-900/50 border border-transparent rounded-xl px-3 py-2.5 font-bold text-app-title dark:text-darkapp-title outline-none focus:ring-2 focus:ring-app-brand/30 transition-all">
           </div>
         </div>
       </div>
 
       <div class="mt-6 pt-4 flex justify-end gap-2">
-        <button onclick="cerrarModalCheck()" class="px-4 py-2 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg font-semibold text-xs cursor-pointer transition-all">Cancelar</button>
-        <button onclick="guardarCheck()" class="px-4 py-2 bg-app-brand hover:bg-teal-700 text-white rounded-lg shadow-sm font-semibold text-xs cursor-pointer transition-all">Guardar Check</button>
+        <button onclick="cerrarModalCheck()" class="px-4 py-2 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-card dark:hover:bg-slate-800 rounded-lg font-semibold text-xs cursor-pointer transition-all">Cancelar</button>
+        <button onclick="guardarCheck()" class="px-4 py-2 text-app-brand hover:bg-app-brand/10 dark:hover:bg-teal-900/30 rounded-lg font-semibold text-xs cursor-pointer transition-all">Guardar Check</button>
       </div>
     </div>
   </div>
@@ -310,86 +317,89 @@
 
   <!-- Modal Eliminar Check -->
   <div id="confirmModalEliminar" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10012] flex items-center justify-center p-4 hidden">
-      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
+      <div class="bg-app-bg dark:bg-darkapp-bg border border-app-border dark:border-darkapp-border rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
           <div class="text-rose-500 flex justify-center mx-auto"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
           <p class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">
               ¿Desea eliminar este check?<br>Esta acción no se puede deshacer.
           </p>
           <div class="flex justify-center items-center gap-2 w-full pt-2">
-              <button onclick="cerrarModalEliminar(false)" class="py-2 px-4 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Cancelar</button>
-              <button onclick="cerrarModalEliminar(true)" class="py-2 px-4 bg-rose-500 hover:bg-rose-600 text-white rounded-lg shadow-sm transition-all font-semibold text-xs cursor-pointer shrink-0">Confirmar</button>
+              <button onclick="cerrarModalEliminar(false)" class="py-2 px-4 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 hover:bg-app-card/50 dark:hover:bg-slate-800/50 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Cancelar</button>
+              <button onclick="cerrarModalEliminar(true)" class="py-2 px-4 text-rose-500 hover:bg-rose-500/10 dark:hover:bg-rose-900/30 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Confirmar</button>
           </div>
       </div>
   </div>
 
   <!-- Modal Eliminar Mes Historial -->
   <div id="confirmModalMesHistorial" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10022] flex items-center justify-center p-4 hidden">
-      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
+      <div class="bg-app-bg dark:bg-darkapp-bg border border-app-border dark:border-darkapp-border rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
           <div class="text-rose-500 flex justify-center mx-auto"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
           <p class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">
               ¿Desea eliminar este mes del historial?<br>Esta acción no se puede deshacer.
           </p>
           <div class="flex justify-center items-center gap-2 w-full pt-2">
-              <button onclick="cerrarModalMesHistorialConfirm(false)" class="py-2 px-4 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Cancelar</button>
-              <button onclick="cerrarModalMesHistorialConfirm(true)" class="py-2 px-4 bg-rose-500 hover:bg-rose-600 text-white rounded-lg shadow-sm transition-all font-semibold text-xs cursor-pointer shrink-0">Sí, eliminar</button>
+              <button onclick="cerrarModalMesHistorialConfirm(false)" class="py-2 px-4 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 hover:bg-app-card/50 dark:hover:bg-slate-800/50 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Cancelar</button>
+              <button onclick="cerrarModalMesHistorialConfirm(true)" class="py-2 px-4 text-rose-500 hover:bg-rose-500/10 dark:hover:bg-rose-900/30 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Sí, eliminar</button>
           </div>
       </div>
   </div>
 
-  <!-- Modal Confirmar Todo -->
+  <!-- Modal Confirmar Todo (Estilo Ghost y Fondo de App) -->
   <div id="confirmModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10010] flex items-center justify-center p-4 hidden">
-      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
+      <div class="bg-app-bg dark:bg-darkapp-bg border border-app-border dark:border-darkapp-border rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
           <div class="text-rose-500 flex justify-center mx-auto"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
           <p id="confirmModalText" class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">
-              ¿Desea eliminar todos los datos almacenados?<br>Esta acción eliminará todos los checks registrados.
+              ¿Desea eliminar todos los Checks del mes?<br>Esta acción no se puede deshacer.
           </p>
           <div class="flex flex-col gap-2 w-full pt-2">
-              <button onclick="guardarEnHistorialPrompt()" class="py-2.5 px-4 bg-app-accent hover:bg-app-active text-app-brand rounded-lg transition-all font-semibold text-xs cursor-pointer w-full flex items-center justify-center gap-1.5">
-                  <i data-lucide="bookmark-plus" class="w-4 h-4"></i> Guardar en historial
+              <!-- Botón Ghost Guardar en Historial (Texto verde) -->
+              <button onclick="guardarEnHistorialPrompt()" class="py-2.5 px-4 text-app-brand hover:bg-app-brand/10 dark:hover:bg-teal-900/30 rounded-lg transition-all font-semibold text-xs cursor-pointer w-full flex items-center justify-center gap-1.5">
+                  <i data-lucide="bookmark-plus" class="w-4 h-4"></i> Guardar los checks en el historial
               </button>
               <div class="flex justify-center items-center gap-2 w-full mt-1">
-                  <button onclick="cerrarModalConfirmacion(false)" class="py-2 px-3 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg transition-all font-semibold text-xs cursor-pointer flex-1">Cancelar</button>
-                  <button onclick="cerrarModalConfirmacion(true)" class="py-2 px-3 bg-rose-500 hover:bg-rose-600 text-white rounded-lg shadow-sm transition-all font-semibold text-xs cursor-pointer flex-1">Sí, borrar todo</button>
+                  <!-- Botón Ghost Cancelar (Texto igual a "Actualizar") -->
+                  <button onclick="cerrarModalConfirmacion(false)" class="py-2 px-3 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 hover:bg-app-card/50 dark:hover:bg-slate-800/50 rounded-lg transition-all font-semibold text-xs cursor-pointer flex-1">Cancelar</button>
+                  <!-- Botón Ghost Borrar (Texto rojo) -->
+                  <button onclick="cerrarModalConfirmacion(true)" class="py-2 px-3 text-rose-500 hover:bg-rose-500/10 dark:hover:bg-rose-900/30 rounded-lg transition-all font-semibold text-xs cursor-pointer flex-1">Sí, borrar todo</button>
               </div>
           </div>
       </div>
   </div>
 
-  <!-- Modal Guardar en Historial -->
+  <!-- Modal Guardar en Historial (Estilo Ghost y Fondo de App) -->
   <div id="modalGuardarHistorial" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10018] flex items-center justify-center p-4 hidden">
-      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
+      <div class="bg-app-bg dark:bg-darkapp-bg border border-app-border dark:border-darkapp-border rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
           <div class="text-app-brand flex justify-center mx-auto"><i data-lucide="help-circle" class="w-8 h-8"></i></div>
           <p class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">
-              La información de los checks se guardará en el historial, ¿desea continuar?
+              Los checks se guardará en el historial y se eliminara de la pantalla principal, ¿desea continuar?
           </p>
           <div class="flex justify-center items-center gap-2 w-full pt-2">
-              <button onclick="cancelarGuardarHistorial()" class="py-2 px-4 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">No</button>
-              <button onclick="confirmarGuardarHistorial()" class="py-2 px-4 bg-app-brand hover:bg-teal-700 text-white rounded-lg shadow-sm transition-all font-semibold text-xs cursor-pointer shrink-0">Confirmar</button>
+              <button onclick="cancelarGuardarHistorial()" class="py-2 px-4 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 hover:bg-app-card/50 dark:hover:bg-slate-800/50 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">No</button>
+              <button onclick="confirmarGuardarHistorial()" class="py-2 px-4 text-app-brand hover:bg-app-brand/10 dark:hover:bg-teal-900/30 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Confirmar</button>
           </div>
       </div>
   </div>
 
   <!-- Modal Confirmar Borrar Todo Historial -->
   <div id="confirmModalHistorial" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10019] flex items-center justify-center p-4 hidden">
-      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
+      <div class="bg-app-bg dark:bg-darkapp-bg border border-app-border dark:border-darkapp-border rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
           <div class="text-rose-500 flex justify-center mx-auto"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
           <p class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">
               ¿Desea eliminar todo el historial de checks?<br>Esta acción no se puede deshacer.
           </p>
           <div class="flex justify-center items-center gap-2 w-full pt-2">
-              <button onclick="cerrarModalHistorialConfirm(false)" class="py-2 px-4 text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Cancelar</button>
-              <button onclick="cerrarModalHistorialConfirm(true)" class="py-2 px-4 bg-rose-500 hover:bg-rose-600 text-white rounded-lg shadow-sm transition-all font-semibold text-xs cursor-pointer shrink-0">Sí, borrar todo</button>
+              <button onclick="cerrarModalHistorialConfirm(false)" class="py-2 px-4 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 hover:bg-app-card/50 dark:hover:bg-slate-800/50 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Cancelar</button>
+              <button onclick="cerrarModalHistorialConfirm(true)" class="py-2 px-4 text-rose-500 hover:bg-rose-500/10 dark:hover:bg-rose-900/30 rounded-lg transition-all font-semibold text-xs cursor-pointer shrink-0">Sí, borrar todo</button>
           </div>
       </div>
   </div>
 
   <!-- Modal Alerta Genérico -->
   <div id="alertModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10020] flex items-center justify-center p-4 hidden">
-      <div class="bg-app-card dark:bg-darkapp-card rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
+      <div class="bg-app-bg dark:bg-darkapp-bg border border-app-border dark:border-darkapp-border rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5">
           <div class="text-app-brand flex justify-center mx-auto"><i data-lucide="check-circle-2" class="w-8 h-8"></i></div>
           <p id="alertModalText" class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed">Mensaje</p>
           <div class="flex justify-center gap-2 pt-2">
-              <button onclick="cerrarModalAlerta()" class="py-2.5 px-6 rounded-lg bg-app-brand hover:bg-teal-700 text-white text-xs shadow-sm font-semibold cursor-pointer transition-all">Aceptar</button>
+              <button onclick="cerrarModalAlerta()" class="py-2.5 px-6 rounded-lg text-app-brand hover:bg-app-brand/10 dark:hover:bg-teal-900/30 text-xs font-semibold cursor-pointer transition-all">Aceptar</button>
           </div>
       </div>
   </div>
@@ -1163,7 +1173,7 @@
                 } else {
                     seccionNum.style.display = 'block';
                     opcionesContainer.innerHTML = `
-                        <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+                        <label class="flex items-center justify-center gap-2 p-2 cursor-pointer hover:bg-app-card dark:hover:bg-slate-800/50 rounded-lg transition-colors">
                           <input type="radio" name="numeroCheck" value="${check.numeroCheck}" checked class="text-app-brand focus:ring-app-brand">
                           <span class="font-semibold text-app-title dark:text-darkapp-title">Check ${check.numeroCheck}</span>
                         </label>
@@ -1188,25 +1198,25 @@
                 seccionNum.style.display = 'none';
             } else if (!tiene1 && !tiene2) {
                 opcionesContainer.innerHTML = `
-                    <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+                    <label class="flex items-center justify-center gap-2 p-2 cursor-pointer hover:bg-app-card dark:hover:bg-slate-800/50 rounded-lg transition-colors">
                       <input type="radio" name="numeroCheck" value="1" checked class="text-app-brand focus:ring-app-brand">
                       <span class="font-semibold text-app-title dark:text-darkapp-title">Check 1</span>
                     </label>
-                    <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+                    <label class="flex items-center justify-center gap-2 p-2 cursor-pointer hover:bg-app-card dark:hover:bg-slate-800/50 rounded-lg transition-colors">
                       <input type="radio" name="numeroCheck" value="2" class="text-app-brand focus:ring-app-brand">
                       <span class="font-semibold text-app-title dark:text-darkapp-title">Check 2</span>
                     </label>
                 `;
             } else if (tiene1 && !tiene2) {
                 opcionesContainer.innerHTML = `
-                    <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+                    <label class="flex items-center justify-center gap-2 p-2 cursor-pointer hover:bg-app-card dark:hover:bg-slate-800/50 rounded-lg transition-colors">
                       <input type="radio" name="numeroCheck" value="2" checked class="text-app-brand focus:ring-app-brand">
                       <span class="font-semibold text-app-title dark:text-darkapp-title">Check 2</span>
                     </label>
                 `;
             } else if (!tiene1 && tiene2) {
                 opcionesContainer.innerHTML = `
-                    <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-app-border dark:border-darkapp-border bg-transparent cursor-pointer hover:bg-app-bg dark:hover:bg-slate-800/50 transition-colors">
+                    <label class="flex items-center justify-center gap-2 p-2 cursor-pointer hover:bg-app-card dark:hover:bg-slate-800/50 rounded-lg transition-colors">
                       <input type="radio" name="numeroCheck" value="1" checked class="text-app-brand focus:ring-app-brand">
                       <span class="font-semibold text-app-title dark:text-darkapp-title">Check 1</span>
                     </label>
@@ -1724,7 +1734,7 @@
         const elNotaBono = document.getElementById('kpiNotaBono');
 
         elCalificacion.textContent = calificacionFinal.toFixed(2);
-        elCalificacion.className = `text-4xl md:text-5xl font-extrabold ${colorForScore(calificacionFinal)}`;
+        elCalificacion.className = `text-5xl md:text-6xl font-extrabold ${colorForScore(calificacionFinal)} leading-none text-center`;
 
         // Helper #20: ramas simplificadas con ternario
         elNotaBono.innerHTML = aplicaBono
@@ -1777,6 +1787,7 @@
                 </div>
 
                 <div class="pt-1">
+                    <p class="text-[10px] text-app-sub font-semibold mb-1.5">Estatus de correcciones:</p>
                     <div class="flex flex-wrap items-center gap-4">
                         <div class="flex items-center gap-2">
                             <span class="font-semibold text-app-sub text-[11px]">Enviadas:</span>
