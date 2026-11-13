@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../fonts.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Corte de Cajas - T0151 Gran Plaza Mérida</title>
+    <title>Cortes</title>
+    <link rel="icon" type="image/svg+xml" href="./corte.svg">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#F5F7FA">
@@ -537,21 +538,43 @@
             const isDarkActive = htmlElement.classList.contains('dark');
             setTheme(!isDarkActive);
         });
+// --- SCROLL AUTOMÁTICO PARA INPUTS (evita que el teclado virtual los tape) ---
+function scrollInputIntoView(input) {
+    if (!input) return;
 
+    // Delay para que el teclado virtual custom termine su animación
+    setTimeout(() => {
+        const vv = window.visualViewport;
+        const vvTop = vv ? vv.offsetTop : 0;
+        const vvHeight = vv ? vv.height : window.innerHeight;
+
+        const rect = input.getBoundingClientRect();
+        const inputCenter = rect.top + rect.height / 2;
+
+        // Posición objetivo: 35% desde arriba del área visible
+        const targetY = vvTop + vvHeight * 0.35;
+        const delta = inputCenter - targetY;
+
+        if (Math.abs(delta) > 30) {
+            // En esta web el contenedor scrollable es <main>, NO .main-content
+            const scroller = document.querySelector('main');
+            if (scroller) {
+                scroller.scrollBy({ top: delta, behavior: 'smooth' });
+            }
+        }
+    }, 200);
+}
         // --- FOCUS / BLUR para resaltado ---
         document.addEventListener('focusin', (e) => {
-            const input = e.target.closest('input[data-teclado], .input-cell');
-            if (input) {
-                document.querySelectorAll('input[data-teclado]').forEach(i => {
-                    i.classList.remove('ring-2', 'ring-app-brand/20');
-                });
-                input.classList.add('ring-2', 'ring-app-brand/20');
-                setTimeout(() => {
-                    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    input.classList.add('ring-2', 'ring-app-brand/20');
-                }, 100);
-            }
+    const input = e.target.closest('input[data-teclado], .input-cell');
+    if (input) {
+        document.querySelectorAll('input[data-teclado]').forEach(i => {
+            i.classList.remove('ring-2', 'ring-app-brand/20');
         });
+        input.classList.add('ring-2', 'ring-app-brand/20');
+        scrollInputIntoView(input);   // 👈 reemplaza el setTimeout + scrollIntoView
+    }
+});
 
         document.addEventListener('focusout', (e) => {
             const input = e.target.closest('input[data-teclado]');
