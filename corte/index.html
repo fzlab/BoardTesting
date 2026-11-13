@@ -256,20 +256,25 @@
                     </table>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-app-border dark:border-darkapp-border">
-                    <div class="flex flex-col justify-between">
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider text-app-sub dark:text-darkapp-sub mb-2 text-center">Número de Retiros</label>
-                        <input type="text" id="num_retiros" data-teclado inputmode="none" readonly class="input-cell raw-number-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-center outline-none transition-all focus:ring-2 focus:ring-app-brand/20" placeholder="0">
-                    </div>
-                    <div class="flex flex-col justify-between">
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider text-app-sub dark:text-darkapp-sub mb-2 text-center">Respetos de Precio</label>
-                        <input type="text" id="respeto_precio" data-teclado inputmode="none" readonly class="input-cell currency-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-center outline-none transition-all focus:ring-2 focus:ring-app-brand/20" placeholder="$0.00">
-                    </div>
-                    <div class="flex flex-col justify-between">
-                        <label class="block text-[10px] font-semibold uppercase tracking-wider text-app-sub dark:text-darkapp-sub mb-2 text-center">Cajas Abiertas</label>
-                        <input type="text" id="cajas_abiertas" data-teclado inputmode="none" readonly class="input-cell raw-number-input w-full bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-center outline-none transition-all focus:ring-2 focus:ring-app-brand/20" placeholder="0">
+                <!-- SECCIÓN MODIFICADA: Se añade items-center y max-w-[120px] mx-auto a los inputs para limitar su ancho -->
+                <div class="pt-4 border-t border-app-border dark:border-darkapp-border">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full sm:w-3/4 mx-auto">
+                        <div class="flex flex-col justify-between items-center">
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider text-app-sub dark:text-darkapp-sub mb-2 text-center">Número de Retiros</label>
+                            <input type="text" id="num_retiros" data-teclado inputmode="none" readonly class="input-cell raw-number-input w-full max-w-[120px] bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-center outline-none transition-all focus:ring-2 focus:ring-app-brand/20" placeholder="0">
+                        </div>
+                        <div class="flex flex-col justify-between items-center">
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider text-app-sub dark:text-darkapp-sub mb-2 text-center">Respetos de Precio</label>
+                            <input type="text" id="respeto_precio" data-teclado inputmode="none" readonly class="input-cell currency-input w-full max-w-[120px] bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-center outline-none transition-all focus:ring-2 focus:ring-app-brand/20" placeholder="$0.00">
+                        </div>
+                        <div class="flex flex-col justify-between items-center">
+                            <label class="block text-[10px] font-semibold uppercase tracking-wider text-app-sub dark:text-darkapp-sub mb-2 text-center">Cajas Abiertas</label>
+                            <input type="text" id="cajas_abiertas" data-teclado inputmode="none" readonly class="input-cell raw-number-input w-full max-w-[120px] bg-app-bg dark:bg-slate-800/50 border-none rounded-lg px-2 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title text-center outline-none transition-all focus:ring-2 focus:ring-app-brand/20" placeholder="0">
+                        </div>
                     </div>
                 </div>
+                <!-- FIN DE LA SECCIÓN MODIFICADA -->
+
             </div>
 
             <!-- Columna Derecha Dividida en Dos Tarjetas -->
