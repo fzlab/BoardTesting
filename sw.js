@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Nexus-GP-v1.9.35';
+const CACHE_NAME = 'Nexus-GP-v1.9.36';
 
 // Archivos y rutas estáticas esenciales (usar rutas absolutas)
 const STATIC_ASSETS = [
@@ -25,6 +25,7 @@ const STATIC_ASSETS = [
     '/ventas/index.html',
     '/notas/index.html',
     '/checks/index.html'
+    '/minisers/index.html'
 ];
 
 // Instalación: Guardar recursos propios de forma segura
