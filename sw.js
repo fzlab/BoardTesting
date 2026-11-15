@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Nexus-GP-v1.9.36';
+const CACHE_NAME = 'Nexus-GP-v1.9.37';
 
 // Archivos y rutas estáticas esenciales (usar rutas absolutas)
 const STATIC_ASSETS = [
