@@ -24,7 +24,7 @@ const STATIC_ASSETS = [
     '/tickets/index.html',
     '/ventas/index.html',
     '/notas/index.html',
-    '/checks/index.html'
+    '/checks/index.html',
     '/minisers/index.html'
 ];
 
