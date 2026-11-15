@@ -1,0 +1,950 @@
+<!DOCTYPE html>  
+<html lang="es" class="h-full">  
+<head>  
+  <meta charset="UTF-8">  
+  <link rel="stylesheet" href="../fonts.css">  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">  
+  <title>Gestor de Empleados - Miniser</title>    
+  <link rel="icon" type="image/svg+xml" href="./agenda.svg">
+    
+  <!-- SEGURIDAD: Content Security Policy + Referrer -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://wa.me; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; img-src 'self' data: blob: https://mifbcyxtafeacwkzqzsq.supabase.co; connect-src 'self' https://mifbcyxtafeacwkzqzsq.supabase.co wss://mifbcyxtafeacwkzqzsq.supabase.co; base-uri 'self'; form-action 'self'; object-src 'none';">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+
+  <!-- Soporte PWA e iOS / Barra de Estado -->    
+  <meta name="theme-color" content="#F5F7FA">  
+  <meta name="apple-mobile-web-app-capable" content="yes">  
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">    
+
+  <!-- GUARD DE SESIÓN (1ª capa) -->
+  <script>
+      (function() {
+          const SESSION_KEY = 'sb-mifbcyxtafeacwkzqzsq-auth-token';
+          if (localStorage.getItem(SESSION_KEY) === null) {
+              document.documentElement.style.visibility = 'hidden';
+              window.location.replace('../index.html');
+          }
+      })();
+  </script>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">  
+  <script src="https://cdn.tailwindcss.com"></script>  
+  <script src="https://unpkg.com/lucide@1.72.0"></script>    
+  <!-- SDK de Supabase v2 -->    
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  
+
+  <script>  
+    tailwind.config = {  
+        darkMode: 'class',  
+        theme: {  
+            extend: {  
+                fontFamily: { sans: ['Geist', 'sans-serif'] },  
+                colors: {  
+                    app: {  
+                        bg: '#F5F7FA', card: '#FFFFFF', border: '#E5EAF0',  
+                        title: '#172033', sub: '#64748B', brand: '#0D9488', accent: '#E6F6F4',  
+                    },  
+                    darkapp: {  
+                        bg: '#0F172A', card: '#1E293B', border: '#334155',  
+                        title: '#F8FAFC', sub: '#94A3B8'  
+                    }  
+                }  
+            }  
+        }  
+    }  
+  </script>    
+
+  <style>  
+      html, body { overscroll-behavior-y: contain; -webkit-tap-highlight-color: transparent; }  
+      body { user-select: none; -webkit-user-select: none; }  
+      input, select, textarea { user-select: text; -webkit-user-select: text; }  
+      ::-webkit-scrollbar { width: 6px; height: 6px; }  
+      ::-webkit-scrollbar-track { background: transparent; }  
+      ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }  
+      .dark ::-webkit-scrollbar-thumb { background: #334155; }  
+      body, .card, input, select, button { transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; }  
+      
+      .glass-modal {  
+          background: rgba(255, 255, 255, 0.85);  
+          backdrop-filter: blur(16px);  
+          -webkit-backdrop-filter: blur(16px);  
+      }  
+      .dark .glass-modal {  
+          background: rgba(15, 23, 42, 0.9);  
+      }  
+      .input-minimal {  
+          background-color: transparent;  
+          border: 1px solid #E5EAF0;  
+      }  
+      .dark .input-minimal {  
+          border-color: #334155;  
+          background-color: rgba(30, 41, 59, 0.4);  
+      }  
+      .input-minimal:focus {  
+          border-color: #0D9488;  
+          outline: none;  
+          box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);  
+      }  
+  </style>  
+</head>  
+<body class="h-full bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title flex flex-col font-sans overflow-hidden antialiased">    
+
+  <!-- Overlay general para menús y modales -->
+  <div id="optionsBlurOverlay" onclick="closeAllMenus()" class="fixed inset-0 z-40 bg-slate-900/20 dark:bg-slate-950/40 backdrop-blur-[3px] transition-opacity duration-200 hidden"></div>    
+    
+  <div class="main-content flex-1 flex flex-col overflow-y-auto">  
+    <!-- TOPBAR -->
+    <header class="bg-app-bg dark:bg-darkapp-bg px-4 py-3 flex items-center justify-between shrink-0 z-50 sticky top-0 border-b border-app-border dark:border-darkapp-border">  
+        <div class="flex items-center space-x-3">  
+          <a href="../index.html" class="p-2 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 rounded-lg transition-all cursor-pointer" title="Ir al Inicio">  
+              <i data-lucide="house" class="w-5 h-5"></i>  
+          </a>    
+          <div>  
+              <h1 class="font-bold text-base leading-tight">Gestor de Empleados</h1>  
+              <p class="text-[11px] text-app-sub dark:text-darkapp-sub font-medium mt-0.5">Control y Base de Datos - Miniser</p>  
+          </div>  
+        </div>  
+        <div class="flex items-center gap-2">  
+
+          <!-- Toggle Tema -->
+          <button id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors" title="Cambiar modo">  
+              <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">  
+                  <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>  
+                  <i data-lucide="moon" class="w-3.5 h-3.5 text-slate-400 dark:text-indigo-400 opacity-100 dark:opacity-40"></i>  
+              </div>  
+              <div class="w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center transform transition-transform translate-x-0 dark:translate-x-6 z-10">  
+                  <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 dark:hidden"></i>  
+                  <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400 hidden dark:block"></i>  
+              </div>  
+          </button>  
+
+          <!-- Botón Menú Acciones Globales -->
+          <div class="relative">  
+            <button onclick="toggleToolsMenu(event)" class="p-2 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 hover:bg-app-card dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer relative z-50">  
+              <i data-lucide="more-vertical" class="w-5 h-5"></i>  
+            </button>  
+            <div id="toolsDropdown" class="hidden absolute right-0 top-full mt-2 bg-app-card/90 dark:bg-darkapp-card/90 backdrop-blur-md min-w-[220px] shadow-lg border border-app-border/60 dark:border-darkapp-border/60 rounded-xl z-50 py-1 flex flex-col gap-0.5">  
+              <button onclick="exportarExcelGeneral(); closeAllMenus();" class="w-full px-4 py-2.5 text-left text-xs font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer">
+                  <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-500"></i> Exportar Todo a Excel
+              </button>  
+              <button onclick="compartirWhatsappGeneral(); closeAllMenus();" class="w-full px-4 py-2.5 text-left text-xs font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer">
+                  <i data-lucide="share-2" class="w-4 h-4 text-teal-500"></i> Compartir Agenda Global (WA)
+              </button>  
+            </div>  
+          </div>  
+      </div>  
+    </header>  
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="px-4 md:px-6 max-w-7xl mx-auto w-full flex flex-col gap-5 py-6 flex-1">  
+        
+          <!-- Indicador de Conexión -->
+          <span id="conexionStatus" class="inline-flex items-center gap-1.5 text-[11px] text-amber-500 font-semibold uppercase tracking-wider"><i class="fa-solid fa-circle-dot"></i> Conectando...</span>          
+        
+      <!-- SECCIÓN DE ALERTAS Y NOTIFICACIONES -->
+      <div id="seccionAlertas" class="hidden flex-col gap-2 bg-gradient-to-r from-teal-500/10 via-amber-500/10 to-rose-500/1 border border-app-brand/30 dark:border-teal-800/40 rounded-2xl p-4 shadow-sm backdrop-blur-sm">
+          <div class="flex items-center gap-2 text-xs font-bold text-app-brand dark:text-teal-400 uppercase tracking-wider">
+              <i data-lucide="bell-ring" class="w-4 h-4 animate-bounce"></i> Notificaciones del Día
+          </div>
+          <div id="listaAlertas" class="flex flex-col gap-1.5 pt-1 text-xs font-medium">
+              <!-- Inyectado dinámicamente -->
+          </div>
+      </div>
+
+      <!-- Barra de herramientas superior -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div class="relative flex-1">
+              <i data-lucide="search" class="w-4 h-4 text-app-sub absolute left-3.5 top-3"></i>
+              <input type="text" id="inputBuscar" oninput="filtrarEmpleados()" placeholder="Buscar por nombre, puesto o número..." class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl input-minimal font-medium">
+          </div>
+          <button onclick="abrirModalEmpleado()" class="bg-app-brand hover:bg-teal-700 text-white font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer">
+              <i data-lucide="user-plus" class="w-4 h-4"></i> Agregar Miniser
+          </button>
+      </div>
+
+      <!-- Agenda / Lista de Empleados -->
+      <div id="gridEmpleados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Se inyecta dinámicamente -->
+      </div>
+
+      <!-- Estado vacío -->
+      <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center">
+          <div class="w-16 h-16 rounded-2xl bg-app-card dark:bg-darkapp-card border border-app-border dark:border-darkapp-border flex items-center justify-center text-app-sub mb-3 shadow-sm">
+              <i data-lucide="users" class="w-8 h-8 opacity-40"></i>
+          </div>
+          <p class="text-sm font-bold text-app-title dark:text-darkapp-title">No hay empleados registrados</p>
+          <p class="text-xs text-app-sub mt-1">Comienza agregando un nuevo Miniser a la agenda.</p>
+      </div>
+    </div>
+  </div>    
+
+  <!-- MODAL CREAR / EDITAR EMPLEADO -->
+  <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10000] flex items-center justify-center p-4 hidden" id="modalEmpleado">  
+    <div class="glass-modal border border-white/20 dark:border-slate-700/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">  
+      <div class="flex items-center justify-between pb-2 border-b border-app-border dark:border-darkapp-border">  
+        <h3 id="modalTitulo" class="text-base font-bold text-app-title dark:text-darkapp-title">Nuevo Miniser</h3>  
+        <span onclick="cerrarModalEmpleado()" class="text-app-sub hover:text-app-title cursor-pointer text-2xl leading-none">&times;</span>  
+      </div>  
+
+      <form id="formEmpleado" onsubmit="guardarEmpleado(event)" class="space-y-3 text-xs">  
+        <input type="hidden" id="empId">
+        <input type="hidden" id="empIdOriginal">
+        <input type="hidden" id="empFotoUrl"> <!-- URL del Bucket de Supabase -->
+
+        <!-- Fotografía -->
+        <div class="flex flex-col items-center gap-2 py-2">
+            <div class="relative w-24 h-24 rounded-full overflow-hidden bg-app-card dark:bg-slate-800 border-2 border-app-border dark:border-darkapp-border flex items-center justify-center shadow-inner">
+                <img id="imgPreview" src="" class="w-full h-full object-cover hidden">
+                <i data-lucide="user" id="imgPlaceholder" class="w-8 h-8 text-app-sub"></i>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="px-3 py-1.5 bg-app-card dark:bg-slate-800 border border-app-border dark:border-darkapp-border rounded-lg font-semibold hover:border-app-brand cursor-pointer transition-colors flex items-center gap-1.5">
+                    <i data-lucide="image" class="w-3.5 h-3.5 text-app-brand"></i> Galería
+                    <input type="file" id="inputFoto" accept="image/*" onchange="seleccionarArchivoFoto(this)" class="hidden">
+                </label>
+                <button type="button" onclick="abrirCamaraModal()" class="px-3 py-1.5 bg-app-card dark:bg-slate-800 border border-app-border dark:border-darkapp-border rounded-lg font-semibold hover:border-app-brand cursor-pointer transition-colors flex items-center gap-1.5">
+                    <i data-lucide="camera" class="w-3.5 h-3.5 text-app-brand"></i> Cámara
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="space-y-1">
+                <label class="font-semibold text-app-sub">Nombre Completo *</label>
+                <input type="text" id="empNombre" required class="w-full px-3 py-2 rounded-xl input-minimal font-semibold">
+            </div>
+            <div class="space-y-1">
+                <label class="font-semibold text-app-sub">Núm. de Empleado (Único) *</label>
+                <input type="text" id="empNumero" required class="w-full px-3 py-2 rounded-xl input-minimal font-semibold">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="space-y-1">
+                <label class="font-semibold text-app-sub">Correo Electrónico</label>
+                <input type="email" id="empCorreo" class="w-full px-3 py-2 rounded-xl input-minimal font-semibold">
+            </div>
+            <div class="space-y-1">
+                <label class="font-semibold text-app-sub">Número Celular</label>
+                <input type="tel" id="empTelefono" class="w-full px-3 py-2 rounded-xl input-minimal font-semibold">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="space-y-1">
+                <label class="font-semibold text-app-sub">Fecha de Nacimiento *</label>
+                <input type="date" id="empNacimiento" required class="w-full px-3 py-2 rounded-xl input-minimal font-semibold">
+            </div>
+            <div class="space-y-1">
+                <label class="font-semibold text-app-sub">Fecha de Ingreso *</label>
+                <input type="date" id="empIngreso" required onchange="calcularAntiguedadPreview()" class="w-full px-3 py-2 rounded-xl input-minimal font-semibold">
+            </div>
+        </div>
+
+        <div class="space-y-1">
+            <label class="font-semibold text-app-sub">Antigüedad Calculada</label>
+            <input type="text" id="empAntiguedadPreview" readonly value="-- años" class="w-full px-3 py-2 rounded-xl input-minimal font-bold text-app-brand bg-app-card/50 dark:bg-slate-800/50">
+        </div>
+
+        <!-- SELECTOR DE PUESTO ESTILIZADO -->
+        <div class="space-y-1 relative">
+            <label class="font-semibold text-app-sub">Puesto en la Empresa *</label>
+            <div class="relative">
+                <button type="button" id="btnSelectPuesto" onclick="togglePuestoDropdown(event)" class="w-full px-3 py-2 rounded-xl input-minimal font-semibold text-left flex items-center justify-between cursor-pointer">
+                    <span id="selectedPuestoLabel">Seleccione un puesto...</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-app-sub"></i>
+                </button>
+                <input type="hidden" id="empPuestoSelect" required>
+                <div id="puestoDropdownList" class="hidden absolute left-0 right-0 bottom-full mb-1 bg-app-card/95 dark:bg-darkapp-card/95 backdrop-blur-md shadow-xl border border-app-border dark:border-darkapp-border rounded-xl z-50 py-1 flex flex-col">
+                    <div onclick="seleccionarPuesto('Gerente')" class="px-4 py-2.5 text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Gerente</div>
+                    <div onclick="seleccionarPuesto('Subgerente')" class="px-4 py-2.5 text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Subgerente</div>
+                    <div onclick="seleccionarPuesto('Promotor')" class="px-4 py-2.5 text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Promotor</div>
+                    <div onclick="seleccionarPuesto('Promotor de temporada')" class="px-4 py-2.5 text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Promotor de temporada</div>
+                    <div onclick="seleccionarPuesto('Otro')" class="px-4 py-2.5 text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer text-app-brand">Otro</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="divPuestoOtro" class="space-y-1 hidden">
+            <label class="font-semibold text-app-sub">Especifique el Puesto *</label>
+            <input type="text" id="empPuestoOtro" class="w-full px-3 py-2 rounded-xl input-minimal font-semibold">
+        </div>
+
+        <div class="pt-3 flex justify-end gap-2">
+            <button type="button" onclick="cerrarModalEmpleado()" class="px-4 py-2 bg-transparent text-app-title dark:text-darkapp-title rounded-xl font-semibold hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer">Cancelar</button>
+            <button type="submit" class="px-5 py-2 bg-transparent text-app-brand font-semibold rounded-xl hover:bg-app-brand/10 transition-colors cursor-pointer">Guardar Miniser</button>
+        </div>
+      </form>  
+    </div>  
+  </div>    
+
+  <!-- MODAL CÁMARA -->
+  <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[10005] flex items-center justify-center p-4 hidden" id="modalCamara">
+      <div class="flex flex-col items-center gap-4 max-w-md w-full">
+          <div class="relative w-full rounded-2xl overflow-hidden bg-black aspect-square shadow-2xl border border-white/10">
+              <video id="videoCamara" autoplay playsinline class="w-full h-full object-cover"></video>
+              <canvas id="canvasCamara" class="hidden"></canvas>
+          </div>
+          <div class="flex items-center gap-3 w-full">
+              <button type="button" onclick="cerrarCamaraModal()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl text-xs cursor-pointer">Cancelar</button>
+              <button type="button" onclick="capturarFotoCamara()" class="flex-1 py-3 bg-app-brand hover:bg-teal-700 text-white font-semibold rounded-xl text-xs cursor-pointer shadow-lg flex items-center justify-center gap-2">
+                  <i data-lucide="camera" class="w-4 h-4"></i> Capturar Foto
+              </button>
+          </div>
+      </div>
+  </div>
+
+  <!-- MODAL ALERTA GLASSMORPHISM -->
+  <div id="alertModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10010] flex items-center justify-center p-4 hidden">  
+      <div class="glass-modal border border-white/20 dark:border-slate-700/30 rounded-2xl p-6 w-full max-w-sm shadow-xl text-center space-y-4">  
+          <div id="alertModalIconContainer" class="text-app-brand flex justify-center mx-auto">  
+              <i data-lucide="check-circle-2" class="w-8 h-8"></i>  
+          </div>  
+          <p id="alertModalText" class="text-sm font-semibold text-app-title dark:text-darkapp-title leading-relaxed">Operación exitosa</p>  
+          <button onclick="cerrarModalAlerta()" class="w-full py-2.5 rounded-xl bg-transparent hover:bg-app-brand/10 text-app-brand text-xs font-semibold cursor-pointer transition-colors">Aceptar</button>  
+      </div>  
+  </div>    
+
+  <!-- MODAL CONFIRMACIÓN GLASSMORPHISM -->
+  <div id="confirmModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10010] flex items-center justify-center p-4 hidden">  
+      <div class="glass-modal border border-white/20 dark:border-slate-700/30 rounded-2xl p-6 w-full max-w-sm shadow-xl text-center space-y-4">  
+          <div class="text-amber-500 flex justify-center mx-auto">  
+              <i data-lucide="alert-triangle" class="w-8 h-8"></i>  
+          </div>  
+          <p id="confirmModalText" class="text-sm font-semibold text-app-title dark:text-darkapp-title leading-relaxed">¿Desea continuar?</p>  
+          <div class="flex items-center gap-2 pt-2">
+              <button onclick="cerrarModalConfirmacion(false)" class="flex-1 py-2.5 rounded-xl bg-transparent hover:bg-slate-200/50 dark:hover:bg-slate-700/50 text-app-title dark:text-darkapp-title text-xs font-semibold cursor-pointer transition-colors">Cancelar</button>
+              <button onclick="cerrarModalConfirmacion(true)" class="flex-1 py-2.5 rounded-xl bg-transparent hover:bg-rose-500/10 text-rose-500 text-xs font-semibold cursor-pointer transition-colors">Confirmar</button>
+          </div>
+      </div>  
+  </div>    
+
+  <!-- JAVASCRIPT: SUPABASE, AUTH GUARD, CRUD Y NOTIFICACIONES -->
+  <script>  
+    // --- SUPABASE CONFIG Y CLIENTE ---
+    const SUPABASE_URL = "https://mifbcyxtafeacwkzqzsq.supabase.co";  
+    const SUPABASE_ANON_KEY = "sb_publishable_O6EAbkSba1NQPq08k_7bHg_PZ_x4ZU5";  
+
+    if (!window.supabase) {
+        console.error('[Supabase] SDK no disponible, redirigiendo al login.');
+        window.location.replace('../index.html');
+        throw new Error('Supabase SDK no disponible');
+    }
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);  
+
+    // Escucha logout o expiración de token en otra pestaña
+    supabaseClient.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_OUT') window.location.replace('../index.html');
+    });
+
+    // --- TEMA ---
+    const btnThemeToggle = document.getElementById('btn-theme-toggle');  
+    const htmlElement = document.documentElement;  
+    function setTheme(isDark) {  
+        const themeMeta = document.querySelector('meta[name="theme-color"]');  
+        if (isDark) {  
+            htmlElement.classList.add('dark');  
+            localStorage.setItem('theme', 'dark');  
+            if (themeMeta) themeMeta.setAttribute('content', '#0f172a');  
+        } else {  
+            htmlElement.classList.remove('dark');  
+            localStorage.setItem('theme', 'light');  
+            if (themeMeta) themeMeta.setAttribute('content', '#F5F7FA');  
+        }  
+    }  
+    const savedTheme = localStorage.getItem('theme');  
+    setTheme(savedTheme !== 'light');  
+    btnThemeToggle.addEventListener('click', () => setTheme(!htmlElement.classList.contains('dark')));  
+
+    // --- ESTABLECER FECHA MÁXIMA ACTUAL EN LOS INPUTS DE FECHA ---
+    function inicializarFechasMaximas() {
+        const hoyStr = new Date().toISOString().split('T')[0];
+        document.getElementById('empNacimiento').max = hoyStr;
+        document.getElementById('empIngreso').max = hoyStr;
+    }
+
+    // --- MENÚS Y DROPDOWNS ---
+    function toggleToolsMenu(event) {  
+        event.stopPropagation();  
+        const dropdown = document.getElementById('toolsDropdown');  
+        const overlay = document.getElementById('optionsBlurOverlay');  
+        const isHidden = dropdown.classList.contains('hidden');  
+        closeAllMenus();  
+        if (isHidden) {  
+            dropdown.classList.remove('hidden');  
+            overlay.classList.remove('hidden');  
+        }  
+    }  
+
+    function togglePuestoDropdown(event) {
+        event.stopPropagation();
+        const list = document.getElementById('puestoDropdownList');
+        list.classList.toggle('hidden');
+    }
+
+    function seleccionarPuesto(val) {
+        document.getElementById('empPuestoSelect').value = val;
+        document.getElementById('selectedPuestoLabel').innerText = val;
+        document.getElementById('puestoDropdownList').classList.add('hidden');
+        
+        const otroDiv = document.getElementById('divPuestoOtro');
+        if (val === 'Otro') {
+            otroDiv.classList.remove('hidden');
+            document.getElementById('empPuestoOtro').required = true;
+        } else {
+            otroDiv.classList.add('hidden');
+            document.getElementById('empPuestoOtro').required = false;
+            document.getElementById('empPuestoOtro').value = '';
+        }
+    }
+
+    function closeAllMenus() {  
+        document.getElementById('toolsDropdown').classList.add('hidden');  
+        document.getElementById('puestoDropdownList').classList.add('hidden');
+        document.getElementById('optionsBlurOverlay').classList.add('hidden');  
+    }  
+    window.addEventListener('click', (e) => { if (!e.target.closest('header') && !e.target.closest('#modalEmpleado')) closeAllMenus(); });
+
+    // --- ESTADO DE CONEXIÓN ---
+    function actualizarEstadoConexionUI() {  
+        const statusEl = document.getElementById('conexionStatus');  
+        if (!statusEl) return;  
+        if (!navigator.onLine) {  
+            statusEl.className = "inline-flex items-center gap-1.5 text-[11px] text-amber-500 font-semibold uppercase tracking-wider";  
+            statusEl.innerHTML = `<i class="fa-solid fa-wifi"></i> Sin Conexión`;  
+        } else {  
+            statusEl.className = "inline-flex items-center gap-1.5 text-[11px] text-emerald-500 font-semibold uppercase tracking-wider";  
+            statusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> En Línea`;  
+        }  
+    }  
+
+    // --- MODALES PERSONALIZADOS (GLASSMORPHISM) ---
+    let confirmCallback = null;
+
+    function mostrarAlerta(texto, esError = false) {
+        const textEl = document.getElementById('alertModalText');
+        const iconContainer = document.getElementById('alertModalIconContainer');
+        textEl.innerText = texto;
+        
+        if (esError) {
+            iconContainer.className = "text-rose-500 flex justify-center mx-auto";
+            iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+        } else {
+            iconContainer.className = "text-app-brand flex justify-center mx-auto";
+            iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+        }
+        document.getElementById('alertModal').classList.remove('hidden');
+    }
+    function cerrarModalAlerta() {
+        document.getElementById('alertModal').classList.add('hidden');
+    }
+
+    function mostrarConfirmacion(texto, callback) {
+        document.getElementById('confirmModalText').innerText = texto;
+        confirmCallback = callback;
+        document.getElementById('confirmModal').classList.remove('hidden');
+    }
+    function cerrarModalConfirmacion(resultado) {
+        document.getElementById('confirmModal').classList.add('hidden');
+        if (confirmCallback) confirmCallback(resultado);
+        confirmCallback = null;
+    }
+
+    // --- GESTIÓN DE FOTO (Compresión y Supabase Storage Bucket) ---
+    let archivoFotoSeleccionado = null;
+
+    function comprimirImagenFile(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 400;
+                    const MAX_HEIGHT = 400;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    } else {
+                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    canvas.toBlob((blob) => {
+                        resolve(new File([blob], "foto_comprimida.jpg", { type: "image/jpeg" }));
+                    }, 'image/jpeg', 0.75);
+                };
+            };
+        });
+    }
+
+    async function seleccionarArchivoFoto(input) {
+        if (input.files && input.files[0]) {
+            archivoFotoSeleccionado = await comprimirImagenFile(input.files[0]);
+            const reader = new FileReader();
+            reader.onload = (e) => mostrarPreviewFoto(e.target.result);
+            reader.readAsDataURL(archivoFotoSeleccionado);
+        }
+    }
+
+    function mostrarPreviewFoto(url) {
+        const preview = document.getElementById('imgPreview');
+        const placeholder = document.getElementById('imgPlaceholder');
+        if (url) {
+            preview.src = url;
+            preview.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+        } else {
+            preview.src = '';
+            preview.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+        }
+    }
+
+    async function subirFotoASupabase(file, numeroEmpleado) {
+        const fileExt = 'jpg';
+        const fileName = `emp_${numeroEmpleado}_${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { data, error } = await supabaseClient.storage
+            .from('empleados-fotos')
+            .upload(filePath, file, { upsert: true });
+
+        if (error) {
+            console.error("Error al subir la imagen:", error);
+            throw error;
+        }
+
+        const { data: publicURLData } = supabaseClient.storage
+            .from('empleados-fotos')
+            .getPublicUrl(filePath);
+
+        return publicURLData.publicUrl;
+    }
+
+    // --- CÁMARA ---
+    let videoStream = null;
+    async function abrirCamaraModal() {
+        document.getElementById('modalCamara').classList.remove('hidden');
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+            document.getElementById('videoCamara').srcObject = videoStream;
+        } catch (err) {
+            mostrarAlerta("No se pudo acceder a la cámara.", true);
+            cerrarCamaraModal();
+        }
+    }
+    function cerrarCamaraModal() {
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            videoStream = null;
+        }
+        document.getElementById('modalCamara').classList.add('hidden');
+    }
+    function capturarFotoCamara() {
+        const video = document.getElementById('videoCamara');
+        const canvas = document.getElementById('canvasCamara');
+        canvas.width = video.videoWidth || 400;
+        canvas.height = video.videoHeight || 400;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        canvas.toBlob(async (blob) => {
+            const rawFile = new File([blob], "captura_camara.jpg", { type: "image/jpeg" });
+            archivoFotoSeleccionado = await comprimirImagenFile(rawFile);
+            mostrarPreviewFoto(canvas.toDataURL('image/jpeg', 0.75));
+            cerrarCamaraModal();
+        }, 'image/jpeg', 0.75);
+    }
+
+    // --- CÁLCULO DE ANTIGÜEDAD ---
+    function calcularAniosAntiguedad(fechaIngreso) {
+        if (!fechaIngreso) return '0 años';
+        const ingreso = new Date(fechaIngreso);
+        const hoy = new Date();
+        let anos = hoy.getFullYear() - ingreso.getFullYear();
+        const m = hoy.getMonth() - ingreso.getMonth();
+        if (m < 0 || (m === 0 && hoy.getDate() < ingreso.getDate())) anos--;
+        const meses = (hoy.getFullYear() - ingreso.getFullYear()) * 12 + (hoy.getMonth() - ingreso.getMonth());
+        if (anos < 1) return `${Math.max(0, meses)} meses`;
+        return `${anos} año${anos > 1 ? 's' : ''}`;
+    }
+
+    function calcularAntiguedadPreview() {
+        const val = document.getElementById('empIngreso').value;
+        document.getElementById('empAntiguedadPreview').value = calcularAniosAntiguedad(val);
+    }
+
+    // --- VERIFICAR CUMPLEAÑOS Y ANIVERSARIOS HOY ---
+    function evaluarAlertasYNotificaciones(empleados) {
+        const hoy = new Date();
+        const mesHoy = hoy.getMonth() + 1;
+        const diaHoy = hoy.getDate();
+        const listaAlertas = document.getElementById('listaAlertas');
+        const seccionAlertas = document.getElementById('seccionAlertas');
+        listaAlertas.innerHTML = '';
+        let alertasCount = 0;
+
+        empleados.forEach(emp => {
+            if (emp.nacimiento) {
+                const partesNac = emp.nacimiento.split('-');
+                if (partesNac.length === 3) {
+                    const mesNac = parseInt(partesNac[1], 10);
+                    const diaNac = parseInt(partesNac[2], 10);
+                    if (mesNac === mesHoy && diaNac === diaHoy) {
+                        alertasCount++;
+                        const div = document.createElement('div');
+                        div.className = "flex items-center gap-2 text-app-title dark:text-darkapp-title bg-white/60 dark:bg-slate-800/60 p-2 rounded-xl border border-app-brand/20";
+                        div.innerHTML = `<i data-lucide="cake" class="w-4 h-4 text-rose-500 shrink-0"></i> <span>¡Hoy es el <strong>cumpleaños</strong> de <strong>${emp.nombre}</strong>! 🎂</span>`;
+                        listaAlertas.appendChild(div);
+                    }
+                }
+            }
+
+            if (emp.ingreso) {
+                const partesIng = emp.ingreso.split('-');
+                if (partesIng.length === 3) {
+                    const anioIng = parseInt(partesIng[0], 10);
+                    const mesIng = parseInt(partesIng[1], 10);
+                    const diaIng = parseInt(partesIng[2], 10);
+                    const anosCumplidos = hoy.getFullYear() - anioIng;
+
+                    if (mesIng === mesHoy && diaIng === diaIng && anosCumplidos > 0) {
+                        alertasCount++;
+                        const div = document.createElement('div');
+                        div.className = "flex items-center gap-2 text-app-title dark:text-darkapp-title bg-white/60 dark:bg-slate-800/60 p-2 rounded-xl border border-app-brand/20";
+                        div.innerHTML = `<i data-lucide="award" class="w-4 h-4 text-amber-500 shrink-0"></i> <span>¡<strong>${emp.nombre}</strong> hoy cumple <strong>${anosCumplidos} año${anosCumplidos > 1 ? 's' : ''}</strong> en la empresa! 🏆</span>`;
+                        listaAlertas.appendChild(div);
+                    }
+                }
+            }
+        });
+
+        if (alertasCount > 0) {
+            seccionAlertas.classList.remove('hidden');
+            seccionAlertas.classList.add('flex');
+        } else {
+            seccionAlertas.classList.remove('flex');
+            seccionAlertas.classList.add('hidden');
+        }
+        lucide.createIcons();
+    }
+
+    // --- CRUD EMPLEADOS CON SUPABASE ---
+    async function abrirModalEmpleado(id = null) {
+        document.getElementById('formEmpleado').reset();
+        inicializarFechasMaximas();
+        document.getElementById('empId').value = '';
+        document.getElementById('empIdOriginal').value = '';
+        document.getElementById('empFotoUrl').value = '';
+        archivoFotoSeleccionado = null;
+        mostrarPreviewFoto('');
+        document.getElementById('divPuestoOtro').classList.add('hidden');
+        document.getElementById('modalTitulo').innerText = 'Nuevo Miniser';
+        document.getElementById('selectedPuestoLabel').innerText = 'Seleccione un puesto...';
+        document.getElementById('empPuestoSelect').value = '';
+
+        if (id) {
+            document.getElementById('modalTitulo').innerText = 'Editar Miniser';
+            const { data: emp, error } = await supabaseClient
+                .from('empleados')
+                .select('*')
+                .eq('id', Number(id))
+                .single();
+
+            if (emp && !error) {
+                document.getElementById('empId').value = emp.id;
+                document.getElementById('empIdOriginal').value = emp.numero_empleado;
+                document.getElementById('empNombre').value = emp.nombre;
+                document.getElementById('empNumero').value = emp.numero_empleado;
+                document.getElementById('empCorreo').value = emp.correo || '';
+                document.getElementById('empTelefono').value = emp.telefono || '';
+                document.getElementById('empNacimiento').value = emp.nacimiento || '';
+                document.getElementById('empIngreso').value = emp.ingreso;
+                document.getElementById('empFotoUrl').value = emp.foto_url || '';
+                calcularAntiguedadPreview();
+                
+                if (['Gerente', 'Subgerente', 'Promotor', 'Promotor de temporada'].includes(emp.puesto)) {
+                    seleccionarPuesto(emp.puesto);
+                } else {
+                    seleccionarPuesto('Otro');
+                    document.getElementById('empPuestoOtro').value = emp.puesto;
+                }
+
+                if (emp.foto_url) {
+                    mostrarPreviewFoto(emp.foto_url);
+                }
+            }
+        }
+        document.getElementById('modalEmpleado').classList.remove('hidden');
+    }
+
+    function cerrarModalEmpleado() {
+        document.getElementById('modalEmpleado').classList.add('hidden');
+    }
+
+    async function guardarEmpleado(event) {
+        event.preventDefault();
+        const idVal = document.getElementById('empId').value;
+        const numeroIngresado = document.getElementById('empNumero').value.trim();
+        const puestoSelect = document.getElementById('empPuestoSelect').value;
+        const fechaNacimiento = document.getElementById('empNacimiento').value;
+        const fechaIngreso = document.getElementById('empIngreso').value;
+
+        const hoyStr = new Date().toISOString().split('T')[0];
+        if (fechaNacimiento > hoyStr) {
+            mostrarAlerta('La fecha de nacimiento no puede ser una fecha a futuro.', true);
+            return;
+        }
+        if (fechaIngreso > hoyStr) {
+            mostrarAlerta('La fecha de ingreso no puede ser una fecha a futuro.', true);
+            return;
+        }
+
+        if (!puestoSelect) {
+            mostrarAlerta('Por favor seleccione un puesto válido.', true);
+            return;
+        }
+
+        const puestoFinal = puestoSelect === 'Otro' ? document.getElementById('empPuestoOtro').value.trim() : puestoSelect;
+
+        // Verificar si el número de empleado ya existe
+        const { data: existing, error: errCheck } = await supabaseClient
+            .from('empleados')
+            .select('id, numero_empleado')
+            .eq('numero_empleado', numeroIngresado);
+
+        if (!errCheck && existing) {
+            const existe = existing.some(emp => !idVal || emp.id !== Number(idVal));
+            if (existe) {
+                mostrarAlerta('El número de empleado ingresado ya existe. Por favor valide el número de empleado.', true);
+                return;
+            }
+        }
+
+        let fotoUrlFinal = document.getElementById('empFotoUrl').value;
+        if (archivoFotoSeleccionado) {
+            try {
+                fotoUrlFinal = await subirFotoASupabase(archivoFotoSeleccionado, numeroIngresado);
+            } catch (err) {
+                mostrarAlerta('Error al subir la imagen al bucket.', true);
+                return;
+            }
+        }
+
+        const empleadoObj = {
+            nombre: document.getElementById('empNombre').value.trim(),
+            numero_empleado: numeroIngresado,
+            correo: document.getElementById('empCorreo').value.trim(),
+            telefono: document.getElementById('empTelefono').value.trim(),
+            nacimiento: fechaNacimiento,
+            ingreso: fechaIngreso,
+            puesto: puestoFinal,
+            foto_url: fotoUrlFinal
+        };
+
+        let res;
+        if (idVal) {
+            res = await supabaseClient.from('empleados').update(empleadoObj).eq('id', Number(idVal));
+        } else {
+            res = await supabaseClient.from('empleados').insert([empleadoObj]);
+        }
+
+        if (res.error) {
+            mostrarAlerta('Error al guardar el empleado en Supabase.', true);
+        } else {
+            cerrarModalEmpleado();
+            cargarEmpleados();
+            mostrarAlerta(idVal ? 'Empleado actualizado correctamente' : 'Empleado registrado con éxito');
+        }
+    }
+
+    async function eliminarEmpleado(id) {
+        mostrarConfirmacion('¿Está seguro de eliminar este empleado?', async (confirmado) => {
+            if (confirmado) {
+                const { error } = await supabaseClient.from('empleados').delete().eq('id', Number(id));
+                if (!error) {
+                    cargarEmpleados();
+                    mostrarAlerta('Empleado eliminado correctamente.');
+                } else {
+                    mostrarAlerta('Error al eliminar el empleado.', true);
+                }
+            }
+        });
+    }
+
+    async function cargarEmpleados() {
+        const { data: empleados, error } = await supabaseClient
+            .from('empleados')
+            .select('*')
+            .order('nombre', { ascending: true });
+
+        if (!error && empleados) {
+            renderizarAgenda(empleados);
+            evaluarAlertasYNotificaciones(empleados);
+        }
+        actualizarEstadoConexionUI();
+    }
+
+    async function filtrarEmpleados() {
+        const filtro = document.getElementById('inputBuscar').value.toLowerCase();
+        const { data: empleados, error } = await supabaseClient
+            .from('empleados')
+            .select('*')
+            .order('nombre', { ascending: true });
+
+        if (!error && empleados) {
+            const lista = empleados.filter(emp => 
+                emp.nombre.toLowerCase().includes(filtro) || 
+                emp.numero_empleado.toLowerCase().includes(filtro) || 
+                emp.puesto.toLowerCase().includes(filtro)
+            );
+            renderizarAgenda(lista);
+        }
+    }
+
+    function renderizarAgenda(empleados) {
+        const grid = document.getElementById('gridEmpleados');
+        const emptyState = document.getElementById('emptyState');
+        grid.innerHTML = '';
+
+        if (empleados.length === 0) {
+            emptyState.classList.remove('hidden');
+            emptyState.classList.add('flex');
+            return;
+        }
+        emptyState.classList.remove('flex');
+        emptyState.classList.add('hidden');
+
+        empleados.forEach(emp => {
+            const antiguedad = calcularAniosAntiguedad(emp.ingreso);
+            const card = document.createElement('div');
+            card.className = "bg-app-card dark:bg-darkapp-card border border-app-border dark:border-darkapp-border rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-3";
+            card.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="w-14 h-14 rounded-full overflow-hidden bg-app-bg dark:bg-slate-800 border border-app-border dark:border-darkapp-border flex items-center justify-center shrink-0">
+                        ${emp.foto_url ? `<img src="${emp.foto_url}" class="w-full h-full object-cover">` : `<i data-lucide="user" class="w-6 h-6 text-app-sub"></i>`}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-sm truncate text-app-title dark:text-darkapp-title">${emp.nombre}</h4>
+                        <p class="text-[11px] text-app-brand font-semibold">${emp.puesto}</p>
+                        <p class="text-[10px] text-app-sub mt-0.5">ID: <span class="font-bold text-app-title dark:text-darkapp-title">${emp.numero_empleado}</span></p>
+                    </div>
+                </div>
+                <div class="space-y-1 text-xs py-1 border-t border-b border-app-border/50 dark:border-darkapp-border/50">
+                    <div class="flex items-center gap-2 text-app-sub"><i data-lucide="mail" class="w-3.5 h-3.5"></i> <span class="truncate">${emp.correo || 'No registrado'}</span></div>
+                    <div class="flex items-center gap-2 text-app-sub"><i data-lucide="phone" class="w-3.5 h-3.5"></i> <span>${emp.telefono || 'No registrado'}</span></div>
+                    <div class="flex items-center gap-2 text-app-sub"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> <span>Ingreso: ${emp.ingreso} (${antiguedad})</span></div>
+                </div>
+                <div class="flex items-center justify-between pt-1">
+                    <div class="flex items-center gap-1">
+                        <button onclick="compartirEmpleadoWA('${encodeURIComponent(emp.nombre)}', '${encodeURIComponent(emp.puesto)}', '${encodeURIComponent(emp.numero_empleado)}', '${encodeURIComponent(emp.telefono || 'N/A')}', '${encodeURIComponent(emp.correo || 'N/A')} ')" class="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition-colors cursor-pointer" title="Compartir WhatsApp">
+                            <i data-lucide="share-2" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="abrirModalEmpleado(${emp.id})" class="p-2 text-app-sub hover:text-app-brand rounded-lg transition-colors cursor-pointer" title="Editar">
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="eliminarEmpleado(${emp.id})" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors cursor-pointer" title="Eliminar">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+        lucide.createIcons();
+    }
+
+    // --- COMPARTIR Y EXPORTAR ---
+    function compartirEmpleadoWA(nombreEnc, puestoEnc, numeroEnc, telefonoEnc, correoEnc) {
+        const nombre = decodeURIComponent(nombreEnc);
+        const puesto = decodeURIComponent(puestoEnc);
+        const numero = decodeURIComponent(numeroEnc);
+        const telefono = decodeURIComponent(telefonoEnc);
+        const correo = decodeURIComponent(correoEnc);
+
+        const texto = `👤 *Ficha de Miniser*\n\n` +
+                      `• *Nombre completo:* ${nombre}\n` +
+                      `• *Puesto:* ${puesto}\n` +
+                      `• *Número de empleado:* ${numero}\n` +
+                      `• *Número celular:* ${telefono}\n` +
+                      `• *Correo electrónico:* ${correo}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+    }
+
+    async function compartirWhatsappGeneral() {
+        const { data: empleados } = await supabaseClient.from('empleados').select('*').order('nombre', { ascending: true });
+        if (!empleados || empleados.length === 0) {
+            mostrarAlerta("No hay empleados para compartir.", true);
+            return;
+        }
+        let texto = `📋 *Agenda General de Empleados - Miniser*\nTotal registrados: ${empleados.length}\n\n`;
+        empleados.forEach((emp, i) => {
+            texto += `*${i+1}. ${emp.nombre}*\n` +
+                     `   • Puesto: ${emp.puesto}\n` +
+                     `   • Núm. Empleado: ${emp.numero_empleado}\n` +
+                     `   • Celular: ${emp.telefono || 'N/A'}\n` +
+                     `   • Correo: ${emp.correo || 'N/A'}\n\n`;
+        });
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+    }
+
+    async function exportarExcelGeneral() {
+        const { data: empleados } = await supabaseClient.from('empleados').select('*').order('nombre', { ascending: true });
+        if (!empleados || empleados.length === 0) {
+            mostrarAlerta("No hay datos para exportar.", true);
+            return;
+        }
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + "Número de Empleado,Nombre Completo,Puesto,Celular,Correo Electrónico,Fecha Nacimiento,Fecha Ingreso\n";
+        empleados.forEach(emp => {
+            csvContent += `"${emp.numero_empleado}","${emp.nombre}","${emp.puesto}","${emp.telefono || ''}","${emp.correo || ''}","${emp.nacimiento || ''}","${emp.ingreso}"\n`;
+        });
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "agenda_empleados_miniser.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // --- REALTIME SYNC ---
+    function iniciarSuscripcionRealtime() {
+        supabaseClient
+            .channel('cambios-empleados-miniser')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'empleados' }, () => {
+                cargarEmpleados();
+            })
+            .subscribe();
+    }
+
+    window.addEventListener('online', () => cargarEmpleados());
+    window.addEventListener('offline', () => actualizarEstadoConexionUI());
+
+    // Inicializar al cargar la página
+    window.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.replace('../index.html');
+                return;
+            }
+        } catch (e) {
+            window.location.replace('../index.html');
+            return;
+        }
+
+        inicializarFechasMaximas();
+        await cargarEmpleados();
+        iniciarSuscripcionRealtime();
+        lucide.createIcons();
+    });
+  </script>  
+</body>  
+</html>
