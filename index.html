@@ -254,7 +254,7 @@
         }
 
         const ROLE_PERMISSIONS = {
-            gerencial: ['ventas_diarias', 'corte_cajas', 'consultor_fases', 'consultor_existencias', 'gestor_tickets', 'notas', 'checks','minisers'],
+            gerencial: ['ventas_diarias', 'corte_cajas', 'consultor_fases', 'consultor_existencias', 'gestor_tickets', 'notas', 'checks','minisers','checador'],
             promotor: ['consultor_fases', 'consultor_existencias']
         };
         let currentUserRole = null;
@@ -262,6 +262,7 @@
 
         // FIX #5: eliminado el campo `category` (nunca se usaba)
         const PREDEFINED_CATALOG = [
+             { id: 'checador',       title: 'Checador',           url: 'checador/checador.html',     icon: 'clock-check',            desc: 'Registra tus Checadas diarias.' },
             { id: 'ventas_diarias',       title: 'Ventas Diarias',           url: 'ventas/',     icon: 'banknote',            desc: 'Seguimiento a las metas diarias y semanales.' },
             { id: 'corte_cajas',          title: 'Corte de Cajas',           url: 'corte/',      icon: 'circle-dollar-sign',  desc: 'Corte de cajas que se realiza al cierre de tienda.' },
             { id: 'consultor_fases',      title: 'Consultor de Fases',       url: 'fases/',      icon: 'numbers',        desc: 'Consulta las Fases, Fases SALE y los articulos en cada una de ellas.' },

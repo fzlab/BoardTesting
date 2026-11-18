@@ -4,19 +4,16 @@
   <meta charset="UTF-8">  
   <link rel="stylesheet" href="../fonts.css">  
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">  
-  <title>Gestor de Empleados - Miniser</title>    
+  <title>Gestor de Minisers</title>    
   <link rel="icon" type="image/svg+xml" href="./agenda.svg">
     
-  <!-- SEGURIDAD: Content Security Policy + Referrer -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://wa.me; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; img-src 'self' data: blob: https://mifbcyxtafeacwkzqzsq.supabase.co; connect-src 'self' https://mifbcyxtafeacwkzqzsq.supabase.co wss://mifbcyxtafeacwkzqzsq.supabase.co; base-uri 'self'; form-action 'self'; object-src 'none';">
   <meta name="referrer" content="strict-origin-when-cross-origin">
 
-  <!-- Soporte PWA e iOS / Barra de Estado -->    
   <meta name="theme-color" content="#F5F7FA">  
   <meta name="apple-mobile-web-app-capable" content="yes">  
   <meta name="apple-mobile-web-app-status-bar-style" content="default">    
 
-  <!-- GUARD DE SESIÓN (1ª capa) -->
   <script>
       (function() {
           const SESSION_KEY = 'sb-mifbcyxtafeacwkzqzsq-auth-token';
@@ -30,7 +27,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">  
   <script src="https://cdn.tailwindcss.com"></script>  
   <script src="https://unpkg.com/lucide@1.72.0"></script>    
-  <!-- SDK de Supabase v2 -->    
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  
 
   <script>  
@@ -40,14 +36,8 @@
             extend: {  
                 fontFamily: { sans: ['Geist', 'sans-serif'] },  
                 colors: {  
-                    app: {  
-                        bg: '#F5F7FA', card: '#FFFFFF', border: '#E5EAF0',  
-                        title: '#172033', sub: '#64748B', brand: '#0D9488', accent: '#E6F6F4',  
-                    },  
-                    darkapp: {  
-                        bg: '#0F172A', card: '#1E293B', border: '#334155',  
-                        title: '#F8FAFC', sub: '#94A3B8'  
-                    }  
+                    app: { bg: '#F5F7FA', card: '#FFFFFF', border: '#E5EAF0', title: '#172033', sub: '#64748B', brand: '#0D9488', accent: '#E6F6F4' },  
+                    darkapp: { bg: '#0F172A', card: '#1E293B', border: '#334155', title: '#F8FAFC', sub: '#94A3B8' }  
                 }  
             }  
         }  
@@ -63,55 +53,32 @@
       ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }  
       .dark ::-webkit-scrollbar-thumb { background: #334155; }  
       body, .card, input, select, button { transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; }  
+      .glass-modal { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }  
+      .dark .glass-modal { background: rgba(15, 23, 42, 0.9); }  
+      .input-ghost { background-color: rgba(255, 255, 255, 0.4); border: 1px solid transparent; }
+      .dark .input-ghost { background-color: rgba(30, 41, 59, 0.4); }
+      .input-ghost:focus { background-color: rgba(255, 255, 255, 0.8); border-color: #0D9488; outline: none; box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2); }
+      .dark .input-ghost:focus { background-color: rgba(15, 23, 42, 0.8); }
       
-      .glass-modal {  
-          background: rgba(255, 255, 255, 0.85);  
-          backdrop-filter: blur(16px);  
-          -webkit-backdrop-filter: blur(16px);  
-      }  
-      .dark .glass-modal {  
-          background: rgba(15, 23, 42, 0.9);  
-      }  
-
-      /* Efecto Ghost Minimalista para inputs */
-      .input-ghost {
-          background-color: rgba(255, 255, 255, 0.4);
-          border: 1px solid transparent;
-      }
-      .dark .input-ghost {
-          background-color: rgba(30, 41, 59, 0.4);
-      }
-      .input-ghost:focus {
-          background-color: rgba(255, 255, 255, 0.8);
-          border-color: #0D9488;
-          outline: none;
-          box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
-      }
-      .dark .input-ghost:focus {
-          background-color: rgba(15, 23, 42, 0.8);
-      }
+      .avatar-initials { text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
   </style>  
 </head>  
 <body class="h-full bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title flex flex-col font-sans overflow-hidden antialiased">    
 
-  <!-- Overlay general para menús y modales -->
   <div id="optionsBlurOverlay" onclick="closeAllMenus()" class="fixed inset-0 z-40 bg-slate-900/20 dark:bg-slate-950/40 backdrop-blur-[3px] transition-opacity duration-200 hidden"></div>    
     
   <div class="main-content flex-1 flex flex-col overflow-y-auto">  
-    <!-- TOPBAR -->
     <header class="bg-app-bg/95 dark:bg-darkapp-bg/95 backdrop-blur-md px-4 py-3 flex items-center justify-between shrink-0 z-50 sticky top-0">  
         <div class="flex items-center space-x-3">  
           <a href="../index.html" class="p-2 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 rounded-lg transition-all cursor-pointer" title="Ir al Inicio">  
               <i data-lucide="house" class="w-5 h-5"></i>  
           </a>    
           <div>  
-              <h1 class="font-bold text-base leading-tight">Gestor de Empleados</h1>  
-              <p class="text-[11px] text-app-sub dark:text-darkapp-sub font-medium mt-0.5">Control y Base de Datos - Miniser</p>  
+              <h1 class="font-bold text-base leading-tight">Gestor de Minisers</h1>  
+              <p class="text-[11px] text-app-sub dark:text-darkapp-sub font-medium mt-0.5">T0151 - Gran Plaza Mérida</p>  
           </div>  
         </div>  
         <div class="flex items-center gap-2">  
-
-          <!-- Toggle Tema -->
           <button id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors" title="Cambiar modo">  
               <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">  
                   <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>  
@@ -122,8 +89,6 @@
                   <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400 hidden dark:block"></i>  
               </div>  
           </button>  
-
-          <!-- Botón Menú Acciones Globales -->
           <div class="relative">  
             <button onclick="toggleToolsMenu(event)" class="p-2 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 hover:bg-app-card dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer relative z-50">  
               <i data-lucide="more-vertical" class="w-5 h-5"></i>  
@@ -140,48 +105,107 @@
       </div>  
     </header>  
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <div class="px-4 md:px-6 max-w-7xl mx-auto w-full flex flex-col gap-5 py-6 flex-1">  
-        
-          <!-- Indicador de Conexión -->
+    <div class="px-4 md:px-6 max-w-7xl mx-auto w-full flex flex-col gap-4 py-6 flex-1">  
+          
+      <!-- ESTADO Y MINI DASHBOARD -->
+      <div class="flex items-center justify-between flex-wrap gap-2">
           <span id="conexionStatus" class="inline-flex items-center gap-1.5 text-[11px] text-amber-500 font-semibold uppercase tracking-wider"><i class="fa-solid fa-circle-dot"></i> Conectando...</span>          
-        
-      <!-- SECCIÓN DE ALERTAS Y NOTIFICACIONES -->
+          <div class="flex items-center gap-2 text-[11px] font-semibold text-app-sub dark:text-darkapp-sub">
+              <span class="flex items-center gap-1 px-2 py-1"><i data-lucide="users" class="w-3.5 h-3.5 text-app-brand"></i> <span id="totalEmployees">0</span> Minisers</span>
+              
+              <!-- BOTÓN GHOST DE EVENTOS (CUMPLEAÑOS/ANIVERSARIOS) -->
+              <button id="btnEventsIndicator" onclick="openEventsModal()" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-lg text-app-brand dark:text-teal-400 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors cursor-pointer">
+                  <i data-lucide="calendar-heart" class="w-4 h-4"></i> 
+                  <span id="eventsButtonText">0 Eventos (Mes)</span>
+              </button>
+          </div>
+      </div>
+
       <div id="seccionAlertas" class="hidden flex-col gap-2 bg-gradient-to-r from-teal-500/10 via-amber-500/10 to-rose-500/10 border border-transparent rounded-2xl p-4 shadow-sm backdrop-blur-sm">
           <div class="flex items-center gap-2 text-xs font-bold text-app-brand dark:text-teal-400 uppercase tracking-wider">
               <i data-lucide="bell-ring" class="w-4 h-4 animate-bounce"></i> Notificaciones del Día
           </div>
-          <div id="listaAlertas" class="flex flex-col gap-1.5 pt-1 text-xs font-medium">
-              <!-- Inyectado dinámicamente -->
+          <div id="listaAlertas" class="flex flex-col gap-1.5 pt-1 text-xs font-medium"></div>
+      </div>
+
+      <!-- BARRA DE HERRAMIENTAS (BÚSQUEDA Y FILTROS) -->
+      <div class="flex flex-col gap-3 bg-app-card/40 dark:bg-darkapp-card/40 p-3 rounded-2xl shadow-sm border border-app-border/50 dark:border-darkapp-border/50">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div class="relative flex-1">
+                  <i data-lucide="search" class="w-4 h-4 text-app-sub absolute left-3.5 top-3"></i>
+                  <input type="text" id="inputBuscar" oninput="filtrarEmpleados()" placeholder="Buscar por nombre o número..." class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl input-ghost font-medium shadow-sm">
+              </div>
+              <button onclick="abrirModalEmpleado()" class="bg-transparent text-app-brand hover:bg-app-brand/10 dark:text-teal-400 dark:hover:bg-teal-500/10 font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer">
+                  <i data-lucide="user-plus" class="w-4 h-4"></i> Agregar Miniser
+              </button>
+          </div>
+          
+          <!-- FILTROS PERSONALIZADOS (GLASSMORPHISM) -->
+          <div class="grid grid-cols-2 gap-3">
+              <!-- Dropdown Puesto -->
+              <div class="relative">
+                  <button type="button" onclick="toggleCustomDropdown(event, 'dropdownPuesto')" class="w-full h-10 flex items-center justify-between px-3 rounded-xl input-ghost text-xs font-semibold text-app-sub hover:text-app-title transition-colors">
+                      <div class="flex items-center gap-2 truncate">
+                          <i data-lucide="briefcase" class="w-3.5 h-3.5 shrink-0"></i>
+                          <span id="labelPuesto" class="truncate">Todos los puestos</span>
+                      </div>
+                      <i data-lucide="chevron-down" class="w-3.5 h-3.5 shrink-0"></i>
+                  </button>
+                  <div id="dropdownPuesto" class="hidden absolute top-full left-0 mt-1 w-full bg-app-card/95 dark:bg-darkapp-card/95 backdrop-blur-xl shadow-xl border border-white/20 dark:border-slate-700/30 rounded-xl z-[999] py-1 flex flex-col">
+                      <button onclick="selectFilterOption('puesto', '', 'Todos los puestos')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Todos los puestos</button>
+                      <button onclick="selectFilterOption('puesto', 'Gerente', 'Gerente')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Gerente</button>
+                      <button onclick="selectFilterOption('puesto', 'Subgerente', 'Subgerente')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Subgerente</button>
+                      <button onclick="selectFilterOption('puesto', 'Promotor', 'Promotor')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Promotor</button>
+                      <button onclick="selectFilterOption('puesto', 'Promotor de temporada', 'Promotor de temporada')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Promotor de temporada</button>
+                  </div>
+              </div>
+
+              <!-- Dropdown Ordenar -->
+              <div class="relative">
+                  <button type="button" onclick="toggleCustomDropdown(event, 'dropdownOrden')" class="w-full h-10 flex items-center justify-between px-3 rounded-xl input-ghost text-xs font-semibold text-app-sub hover:text-app-title transition-colors">
+                      <div class="flex items-center gap-2 truncate">
+                          <i data-lucide="arrow-down-up" class="w-3.5 h-3.5 shrink-0"></i>
+                          <span id="labelOrden" class="truncate">Nombre (A-Z)</span>
+                      </div>
+                      <i data-lucide="chevron-down" class="w-3.5 h-3.5 shrink-0"></i>
+                  </button>
+                  <div id="dropdownOrden" class="hidden absolute top-full left-0 mt-1 w-full bg-app-card/95 dark:bg-darkapp-card/95 backdrop-blur-xl shadow-xl border border-white/20 dark:border-slate-700/30 rounded-xl z-[999] py-1 flex flex-col">
+                      <button onclick="selectFilterOption('orden', 'name_asc', 'Nombre (A-Z)')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Nombre (A-Z)</button>
+                      <button onclick="selectFilterOption('orden', 'name_desc', 'Nombre (Z-A)')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Nombre (Z-A)</button>
+                      <button onclick="selectFilterOption('orden', 'date_desc', 'Ingreso reciente')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Ingreso reciente</button>
+                      <button onclick="selectFilterOption('orden', 'date_asc', 'Ingreso antiguo')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Ingreso antiguo</button>
+                  </div>
+              </div>
           </div>
       </div>
 
-      <!-- Barra de herramientas superior -->
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div class="relative flex-1">
-              <i data-lucide="search" class="w-4 h-4 text-app-sub absolute left-3.5 top-3"></i>
-              <input type="text" id="inputBuscar" oninput="filtrarEmpleados()" placeholder="Buscar por nombre, puesto o número..." class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl input-ghost font-medium shadow-sm">
-          </div>
-          <button onclick="abrirModalEmpleado()" class="bg-transparent text-app-brand hover:bg-app-brand/10 dark:text-teal-400 dark:hover:bg-teal-500/10 font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer">
-              <i data-lucide="user-plus" class="w-4 h-4"></i> Agregar Miniser
-          </button>
-      </div>
+      <div id="gridEmpleados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2"></div>
 
-      <!-- Agenda / Lista de Empleados -->
-      <div id="gridEmpleados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- Se inyecta dinámicamente -->
-      </div>
-
-      <!-- Estado vacío -->
       <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center">
           <div class="w-16 h-16 rounded-2xl bg-app-card/50 dark:bg-darkapp-card/50 border border-transparent flex items-center justify-center text-app-sub mb-3 shadow-sm">
               <i data-lucide="users" class="w-8 h-8 opacity-40"></i>
           </div>
-          <p class="text-sm font-bold text-app-title dark:text-darkapp-title">No hay empleados registrados</p>
+          <p class="text-sm font-bold text-app-title dark:text-darkapp-title">No hay Minisers registrados</p>
           <p class="text-xs text-app-sub mt-1">Comienza agregando un nuevo Miniser a la agenda.</p>
       </div>
     </div>
   </div>    
+
+  <!-- MODAL: EVENTOS DEL MES (CUMPLEAÑOS Y ANIVERSARIOS) -->
+  <div id="modalEvents" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10000] flex items-center justify-center p-4 hidden">
+      <div class="glass-modal border border-white/20 dark:border-slate-700/30 rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-4 max-h-[80vh] flex flex-col">
+          <div class="flex items-center justify-between pb-2 border-b border-app-border/50 dark:border-darkapp-border/50 shrink-0">
+              <h3 class="text-base font-bold text-app-title dark:text-darkapp-title flex items-center gap-2">
+                  <i data-lucide="party-popper" class="w-5 h-5 text-amber-500"></i>
+                  Eventos del Mes
+              </h3>
+              <span onclick="closeEventsModal()" class="text-app-sub hover:text-app-title cursor-pointer text-2xl leading-none">&times;</span>
+          </div>
+          <div id="eventsListContainer" class="overflow-y-auto flex-1 space-y-2 pr-1">
+              <!-- Inyectado dinámicamente -->
+          </div>
+      </div>
+  </div>
 
   <!-- MODAL CREAR / EDITAR EMPLEADO -->
   <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10000] flex items-center justify-center p-4 hidden" id="modalEmpleado">  
@@ -194,9 +218,8 @@
       <form id="formEmpleado" onsubmit="guardarEmpleado(event)" class="space-y-3 text-xs">  
         <input type="hidden" id="empId">
         <input type="hidden" id="empIdOriginal">
-        <input type="hidden" id="empFotoUrl"> <!-- URL del Bucket de Supabase -->
+        <input type="hidden" id="empFotoUrl">
 
-        <!-- Fotografía -->
         <div class="flex flex-col items-center gap-2 py-2">
             <div class="relative w-24 h-24 rounded-full overflow-hidden bg-app-bg dark:bg-slate-800 border-2 border-transparent flex items-center justify-center shadow-inner">
                 <img id="imgPreview" src="" class="w-full h-full object-cover hidden">
@@ -214,36 +237,18 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div class="space-y-1">
-                <label class="font-semibold text-app-sub">Nombre Completo *</label>
-                <input type="text" id="empNombre" required class="w-full px-3 py-2 rounded-xl input-ghost font-semibold">
-            </div>
-            <div class="space-y-1">
-                <label class="font-semibold text-app-sub">Núm. de Empleado (Único) *</label>
-                <input type="text" id="empNumero" required class="w-full px-3 py-2 rounded-xl input-ghost font-semibold">
-            </div>
+            <div class="space-y-1"><label class="font-semibold text-app-sub">Nombre Completo *</label><input type="text" id="empNombre" required class="w-full px-3 py-2 rounded-xl input-ghost font-semibold capitalize"></div>
+            <div class="space-y-1"><label class="font-semibold text-app-sub">Núm. de Miniser *</label><input type="text" id="empNumero" required class="w-full px-3 py-2 rounded-xl input-ghost font-semibold"></div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div class="space-y-1">
-                <label class="font-semibold text-app-sub">Correo Electrónico</label>
-                <input type="email" id="empCorreo" class="w-full px-3 py-2 rounded-xl input-ghost font-semibold">
-            </div>
-            <div class="space-y-1">
-                <label class="font-semibold text-app-sub">Número Celular</label>
-                <input type="tel" id="empTelefono" class="w-full px-3 py-2 rounded-xl input-ghost font-semibold">
-            </div>
+            <div class="space-y-1"><label class="font-semibold text-app-sub">Correo Electrónico</label><input type="email" id="empCorreo" class="w-full px-3 py-2 rounded-xl input-ghost font-semibold"></div>
+            <div class="space-y-1"><label class="font-semibold text-app-sub">Número Celular</label><input type="tel" id="empTelefono" class="w-full px-3 py-2 rounded-xl input-ghost font-semibold" placeholder="10 dígitos"></div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div class="space-y-1">
-                <label class="font-semibold text-app-sub">Fecha de Nacimiento *</label>
-                <input type="date" id="empNacimiento" required class="w-full px-3 py-2 rounded-xl input-ghost font-semibold">
-            </div>
-            <div class="space-y-1">
-                <label class="font-semibold text-app-sub">Fecha de Ingreso *</label>
-                <input type="date" id="empIngreso" required onchange="calcularAntiguedadPreview()" class="w-full px-3 py-2 rounded-xl input-ghost font-semibold">
-            </div>
+            <div class="space-y-1"><label class="font-semibold text-app-sub">Fecha de Nacimiento *</label><input type="date" id="empNacimiento" required class="w-full px-3 py-2 rounded-xl input-ghost font-semibold"></div>
+            <div class="space-y-1"><label class="font-semibold text-app-sub">Fecha de Ingreso *</label><input type="date" id="empIngreso" required onchange="calcularAntiguedadPreview()" class="w-full px-3 py-2 rounded-xl input-ghost font-semibold"></div>
         </div>
 
         <div class="space-y-1">
@@ -251,7 +256,6 @@
             <input type="text" id="empAntiguedadPreview" readonly value="-- años" class="w-full px-3 py-2 rounded-xl input-ghost font-bold text-app-brand bg-app-card/30 dark:bg-slate-800/30">
         </div>
 
-        <!-- SELECTOR DE PUESTO ESTILIZADO -->
         <div class="space-y-1 relative">
             <label class="font-semibold text-app-sub">Puesto en la Empresa *</label>
             <div class="relative">
@@ -260,7 +264,7 @@
                     <i data-lucide="chevron-down" class="w-4 h-4 text-app-sub"></i>
                 </button>
                 <input type="hidden" id="empPuestoSelect" required>
-                <div id="puestoDropdownList" class="hidden absolute left-0 right-0 bottom-full mb-1 bg-app-card/95 dark:bg-darkapp-card/95 backdrop-blur-md shadow-xl border border-transparent rounded-xl z-50 py-1 flex flex-col">
+                <div id="puestoDropdownList" class="hidden absolute left-0 right-0 bottom-full mb-1 bg-app-card/95 dark:bg-darkapp-card/95 backdrop-blur-md shadow-xl border border-white/20 dark:border-slate-700/30 rounded-xl z-[999] py-1 flex flex-col">
                     <div onclick="seleccionarPuesto('Gerente')" class="px-4 py-2.5 text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Gerente</div>
                     <div onclick="seleccionarPuesto('Subgerente')" class="px-4 py-2.5 text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Subgerente</div>
                     <div onclick="seleccionarPuesto('Promotor')" class="px-4 py-2.5 text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Promotor</div>
@@ -283,7 +287,7 @@
     </div>  
   </div>    
 
-  <!-- MODAL CÁMARA -->
+  <!-- MODAL CÁMARA, ALERTAS Y CONFIRMACIÓN -->
   <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[10005] flex items-center justify-center p-4 hidden" id="modalCamara">
       <div class="flex flex-col items-center gap-4 max-w-md w-full">
           <div class="relative w-full rounded-2xl overflow-hidden bg-black aspect-square shadow-2xl border border-white/10">
@@ -299,7 +303,6 @@
       </div>
   </div>
 
-  <!-- MODAL ALERTA GLASSMORPHISM -->
   <div id="alertModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10010] flex items-center justify-center p-4 hidden">  
       <div class="glass-modal border border-white/20 dark:border-slate-700/30 rounded-2xl p-6 w-full max-w-sm shadow-xl text-center space-y-4">  
           <div id="alertModalIconContainer" class="text-app-brand flex justify-center mx-auto">  
@@ -310,7 +313,6 @@
       </div>  
   </div>    
 
-  <!-- MODAL CONFIRMACIÓN GLASSMORPHISM -->
   <div id="confirmModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[10010] flex items-center justify-center p-4 hidden">  
       <div class="glass-modal border border-white/20 dark:border-slate-700/30 rounded-2xl p-6 w-full max-w-sm shadow-xl text-center space-y-4">  
           <div class="text-amber-500 flex justify-center mx-auto">  
@@ -324,25 +326,35 @@
       </div>  
   </div>    
 
-  <!-- JAVASCRIPT: SUPABASE, AUTH GUARD, CRUD Y NOTIFICACIONES -->
   <script>  
-    // --- SUPABASE CONFIG Y CLIENTE ---
     const SUPABASE_URL = "https://mifbcyxtafeacwkzqzsq.supabase.co";  
     const SUPABASE_ANON_KEY = "sb_publishable_O6EAbkSba1NQPq08k_7bHg_PZ_x4ZU5";  
 
     if (!window.supabase) {
-        console.error('[Supabase] SDK no disponible, redirigiendo al login.');
         window.location.replace('../index.html');
         throw new Error('Supabase SDK no disponible');
     }
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);  
 
-    // Escucha logout o expiración de token en otra pestaña
     supabaseClient.auth.onAuthStateChange((event) => {
         if (event === 'SIGNED_OUT') window.location.replace('../index.html');
     });
 
-    // --- TEMA ---
+    function escapeHtml(str) {
+        if (str == null) return '';
+        return String(str).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    let allEmployees = [];
+    let channelInstance = null;
+    let monthlyEvents = []; // Almacena cumpleaños/aniversarios del mes
+    let currentPuestoFilter = '';
+    let currentSortBy = 'name_asc';
+
+    const AVATAR_COLORS = ['bg-teal-500', 'bg-blue-500', 'bg-indigo-500', 'bg-purple-500', 'bg-pink-500', 'bg-rose-500', 'bg-orange-500', 'bg-amber-500'];
+
     const btnThemeToggle = document.getElementById('btn-theme-toggle');  
     const htmlElement = document.documentElement;  
     function setTheme(isDark) {  
@@ -361,14 +373,40 @@
     setTheme(savedTheme !== 'light');  
     btnThemeToggle.addEventListener('click', () => setTheme(!htmlElement.classList.contains('dark')));  
 
-    // --- ESTABLECER FECHA MÁXIMA ACTUAL EN LOS INPUTS DE FECHA ---
     function inicializarFechasMaximas() {
-        const hoyStr = new Date().toISOString().split('T')[0];
+        const hoy = new Date();
+        const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
         document.getElementById('empNacimiento').max = hoyStr;
         document.getElementById('empIngreso').max = hoyStr;
     }
 
-    // --- MENÚS Y DROPDOWNS ---
+    // LÓGICA DE DROPDOWNS PERSONALIZADOS
+    function toggleCustomDropdown(event, id) {
+        event.stopPropagation();
+        const dropdown = document.getElementById(id);
+        const isHidden = dropdown.classList.contains('hidden');
+        
+        // Cerrar todos los dropdowns abiertos
+        document.querySelectorAll('[id^="dropdown"]').forEach(el => el.classList.add('hidden'));
+        
+        if (isHidden) {
+            dropdown.classList.remove('hidden');
+        }
+    }
+
+    function selectFilterOption(type, value, label) {
+        if (type === 'puesto') {
+            currentPuestoFilter = value;
+            document.getElementById('labelPuesto').textContent = label;
+            document.getElementById('dropdownPuesto').classList.add('hidden');
+        } else if (type === 'orden') {
+            currentSortBy = value;
+            document.getElementById('labelOrden').textContent = label;
+            document.getElementById('dropdownOrden').classList.add('hidden');
+        }
+        filtrarEmpleados();
+    }
+
     function toggleToolsMenu(event) {  
         event.stopPropagation();  
         const dropdown = document.getElementById('toolsDropdown');  
@@ -383,15 +421,13 @@
 
     function togglePuestoDropdown(event) {
         event.stopPropagation();
-        const list = document.getElementById('puestoDropdownList');
-        list.classList.toggle('hidden');
+        document.getElementById('puestoDropdownList').classList.toggle('hidden');
     }
 
     function seleccionarPuesto(val) {
         document.getElementById('empPuestoSelect').value = val;
         document.getElementById('selectedPuestoLabel').innerText = val;
         document.getElementById('puestoDropdownList').classList.add('hidden');
-        
         const otroDiv = document.getElementById('divPuestoOtro');
         if (val === 'Otro') {
             otroDiv.classList.remove('hidden');
@@ -406,11 +442,15 @@
     function closeAllMenus() {  
         document.getElementById('toolsDropdown').classList.add('hidden');  
         document.getElementById('puestoDropdownList').classList.add('hidden');
+        document.getElementById('dropdownPuesto').classList.add('hidden');
+        document.getElementById('dropdownOrden').classList.add('hidden');
         document.getElementById('optionsBlurOverlay').classList.add('hidden');  
     }  
-    window.addEventListener('click', (e) => { if (!e.target.closest('header') && !e.target.closest('#modalEmpleado')) closeAllMenus(); });
 
-    // --- ESTADO DE CONEXIÓN ---
+    window.addEventListener('click', (e) => { 
+        if (!e.target.closest('button') && !e.target.closest('[id^="dropdown"]')) closeAllMenus();
+    });
+
     function actualizarEstadoConexionUI() {  
         const statusEl = document.getElementById('conexionStatus');  
         if (!statusEl) return;  
@@ -423,26 +463,23 @@
         }  
     }  
 
-    // --- MODALES PERSONALIZADOS (GLASSMORPHISM) ---
     let confirmCallback = null;
 
     function mostrarAlerta(texto, esError = false) {
         const textEl = document.getElementById('alertModalText');
         const iconContainer = document.getElementById('alertModalIconContainer');
         textEl.innerText = texto;
-        
         if (esError) {
             iconContainer.className = "text-rose-500 flex justify-center mx-auto";
-            iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+            iconContainer.innerHTML = `<i data-lucide="alert-circle" class="w-8 h-8"></i>`;
         } else {
             iconContainer.className = "text-app-brand flex justify-center mx-auto";
-            iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+            iconContainer.innerHTML = `<i data-lucide="check-circle-2" class="w-8 h-8"></i>`;
         }
         document.getElementById('alertModal').classList.remove('hidden');
+        lucide.createIcons({ root: iconContainer });
     }
-    function cerrarModalAlerta() {
-        document.getElementById('alertModal').classList.add('hidden');
-    }
+    function cerrarModalAlerta() { document.getElementById('alertModal').classList.add('hidden'); }
 
     function mostrarConfirmacion(texto, callback) {
         document.getElementById('confirmModalText').innerText = texto;
@@ -455,7 +492,50 @@
         confirmCallback = null;
     }
 
-    // --- GESTIÓN DE FOTO (Compresión y Supabase Storage Bucket) ---
+    // MODAL DE EVENTOS DEL MES
+    function openEventsModal() {
+        const container = document.getElementById('eventsListContainer');
+        container.innerHTML = '';
+
+        if (monthlyEvents.length === 0) {
+            container.innerHTML = '<p class="text-center text-xs text-app-sub py-4">No hay eventos este mes.</p>';
+        } else {
+            // Ordenar por día
+            monthlyEvents.sort((a, b) => a.day - b.day);
+
+            monthlyEvents.forEach(ev => {
+                const icon = ev.type === 'birthday' ? 'cake' : 'award';
+                const color = ev.type === 'birthday' ? 'text-rose-500' : 'text-amber-500';
+                const label = ev.type === 'birthday' ? 'Cumpleaños' : 'Aniversario';
+                
+                container.innerHTML += `
+                    <div class="flex items-center justify-between bg-white/50 dark:bg-slate-800/50 p-3 rounded-xl border border-transparent">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-app-bg dark:bg-slate-700 flex items-center justify-center shrink-0">
+                                <i data-lucide="${icon}" class="w-4 h-4 ${color}"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-sm text-app-title dark:text-darkapp-title">${escapeHtml(ev.name)}</p>
+                                <p class="text-[11px] text-app-sub dark:text-darkapp-sub">${label}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-sm text-app-brand dark:text-teal-400">${ev.day} de ${ev.monthName}</p>
+                            ${ev.years ? `<p class="text-[10px] text-app-sub">${ev.years} años</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('modalEvents').classList.remove('hidden');
+        lucide.createIcons({ root: container });
+    }
+
+    function closeEventsModal() {
+        document.getElementById('modalEvents').classList.add('hidden');
+    }
+
     let archivoFotoSeleccionado = null;
 
     function comprimirImagenFile(file) {
@@ -467,23 +547,13 @@
                 img.src = event.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 400;
-                    const MAX_HEIGHT = 400;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    } else {
-                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    canvas.toBlob((blob) => {
-                        resolve(new File([blob], "foto_comprimida.jpg", { type: "image/jpeg" }));
-                    }, 'image/jpeg', 0.75);
+                    const MAX = 400;
+                    let w = img.width, h = img.height;
+                    if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+                    else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    canvas.toBlob((blob) => resolve(new File([blob], "foto_comprimida.jpg", { type: "image/jpeg" })), 'image/jpeg', 0.75);
                 };
             };
         });
@@ -513,27 +583,13 @@
     }
 
     async function subirFotoASupabase(file, numeroEmpleado) {
-        const fileExt = 'jpg';
-        const fileName = `emp_${numeroEmpleado}_${Date.now()}.${fileExt}`;
-        const filePath = `${fileName}`;
-
-        const { data, error } = await supabaseClient.storage
-            .from('empleados-fotos')
-            .upload(filePath, file, { upsert: true });
-
-        if (error) {
-            console.error("Error al subir la imagen:", error);
-            throw error;
-        }
-
-        const { data: publicURLData } = supabaseClient.storage
-            .from('empleados-fotos')
-            .getPublicUrl(filePath);
-
+        const fileName = `emp_${numeroEmpleado}_${Date.now()}.jpg`;
+        const { error } = await supabaseClient.storage.from('empleados-fotos').upload(fileName, file, { upsert: true });
+        if (error) throw error;
+        const { data: publicURLData } = supabaseClient.storage.from('empleados-fotos').getPublicUrl(fileName);
         return publicURLData.publicUrl;
     }
 
-    // --- CÁMARA ---
     let videoStream = null;
     async function abrirCamaraModal() {
         document.getElementById('modalCamara').classList.remove('hidden');
@@ -557,9 +613,7 @@
         const canvas = document.getElementById('canvasCamara');
         canvas.width = video.videoWidth || 400;
         canvas.height = video.videoHeight || 400;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
         canvas.toBlob(async (blob) => {
             const rawFile = new File([blob], "captura_camara.jpg", { type: "image/jpeg" });
             archivoFotoSeleccionado = await comprimirImagenFile(rawFile);
@@ -568,7 +622,6 @@
         }, 'image/jpeg', 0.75);
     }
 
-    // --- CÁLCULO DE ANTIGÜEDAD ---
     function calcularAniosAntiguedad(fechaIngreso) {
         if (!fechaIngreso) return '0 años';
         const ingreso = new Date(fechaIngreso);
@@ -586,7 +639,6 @@
         document.getElementById('empAntiguedadPreview').value = calcularAniosAntiguedad(val);
     }
 
-    // --- VERIFICAR CUMPLEAÑOS Y ANIVERSARIOS HOY ---
     function evaluarAlertasYNotificaciones(empleados) {
         const hoy = new Date();
         const mesHoy = hoy.getMonth() + 1;
@@ -594,55 +646,99 @@
         const anioActual = hoy.getFullYear();
         const listaAlertas = document.getElementById('listaAlertas');
         const seccionAlertas = document.getElementById('seccionAlertas');
+        const btnEventsIndicator = document.getElementById('btnEventsIndicator');
+        
         listaAlertas.innerHTML = '';
-        let alertasCount = 0;
+        monthlyEvents = []; // Resetear eventos del mes
+        
+        let alertasHoy = 0;
+        let birthdaysMonth = 0;
+        let anniversariesMonth = 0;
+        let birthdaysToday = 0;
+        let anniversariesToday = 0;
+
+        const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
         empleados.forEach(emp => {
+            // Cumpleaños
             if (emp.nacimiento) {
                 const partesNac = emp.nacimiento.split('-');
                 if (partesNac.length === 3) {
-                    const mesNac = parseInt(partesNac[1], 10);
-                    const diaNac = parseInt(partesNac[2], 10);
-                    if (mesNac === mesHoy && diaNac === diaHoy) {
-                        alertasCount++;
-                        const div = document.createElement('div');
-                        div.className = "flex items-center gap-2 text-app-title dark:text-darkapp-title bg-white/60 dark:bg-slate-800/60 p-2 rounded-xl border border-transparent";
-                        div.innerHTML = `<i data-lucide="cake" class="w-4 h-4 text-rose-500 shrink-0"></i> <span>¡Hoy es el <strong>cumpleaños</strong> de <strong>${emp.nombre}</strong>! 🎂</span>`;
-                        listaAlertas.appendChild(div);
+                    const m = parseInt(partesNac[1], 10);
+                    const d = parseInt(partesNac[2], 10);
+                    
+                    if (m === mesHoy) {
+                        birthdaysMonth++;
+                        monthlyEvents.push({ type: 'birthday', name: emp.nombre, day: d, monthName: monthNames[m-1] });
+
+                        if (d === diaHoy) {
+                            alertasHoy++;
+                            birthdaysToday++;
+                            const div = document.createElement('div');
+                            div.className = "flex items-center gap-2 text-app-title dark:text-darkapp-title bg-white/60 dark:bg-slate-800/60 p-2 rounded-xl border border-transparent";
+                            div.innerHTML = `<i data-lucide="cake" class="w-4 h-4 text-rose-500 shrink-0"></i> <span>¡Hoy es el <strong>cumpleaños</strong> de <strong>${escapeHtml(emp.nombre)}</strong>! 🎂</span>`;
+                            listaAlertas.appendChild(div);
+                        }
                     }
                 }
             }
 
+            // Aniversarios
             if (emp.ingreso) {
                 const partesIng = emp.ingreso.split('-');
                 if (partesIng.length === 3) {
                     const anioIng = parseInt(partesIng[0], 10);
-                    const mesIng = parseInt(partesIng[1], 10);
-                    const diaIng = parseInt(partesIng[2], 10);
-                    const anosCumplidos = anioActual - anioIng;
+                    const m = parseInt(partesIng[1], 10);
+                    const d = parseInt(partesIng[2], 10);
 
-                    if (anioIng < anioActual && mesIng === mesHoy && diaIng === diaHoy) {
-                        alertasCount++;
-                        const div = document.createElement('div');
-                        div.className = "flex items-center gap-2 text-app-title dark:text-darkapp-title bg-white/60 dark:bg-slate-800/60 p-2 rounded-xl border border-transparent";
-                        div.innerHTML = `<i data-lucide="award" class="w-4 h-4 text-amber-500 shrink-0"></i> <span>¡<strong>${emp.nombre}</strong> hoy cumple <strong>${anosCumplidos} año${anosCumplidos > 1 ? 's' : ''}</strong> en la empresa! 🏆</span>`;
-                        listaAlertas.appendChild(div);
+                    if (m === mesHoy && anioIng < anioActual) {
+                        anniversariesMonth++;
+                        const years = anioActual - anioIng;
+                        monthlyEvents.push({ type: 'anniversary', name: emp.nombre, day: d, monthName: monthNames[m-1], years: years });
+
+                        if (d === diaHoy) {
+                            alertasHoy++;
+                            anniversariesToday++;
+                            const div = document.createElement('div');
+                            div.className = "flex items-center gap-2 text-app-title dark:text-darkapp-title bg-white/60 dark:bg-slate-800/60 p-2 rounded-xl border border-transparent";
+                            div.innerHTML = `<i data-lucide="award" class="w-4 h-4 text-amber-500 shrink-0"></i> <span>¡<strong>${escapeHtml(emp.nombre)}</strong> hoy cumple <strong>${years} año${years > 1 ? 's' : ''}</strong> en la empresa! 🏆</span>`;
+                            listaAlertas.appendChild(div);
+                        }
                     }
                 }
             }
         });
 
-        if (alertasCount > 0) {
-            seccionAlertas.classList.remove('hidden');
-            seccionAlertas.classList.add('flex');
+        document.getElementById('totalEmployees').textContent = empleados.length;
+
+        // Lógica del botón de eventos
+        if (birthdaysMonth > 0 || anniversariesMonth > 0) {
+            btnEventsIndicator.classList.remove('hidden');
+            btnEventsIndicator.classList.add('flex');
+
+            let textParts = [];
+            if (birthdaysToday > 0) textParts.push(`${birthdaysToday} Cumpleaños (Hoy)`);
+            else if (birthdaysMonth > 0) textParts.push(`${birthdaysMonth} Cumpleaños (Mes)`);
+
+            if (anniversariesToday > 0) textParts.push(`${anniversariesToday} Aniversario(s) (Hoy)`);
+            else if (anniversariesMonth > 0) textParts.push(`${anniversariesMonth} Aniversario(s) (Mes)`);
+
+            document.getElementById('eventsButtonText').textContent = textParts.join(' / ');
         } else {
-            seccionAlertas.classList.remove('flex');
-            seccionAlertas.classList.add('hidden');
+            btnEventsIndicator.classList.add('hidden');
+            btnEventsIndicator.classList.remove('flex');
         }
-        lucide.createIcons();
+
+        if (alertasHoy > 0) { 
+            seccionAlertas.classList.remove('hidden'); 
+            seccionAlertas.classList.add('flex'); 
+        } else { 
+            seccionAlertas.classList.remove('flex'); 
+            seccionAlertas.classList.add('hidden'); 
+        }
+        lucide.createIcons({ root: seccionAlertas });
     }
 
-    // --- CRUD EMPLEADOS CON SUPABASE ---
     async function abrirModalEmpleado(id = null) {
         document.getElementById('formEmpleado').reset();
         inicializarFechasMaximas();
@@ -658,12 +754,7 @@
 
         if (id) {
             document.getElementById('modalTitulo').innerText = 'Editar Miniser';
-            const { data: emp, error } = await supabaseClient
-                .from('empleados')
-                .select('*')
-                .eq('id', Number(id))
-                .single();
-
+            const { data: emp, error } = await supabaseClient.from('empleados').select('*').eq('id', Number(id)).single();
             if (emp && !error) {
                 document.getElementById('empId').value = emp.id;
                 document.getElementById('empIdOriginal').value = emp.numero_empleado;
@@ -675,25 +766,19 @@
                 document.getElementById('empIngreso').value = emp.ingreso;
                 document.getElementById('empFotoUrl').value = emp.foto_url || '';
                 calcularAntiguedadPreview();
-                
                 if (['Gerente', 'Subgerente', 'Promotor', 'Promotor de temporada'].includes(emp.puesto)) {
                     seleccionarPuesto(emp.puesto);
                 } else {
                     seleccionarPuesto('Otro');
                     document.getElementById('empPuestoOtro').value = emp.puesto;
                 }
-
-                if (emp.foto_url) {
-                    mostrarPreviewFoto(emp.foto_url);
-                }
+                if (emp.foto_url) mostrarPreviewFoto(emp.foto_url);
             }
         }
         document.getElementById('modalEmpleado').classList.remove('hidden');
     }
 
-    function cerrarModalEmpleado() {
-        document.getElementById('modalEmpleado').classList.add('hidden');
-    }
+    function cerrarModalEmpleado() { document.getElementById('modalEmpleado').classList.add('hidden'); }
 
     async function guardarEmpleado(event) {
         event.preventDefault();
@@ -703,44 +788,25 @@
         const fechaNacimiento = document.getElementById('empNacimiento').value;
         const fechaIngreso = document.getElementById('empIngreso').value;
 
-        const hoyStr = new Date().toISOString().split('T')[0];
-        if (fechaNacimiento > hoyStr) {
-            mostrarAlerta('La fecha de nacimiento no puede ser una fecha a futuro.', true);
-            return;
-        }
-        if (fechaIngreso > hoyStr) {
-            mostrarAlerta('La fecha de ingreso no puede ser una fecha a futuro.', true);
-            return;
-        }
+        const hoy = new Date();
+        const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
 
-        if (!puestoSelect) {
-            mostrarAlerta('Por favor seleccione un puesto válido.', true);
-            return;
-        }
+        if (fechaNacimiento > hoyStr) { mostrarAlerta('La fecha de nacimiento no puede ser una fecha a futuro.', true); return; }
+        if (fechaIngreso > hoyStr) { mostrarAlerta('La fecha de ingreso no puede ser una fecha a futuro.', true); return; }
+        if (!puestoSelect) { mostrarAlerta('Por favor seleccione un puesto válido.', true); return; }
 
         const puestoFinal = puestoSelect === 'Otro' ? document.getElementById('empPuestoOtro').value.trim() : puestoSelect;
 
-        const { data: existing, error: errCheck } = await supabaseClient
-            .from('empleados')
-            .select('id, numero_empleado')
-            .eq('numero_empleado', numeroIngresado);
-
+        const { data: existing, error: errCheck } = await supabaseClient.from('empleados').select('id, numero_empleado').eq('numero_empleado', numeroIngresado);
         if (!errCheck && existing) {
             const existe = existing.some(emp => !idVal || emp.id !== Number(idVal));
-            if (existe) {
-                mostrarAlerta('El número de empleado ingresado ya existe. Por favor valide el número de empleado.', true);
-                return;
-            }
+            if (existe) { mostrarAlerta('El número de Miniser ingresado ya existe.', true); return; }
         }
 
         let fotoUrlFinal = document.getElementById('empFotoUrl').value;
         if (archivoFotoSeleccionado) {
-            try {
-                fotoUrlFinal = await subirFotoASupabase(archivoFotoSeleccionado, numeroIngresado);
-            } catch (err) {
-                mostrarAlerta('Error al subir la imagen al bucket.', true);
-                return;
-            }
+            try { fotoUrlFinal = await subirFotoASupabase(archivoFotoSeleccionado, numeroIngresado); }
+            catch (err) { mostrarAlerta('Error al subir la imagen al bucket.', true); return; }
         }
 
         const empleadoObj = {
@@ -754,81 +820,80 @@
             foto_url: fotoUrlFinal
         };
 
-        let res;
-        if (idVal) {
-            res = await supabaseClient.from('empleados').update(empleadoObj).eq('id', Number(idVal));
-        } else {
-            res = await supabaseClient.from('empleados').insert([empleadoObj]);
-        }
+        let res = idVal
+            ? await supabaseClient.from('empleados').update(empleadoObj).eq('id', Number(idVal))
+            : await supabaseClient.from('empleados').insert([empleadoObj]);
 
         if (res.error) {
-            mostrarAlerta('Error al guardar el empleado en Supabase.', true);
+            mostrarAlerta('Error al guardar al Miniser en la Nube.', true);
         } else {
             cerrarModalEmpleado();
-            cargarEmpleados();
-            mostrarAlerta(idVal ? 'Empleado actualizado correctamente' : 'Empleado registrado con éxito');
+            await cargarEmpleados();
+            mostrarAlerta(idVal ? 'Miniser actualizado correctamente' : 'Miniser registrado con éxito');
         }
     }
 
     async function eliminarEmpleado(id) {
-        mostrarConfirmacion('¿Está seguro de eliminar este empleado?', async (confirmado) => {
+        mostrarConfirmacion('¿Está seguro de eliminar a este Miniser?', async (confirmado) => {
             if (confirmado) {
                 const { error } = await supabaseClient.from('empleados').delete().eq('id', Number(id));
-                if (!error) {
-                    cargarEmpleados();
-                    mostrarAlerta('Empleado eliminado correctamente.');
-                } else {
-                    mostrarAlerta('Error al eliminar el empleado.', true);
-                }
+                if (!error) { await cargarEmpleados(); mostrarAlerta('Miniser eliminado correctamente.'); }
+                else { mostrarAlerta('Error al eliminar al Miniser.', true); }
             }
         });
     }
 
     async function cargarEmpleados() {
-        const { data: empleados, error } = await supabaseClient
-            .from('empleados')
-            .select('*')
-            .order('nombre', { ascending: true });
-
+        const { data: empleados, error } = await supabaseClient.from('empleados').select('*').order('nombre', { ascending: true });
         if (!error && empleados) {
-            renderizarAgenda(empleados);
-            evaluarAlertasYNotificaciones(empleados);
+            allEmployees = empleados;
+            filtrarEmpleados();
+            evaluarAlertasYNotificaciones(allEmployees);
         }
         actualizarEstadoConexionUI();
     }
 
-    async function filtrarEmpleados() {
-        const filtro = document.getElementById('inputBuscar').value.toLowerCase();
-        const { data: empleados, error } = await supabaseClient
-            .from('empleados')
-            .select('*')
-            .order('nombre', { ascending: true });
+    function filtrarEmpleados() {
+        const query = document.getElementById('inputBuscar').value.toLowerCase();
+        const puestoFilter = currentPuestoFilter;
+        const sortBy = currentSortBy;
 
-        if (!error && empleados) {
-            const lista = empleados.filter(emp => 
-                emp.nombre.toLowerCase().includes(filtro) || 
-                emp.numero_empleado.toLowerCase().includes(filtro) || 
-                emp.puesto.toLowerCase().includes(filtro)
-            );
-            renderizarAgenda(lista);
-        }
+        let lista = allEmployees.filter(emp => {
+            const matchQuery = emp.nombre.toLowerCase().includes(query) || 
+                               emp.numero_empleado.toLowerCase().includes(query) || 
+                               emp.puesto.toLowerCase().includes(query);
+            const matchPuesto = !puestoFilter || emp.puesto === puestoFilter;
+            return matchQuery && matchPuesto;
+        });
+
+        lista.sort((a, b) => {
+            if (sortBy === 'name_asc') return a.nombre.localeCompare(b.nombre);
+            if (sortBy === 'name_desc') return b.nombre.localeCompare(a.nombre);
+            if (sortBy === 'date_desc') return new Date(b.ingreso) - new Date(a.ingreso);
+            if (sortBy === 'date_asc') return new Date(a.ingreso) - new Date(b.ingreso);
+            return 0;
+        });
+
+        renderizarAgenda(lista);
     }
 
-    // --- FUNCIÓN PARA EXPANDIR / CONTRAER TARJETA ---
     function toggleCard(cardElement, event) {
         if (event && event.target.closest('button')) return;
-
         const details = cardElement.querySelector('.card-details');
         const chevron = cardElement.querySelector('.card-chevron');
         const isHidden = details.classList.contains('hidden');
+        if (isHidden) { details.classList.remove('hidden'); if (chevron) chevron.style.transform = 'rotate(180deg)'; }
+        else { details.classList.add('hidden'); if (chevron) chevron.style.transform = 'rotate(0deg)'; }
+    }
 
-        if (isHidden) {
-            details.classList.remove('hidden');
-            if (chevron) chevron.style.transform = 'rotate(180deg)';
-        } else {
-            details.classList.add('hidden');
-            if (chevron) chevron.style.transform = 'rotate(0deg)';
+    function getAvatarHTML(emp) {
+        if (emp.foto_url) {
+            return `<img src="${escapeHtml(emp.foto_url)}" class="w-full h-full object-cover">`;
         }
+        const initials = emp.nombre.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+        const colorIndex = emp.nombre.length % AVATAR_COLORS.length;
+        const bgColor = AVATAR_COLORS[colorIndex];
+        return `<div class="w-full h-full ${bgColor} text-white flex items-center justify-center font-bold text-lg avatar-initials rounded-full">${initials}</div>`;
     }
 
     function renderizarAgenda(empleados) {
@@ -837,29 +902,33 @@
         grid.innerHTML = '';
 
         if (empleados.length === 0) {
-            emptyState.classList.remove('hidden');
-            emptyState.classList.add('flex');
+            emptyState.classList.remove('hidden'); emptyState.classList.add('flex');
             return;
         }
-        emptyState.classList.remove('flex');
-        emptyState.classList.add('hidden');
+        emptyState.classList.remove('flex'); emptyState.classList.add('hidden');
 
         empleados.forEach(emp => {
             const antiguedad = calcularAniosAntiguedad(emp.ingreso);
             const card = document.createElement('div');
-            card.className = "bg-app-card dark:bg-darkapp-card border-none rounded-2xl p-4 flex flex-col shadow-[0_2px_10px_rgba(0,0,0,0.02)] gap-3 cursor-pointer transition-all";
+            card.className = "bg-app-card dark:bg-darkapp-card border-none rounded-2xl p-4 flex flex-col shadow-[0_2px_10px_rgba(0,0,0,0.02)] gap-3 cursor-pointer transition-all fade-in";
             card.setAttribute('onclick', 'toggleCard(this, event)');
+            
+            const safeName = escapeHtml(emp.nombre);
+            const safePuesto = escapeHtml(emp.puesto);
+            const safeNumero = escapeHtml(emp.numero_empleado);
+            const safeCorreo = escapeHtml(emp.correo || 'No registrado');
+            const safeTelefono = escapeHtml(emp.telefono || 'No registrado');
+            
             card.innerHTML = `
-                <!-- Cabecera siempre visible -->
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-14 h-14 rounded-full overflow-hidden bg-app-bg dark:bg-slate-800 border border-transparent flex items-center justify-center shrink-0">
-                            ${emp.foto_url ? `<img src="${emp.foto_url}" class="w-full h-full object-cover">` : `<i data-lucide="user" class="w-6 h-6 text-app-sub"></i>`}
+                        <div class="w-14 h-14 rounded-full overflow-hidden bg-app-bg dark:bg-slate-800 border border-transparent flex items-center justify-center shrink-0 shadow-sm">
+                            ${getAvatarHTML(emp)}
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h4 class="font-bold text-sm truncate text-app-title dark:text-darkapp-title">${emp.nombre}</h4>
-                            <p class="text-[11px] text-app-brand font-semibold">${emp.puesto}</p>
-                            <p class="text-[10px] text-app-sub mt-0.5">ID: <span class="font-bold text-app-title dark:text-darkapp-title">${emp.numero_empleado}</span></p>
+                            <h4 class="font-bold text-sm truncate text-app-title dark:text-darkapp-title">${safeName}</h4>
+                            <p class="text-[11px] text-app-brand font-semibold truncate">${safePuesto}</p>
+                            <p class="text-[10px] text-app-sub mt-0.5">#: <span class="font-bold text-app-title dark:text-darkapp-title">${safeNumero}</span></p>
                         </div>
                     </div>
                     <div class="p-1 text-app-sub transition-transform duration-200 card-chevron shrink-0">
@@ -867,21 +936,20 @@
                     </div>
                 </div>
 
-                <!-- Contenido desplegable (oculto por defecto) -->
                 <div class="card-details hidden space-y-3 pt-2 border-t border-app-border/50 dark:border-darkapp-border/50">
                     <div class="space-y-1 text-xs">
-                        <div class="flex items-center gap-2 text-app-sub"><i data-lucide="mail" class="w-3.5 h-3.5"></i> <span class="truncate">${emp.correo || 'No registrado'}</span></div>
-                        <div class="flex items-center gap-2 text-app-sub"><i data-lucide="phone" class="w-3.5 h-3.5"></i> <span>${emp.telefono || 'No registrado'}</span></div>
+                        <div class="flex items-center gap-2 text-app-sub"><i data-lucide="mail" class="w-3.5 h-3.5"></i> <span class="truncate">${safeCorreo}</span></div>
+                        <div class="flex items-center gap-2 text-app-sub"><i data-lucide="phone" class="w-3.5 h-3.5"></i> <span>${safeTelefono}</span></div>
                         <div class="flex items-center gap-2 text-app-sub"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> <span>Ingreso: ${emp.ingreso} (${antiguedad})</span></div>
                     </div>
                     <div class="flex items-center justify-end gap-1 pt-1">
-                        <button onclick="compartirEmpleadoWA('${encodeURIComponent(emp.nombre)}', '${encodeURIComponent(emp.puesto)}', '${encodeURIComponent(emp.numero_empleado)}', '${encodeURIComponent(emp.telefono || 'N/A')}', '${encodeURIComponent(emp.correo || 'N/A')} ')" class="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition-colors cursor-pointer" title="Compartir WhatsApp">
+                        <button data-action="share" data-id="${emp.id}" class="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition-colors cursor-pointer" title="Compartir WhatsApp">
                             <i data-lucide="share-2" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="abrirModalEmpleado(${emp.id})" class="p-2 text-app-sub hover:text-app-brand rounded-lg transition-colors cursor-pointer" title="Editar">
+                        <button data-action="edit" data-id="${emp.id}" class="p-2 text-app-sub hover:text-app-brand rounded-lg transition-colors cursor-pointer" title="Editar">
                             <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="eliminarEmpleado(${emp.id})" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors cursor-pointer" title="Eliminar">
+                        <button data-action="delete" data-id="${emp.id}" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors cursor-pointer" title="Eliminar">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -890,86 +958,75 @@
             grid.appendChild(card);
         });
         lucide.createIcons();
+
+        if (!grid.dataset.listenerAttached) {
+            grid.addEventListener('click', (e) => {
+                const btn = e.target.closest('button[data-action]');
+                if (!btn) return;
+                const action = btn.getAttribute('data-action');
+                const id = btn.getAttribute('data-id');
+                if (action === 'share') {
+                    const emp = allEmployees.find(x => x.id == id);
+                    if (emp) compartirEmpleadoWA(emp);
+                } else if (action === 'edit') {
+                    abrirModalEmpleado(id);
+                } else if (action === 'delete') {
+                    eliminarEmpleado(id);
+                }
+            });
+            grid.dataset.listenerAttached = 'true';
+        }
     }
 
-    // --- COMPARTIR Y EXPORTAR ---
-    function compartirEmpleadoWA(nombreEnc, puestoEnc, numeroEnc, telefonoEnc, correoEnc) {
-        const nombre = decodeURIComponent(nombreEnc);
-        const puesto = decodeURIComponent(puestoEnc);
-        const numero = decodeURIComponent(numeroEnc);
-        const telefono = decodeURIComponent(telefonoEnc);
-        const correo = decodeURIComponent(correoEnc);
-
+    function compartirEmpleadoWA(emp) {
         const texto = `👤 *Ficha de Miniser*\n\n` +
-                      `• *Nombre completo:* ${nombre}\n` +
-                      `• *Puesto:* ${puesto}\n` +
-                      `• *Número de empleado:* ${numero}\n` +
-                      `• *Número celular:* ${telefono}\n` +
-                      `• *Correo electrónico:* ${correo}`;
-        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+                      `• *Nombre completo:* ${emp.nombre}\n` +
+                      `• *Puesto:* ${emp.puesto}\n` +
+                      `• *Número de Miniser:* ${emp.numero_empleado}\n` +
+                      `• *Número celular:* ${emp.telefono || 'No registrado'}\n` +
+                      `• *Correo electrónico:* ${emp.correo || 'No registrado'}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank', 'noopener,noreferrer');
     }
 
     async function compartirWhatsappGeneral() {
-        const { data: empleados } = await supabaseClient.from('empleados').select('*').order('nombre', { ascending: true });
-        if (!empleados || empleados.length === 0) {
-            mostrarAlerta("No hay empleados para compartir.", true);
-            return;
-        }
-        let texto = `📋 *Agenda General de Empleados - Miniser*\nTotal registrados: ${empleados.length}\n\n`;
-        empleados.forEach((emp, i) => {
-            texto += `*${i+1}. ${emp.nombre}*\n` +
-                     `   • Puesto: ${emp.puesto}\n` +
-                     `   • Núm. Empleado: ${emp.numero_empleado}\n` +
-                     `   • Celular: ${emp.telefono || 'N/A'}\n` +
-                     `   • Correo: ${emp.correo || 'N/A'}\n\n`;
+        if (!allEmployees || allEmployees.length === 0) { mostrarAlerta("No hay Minisers para compartir.", true); return; }
+        let texto = `📋 *Agenda General de Minisers*\nTotal registrados: ${allEmployees.length}\n\n`;
+        allEmployees.forEach((emp, i) => {
+            texto += `*${i+1}. ${emp.nombre}*\n   • Puesto: ${emp.puesto}\n   • Núm. Miniser: ${emp.numero_empleado}\n   • Celular: ${emp.telefono || 'N/A'}\n   • Correo: ${emp.correo || 'N/A'}\n\n`;
         });
-        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank', 'noopener,noreferrer');
     }
 
     async function exportarExcelGeneral() {
-        const { data: empleados } = await supabaseClient.from('empleados').select('*').order('nombre', { ascending: true });
-        if (!empleados || empleados.length ===0) {
-            mostrarAlerta("No hay datos para exportar.", true);
-            return;
-        }
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + "Número de Empleado,Nombre Completo,Puesto,Celular,Correo Electrónico,Fecha Nacimiento,Fecha Ingreso\n";
-        empleados.forEach(emp => {
+        if (!allEmployees || allEmployees.length === 0) { mostrarAlerta("No hay datos para exportar.", true); return; }
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + "Número de Miniser,Nombre Completo,Puesto,Celular,Correo Electrónico,Fecha Nacimiento,Fecha Ingreso\n";
+        allEmployees.forEach(emp => {
             csvContent += `"${emp.numero_empleado}","${emp.nombre}","${emp.puesto}","${emp.telefono || ''}","${emp.correo || ''}","${emp.nacimiento || ''}","${emp.ingreso}"\n`;
         });
-        const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "agenda_empleados_miniser.csv");
+        link.setAttribute("href", encodeURI(csvContent));
+        link.setAttribute("download", "agenda_minisers_miniser.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     }
 
-    // --- REALTIME SYNC ---
     function iniciarSuscripcionRealtime() {
-        supabaseClient
+        if (channelInstance) return;
+        channelInstance = supabaseClient
             .channel('cambios-empleados-miniser')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'empleados' }, () => {
-                cargarEmpleados();
-            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'empleados' }, () => cargarEmpleados())
             .subscribe();
     }
 
     window.addEventListener('online', () => cargarEmpleados());
     window.addEventListener('offline', () => actualizarEstadoConexionUI());
 
-    // Inicializar al cargar la página
     window.addEventListener('DOMContentLoaded', async () => {
         try {
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.replace('../index.html');
-                return;
-            }
-        } catch (e) {
-            window.location.replace('../index.html');
-            return;
-        }
+            if (!session) { window.location.replace('../index.html'); return; }
+        } catch (e) { window.location.replace('../index.html'); return; }
 
         inicializarFechasMaximas();
         await cargarEmpleados();

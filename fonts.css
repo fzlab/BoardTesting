@@ -19,8 +19,8 @@
 
 @font-face {
   font-family: 'Geist';
-  src: url('./src/fonts/Geist-Bold.woff2') format('woff2'),
-       url('./src/fonts/Geist-Bold.ttf') format('truetype'); /* Fallback */
+  src: url('./src/fonts/Geist-SemiBold.woff2') format('woff2'),
+       url('./src/fonts/Geist-SemiBold.ttf') format('truetype'); /* Fallback */
   font-weight: 700; /* Si tienes el archivo Bold, úsalo aquí */
   font-style: normal;
   font-display: swap;

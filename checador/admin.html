@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+        <link rel="stylesheet" href="../fonts.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Panel Gerencial - Checador</title>
+  <link rel="icon" type="image/svg+xml" href="./admin.svg">
+  
+  <!-- SEGURIDAD: Content Security Policy + Referrer -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdn.sheetjs.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://mifbcyxtafeacwkzqzsq.supabase.co; connect-src 'self' https://mifbcyxtafeacwkzqzsq.supabase.co wss://mifbcyxtafeacwkzqzsq.supabase.co; base-uri 'self'; form-action 'self'; object-src 'none';">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  
+  <meta name="theme-color" content="#F8F9FA">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- GUARD DE SESIÓN (1ª capa) -->
+  <script>
+      (function() {
+          const SESSION_KEY = 'sb-mifbcyxtafeacwkzqzsq-auth-token';
+          if (localStorage.getItem(SESSION_KEY) === null) {
+              document.documentElement.style.visibility = 'hidden';
+              window.location.replace('../index.html');
+          }
+      })();
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@1.72.0"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <!-- html2canvas para descargar la tabla como imagen -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- SDK de Supabase v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Geist', 'sans-serif'] },
+          colors: {
+            app: {
+              bg: '#F8F9FA', card: '#FFFFFF', border: '#E5E7EB',
+              title: '#111827', sub: '#6B7280', brand: '#0D9488', accent: '#E6F6F4',
+            },
+            darkapp: {
+              bg: '#0F172A', card: '#1E293B', border: '#334155',
+              title: '#F8FAFC', sub: '#94A3B8'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar { display: none; }
+    body { -webkit-tap-highlight-color: transparent; user-select: none; }
+    input, select { user-select: text; }
+    .fade-in { animation: fadeIn 0.2s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .zoom-in { animation: zoomIn 0.2s ease-out; }
+    @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+    .accordion-content.open { max-height: 2500px; transition: max-height 0.5s ease-in; }
+    .blur-overlay { backdrop-filter: blur(4px); background-color: rgba(15, 23, 42, 0.5); }
+    
+    .glass-modal {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+    .dark .glass-modal {
+        background: rgba(15, 23, 42, 0.95);
+    }
+  </style>
+</head>
+<body class="h-full bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title font-sans overflow-hidden antialiased relative transition-colors duration-200">
+
+  <div class="main-content h-full flex flex-col overflow-y-auto pb-10">
+    
+    <header class="px-5 py-4 flex items-center justify-between sticky top-0 bg-app-bg/95 dark:bg-darkapp-bg/95 backdrop-blur-md z-30 transition-colors">
+      <div class="flex items-center space-x-3">
+        <a href="checador.html" class="p-2 -ml-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg transition-colors" title="Ir al Checador">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <h1 class="font-bold text-[17px] leading-tight text-app-title dark:text-darkapp-title">Panel Gerencial</h1>
+          <p class="text-[12px] text-app-sub dark:text-darkapp-sub flex items-center gap-1.5 font-medium mt-0.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-app-brand inline-block"></span> 
+            <span id="branchNameDisplay">Gran Plaza Mérida</span>
+          </p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <!-- Toggle Tema -->
+        <button id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors duration-200" title="Cambiar modo">
+            <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">
+                <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>
+                <i data-lucide="moon" class="w-3.5 h-3.5 text-slate-400 dark:text-indigo-400 opacity-100 dark:opacity-40"></i>
+            </div>
+            <div class="w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center transform transition-transform duration-200 translate-x-0 dark:translate-x-6 z-10">
+                <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 dark:hidden"></i>
+                <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400 hidden dark:block"></i>
+            </div>
+        </button>
+
+        <button onclick="openImportModal()" class="text-[11px] font-semibold text-app-brand dark:text-teal-400 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/10 px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5">
+          <i data-lucide="upload" class="w-4 h-4"></i>
+          <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="px-5 flex-1 flex flex-col gap-4 mt-2">
+      
+      <div class="flex items-center justify-between bg-app-card dark:bg-darkapp-card rounded-xl p-2 shadow-sm">
+        <button onclick="changeWeek(-1)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
+          <i data-lucide="chevron-left" class="w-5 h-5"></i>
+        </button>
+        <div class="flex flex-col items-center">
+          <span id="weekLabel" class="font-bold text-sm text-app-title dark:text-darkapp-title">Cargando...</span>
+          <span id="weekRange" class="text-[11px] text-app-sub dark:text-darkapp-sub font-medium">--/-- al --/--</span>
+        </div>
+        <button onclick="changeWeek(1)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
+          <i data-lucide="chevron-right" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-center gap-4 text-[11px] font-semibold text-app-sub dark:text-darkapp-sub bg-app-card dark:bg-darkapp-card py-2 rounded-xl shadow-sm">
+        <div class="flex items-center gap-1.5">
+                <i data-lucide="clock-check" class="w-4 h-4 text-emerald-500"></i>
+A tiempo</div>
+        <div class="flex items-center gap-1.5">
+              <i data-lucide="clock-fading" class="w-4 h-4 text-orange-400"></i>
+Retardo</div>
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="clock-exclamation-point" class="w-4 h-4 text-rose-500"></i>
+Sin Registro</div>
+      </div>
+
+      <div class="mt-2">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-[13px] uppercase tracking-wide text-app-sub dark:text-darkapp-sub">Desglose por MINISER</h3>
+          <button type="button" onclick="openWeeklyScheduleModal()" class="text-xs font-bold text-app-brand dark:text-teal-400 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/10 active:scale-[0.98] px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="calendar-search" class="w-4 h-4"></i>
+            <span>Horarios</span>
+          </button>
+        </div>
+        <div id="adminList" class="flex flex-col gap-3"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL: Tabla General de Horarios Semanales -->
+  <div id="modalWeeklySchedule" class="fixed inset-0 z-[55] flex items-center justify-center p-3 sm:p-5 hidden">
+    <div class="absolute inset-0 blur-overlay" onclick="closeWeeklyScheduleModal()"></div>
+    <div class="glass-modal w-full max-w-5xl rounded-3xl shadow-2xl relative z-10 flex flex-col max-h-[90vh] overflow-hidden fade-in border border-white/30 dark:border-slate-700/40">
+      
+      <!-- Encabezado del Modal con Botón Descargar Imagen -->
+      <div class="px-5 py-4 border-b border-app-border/60 dark:border-darkapp-border/60 flex items-center justify-between bg-white/40 dark:bg-slate-900/40 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-app-brand/10 dark:bg-teal-500/15 text-app-brand dark:text-teal-400 flex items-center justify-center shrink-0">
+            <i data-lucide="calendar-search" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-app-title dark:text-darkapp-title leading-tight">Horarios de la Semana</h3>
+            <p id="scheduleModalRange" class="text-[11px] font-medium text-app-sub dark:text-darkapp-sub mt-0.5">--/-- al --/--</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnDownloadScheduleImg" onclick="downloadScheduleImage()" class="text-xs font-bold text-white bg-app-brand hover:bg-teal-700 active:scale-[0.98] px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-md cursor-pointer">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Descargar</span>
+          </button>
+          <button type="button" onclick="closeWeeklyScheduleModal()" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title bg-app-bg/80 dark:bg-slate-800/80 rounded-full transition-colors cursor-pointer">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenedor con Scroll Horizontal para la Tabla Tipo Horario -->
+      <div class="p-4 overflow-auto flex-1">
+        <div id="weeklyScheduleTableWrapper" class="overflow-x-auto rounded-xl border border-slate-300 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-900">
+          <!-- Tabla inyectada dinámicamente -->
+        </div>
+        <p class="text-[11px] text-app-sub dark:text-darkapp-sub text-center mt-3 font-medium">Desliza horizontalmente para ver todos los días de la semana</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP FLOTANTE: Hora Exacta de Registro -->
+  <div id="recordExactPopup" class="fixed z-[80] hidden pointer-events-none transition-opacity duration-150">
+    <div class="bg-slate-900 dark:bg-slate-800 text-white px-3 py-1.5 rounded-xl shadow-xl border border-white/15 flex flex-col items-center text-center">
+      <span id="popupRecordLabel" class="text-[9px] font-semibold text-teal-400 uppercase tracking-wider leading-none mb-1">--</span>
+      <span id="popupRecordTime" class="text-xs font-extrabold tracking-wide leading-none">--:--:--</span>
+    </div>
+    <div class="w-2.5 h-2.5 bg-slate-900 dark:bg-slate-800 border-r border-b border-white/15 transform rotate-45 mx-auto -mt-1.5"></div>
+  </div>
+
+  <!-- MODAL: Editar Turno Individual -->
+  <div id="modalEditShift" class="fixed inset-0 z-[60] flex items-center justify-center p-4 hidden">
+    <div class="absolute inset-0 blur-overlay" onclick="closeEditShiftModal()"></div>
+    <div class="glass-modal w-full max-w-sm rounded-3xl shadow-2xl relative z-10 p-6 fade-in border border-white/20 dark:border-slate-700/30">
+      <div class="flex justify-between items-center mb-1">
+        <h3 class="text-base font-bold text-app-title dark:text-darkapp-title">Editar Turno</h3>
+        <button onclick="closeEditShiftModal()" class="p-1.5 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title bg-app-bg dark:bg-slate-800 rounded-full transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p id="editShiftSubtitle" class="text-xs text-app-sub dark:text-darkapp-sub font-medium mb-4">--</p>
+
+      <div class="mb-4">
+        <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-2">Estado del día</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" id="btnTypeWork" onclick="setShiftMode('WORK')" class="py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5">
+            <i data-lucide="clock" class="w-3.5 h-3.5"></i> Turno Laboral
+          </button>
+          <button type="button" id="btnTypeFree" onclick="setShiftMode('LIBRE')" class="py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5">
+            <i data-lucide="coffee" class="w-3.5 h-3.5"></i> Día Libre
+          </button>
+        </div>
+      </div>
+
+      <div id="workHoursContainer" class="grid grid-cols-2 gap-3 mb-5">
+        <div>
+          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Hora Ingreso</label>
+          <input type="time" id="editStartTime" class="w-full bg-app-bg dark:bg-slate-800 border border-transparent dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm font-bold text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors">
+        </div>
+        <div>
+          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Hora Salida</label>
+          <input type="time" id="editEndTime" class="w-full bg-app-bg dark:bg-slate-800 border border-transparent dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm font-bold text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors">
+        </div>
+      </div>
+
+      <div id="freeDayNotice" class="hidden bg-app-bg dark:bg-slate-800 rounded-xl p-3 mb-5 text-center">
+        <p class="text-xs font-semibold text-app-sub dark:text-darkapp-sub">Este día quedará marcado como <strong>Día Libre</strong> en el sistema.</p>
+      </div>
+
+      <div class="flex gap-2">
+        <button type="button" onclick="closeEditShiftModal()" class="flex-1 bg-transparent text-app-sub dark:text-darkapp-sub hover:bg-app-bg dark:hover:bg-slate-800 font-bold py-3 rounded-xl text-xs transition-colors">
+          Cancelar
+        </button>
+        <button type="button" id="btnSaveShift" onclick="saveEditedShift()" class="flex-1 bg-transparent text-app-brand dark:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 font-bold py-3 rounded-xl text-xs transition-colors">
+          Guardar Cambios
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Importar Excel -->
+  <div id="modalImport" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div class="absolute inset-0 blur-overlay" onclick="closeImportModal()"></div>
+    <div class="glass-modal w-full max-w-md rounded-3xl shadow-2xl relative z-10 p-5 fade-in border border-white/20 dark:border-slate-700/30">
+      <div class="flex justify-between items-center mb-1">
+        <h3 class="text-base font-bold text-app-title dark:text-darkapp-title">Actualizar Turnos por Excel</h3>
+        <button onclick="closeImportModal()" class="p-1.5 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title bg-app-bg dark:bg-slate-800 rounded-full transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p class="text-xs text-app-sub dark:text-darkapp-sub mb-4"> Selecciona el archivo Excel descargado de SHIFT. <br>Los turnos de las fechas incluidas en el archivo se actualizarán automáticamente en la Nube.</p>
+      
+      <div id="importDropzone" class="border-2 border-dashed border-app-border dark:border-slate-600 rounded-2xl p-6 text-center cursor-pointer hover:border-app-brand dark:hover:border-teal-500 hover:bg-app-brand/5 dark:hover:bg-teal-500/5 transition-colors" onclick="document.getElementById('excelInput').click()">
+        <i data-lucide="file-spreadsheet" class="w-10 h-10 mx-auto mb-2 text-app-brand dark:text-teal-400"></i>
+        <p class="text-sm font-semibold text-app-title dark:text-darkapp-title">Toca para seleccionar el archivo</p>
+        <p class="text-[11px] text-app-sub dark:text-darkapp-sub mt-1">.xlsx o .xls</p>
+      </div>
+      <input type="file" id="excelInput" accept=".xlsx,.xls" class="hidden" onchange="handleExcelFile(this.files[0])">
+      
+      <div id="importStatus" class="mt-4"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Galería de Fotos por Empleado -->
+  <div id="modalPhotos" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 hidden">
+    <div class="absolute inset-0 blur-overlay" onclick="closeGalleryModal()"></div>
+    <div class="glass-modal w-full max-w-md rounded-3xl shadow-2xl flex flex-col relative z-10 max-h-[85vh] overflow-hidden fade-in border border-white/20 dark:border-slate-700/30">
+      <div class="px-5 py-4 border-b border-app-border/50 dark:border-darkapp-border/50 flex justify-between items-center bg-transparent">
+        <div>
+          <h3 class="text-base font-bold text-app-title dark:text-darkapp-title">Galería de Registros</h3>
+          <p id="modalPhotosTitle" class="text-xs text-app-sub dark:text-darkapp-sub mt-0.5">Nombre del Miniser</p>
+        </div>
+        <button onclick="closeGalleryModal()" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title bg-app-bg dark:bg-slate-800 rounded-full transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modalPhotosContent" class="p-4 overflow-y-auto flex-1 bg-transparent space-y-6"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Lightbox -->
+  <div id="modalLightbox" class="fixed inset-0 z-[70] bg-black/95 flex flex-col items-center justify-center hidden fade-in">
+    <button onclick="closeLightbox()" class="absolute top-6 right-6 p-2.5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors z-10">
+      <i data-lucide="x" class="w-6 h-6"></i>
+    </button>
+    
+    <div class="w-full flex-1 flex items-center justify-center p-4 overflow-hidden" onclick="closeLightbox()">
+      <img id="lightboxImage" src="" class="max-w-full max-h-[78vh] object-contain rounded-lg zoom-in shadow-2xl" onclick="event.stopPropagation()">
+    </div>
+
+    <div class="pb-8 pt-2 px-4 flex flex-col items-center gap-2.5 z-10 w-full max-w-xs" onclick="event.stopPropagation()">
+      <button id="btnDownloadPhoto" onclick="downloadLightboxPhoto()" class="w-full bg-app-brand hover:bg-teal-600 active:scale-[0.98] text-white font-bold py-3 px-5 rounded-2xl text-xs shadow-lg flex items-center justify-center gap-2 transition-all">
+        <i data-lucide="download" class="w-4 h-4"></i>
+        <span>Descargar imagen original</span>
+      </button>
+      <p class="text-white/50 text-[11px] font-medium">Toca fuera de la imagen o la 'X' para cerrar</p>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================================
+    // HELPERS DE SEGURIDAD Y UTILIDADES
+    // ============================================================================
+    
+    function escapeHtml(str) {
+        if (str == null) return '';
+        return String(str).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    // ==== CONFIGURACIÓN DE SUPABASE ====
+    const SUPABASE_URL = "https://mifbcyxtafeacwkzqzsq.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_O6EAbkSba1NQPq08k_7bHg_PZ_x4ZU5";
+    
+    if (!window.supabase) {
+        console.error('[Supabase] SDK no disponible, redirigiendo al login.');
+        window.location.replace('../index.html');
+        throw new Error('Supabase SDK no disponible');
+    }
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    supabaseClient.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_OUT') window.location.replace('../index.html');
+    });
+
+    // --- TEMA CLARO/OSCURO ---
+    const btnThemeToggle = document.getElementById('btn-theme-toggle');
+    const htmlElement = document.documentElement;
+    
+    function setTheme(isDark) {
+        const themeMeta = document.querySelector('meta[name="theme-color"]');
+        if (isDark) {
+            htmlElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            if (themeMeta) themeMeta.setAttribute('content', '#0F172A');
+        } else {
+            htmlElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            if (themeMeta) themeMeta.setAttribute('content', '#F8F9FA');
+        }
+    }
+
+    setTheme(localStorage.getItem('theme') !== 'light');
+    btnThemeToggle.addEventListener('click', () => {
+        setTheme(!htmlElement.classList.contains('dark'));
+    });
+
+    let employees = [];
+    let allRecords = [];
+    let currentWeekOffset = 0;
+
+    let editingEmpId = null;
+    let editingDateStr = null;
+    let currentEditMode = 'WORK';
+
+    let activePopupTrigger = null;
+    let currentLightboxData = { url: '', filename: 'registro.jpg' };
+
+    const CHECK_TYPES = [
+      { id: 'entry', label: 'Ingreso' },
+      { id: 'lunch_out', label: 'Salida a comer' },
+      { id: 'lunch_in', label: 'Regreso de comer' },
+      { id: 'exit', label: 'Fin de turno' }
+    ];
+    const DAYS_OF_WEEK = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const NON_WORK_SHIFTS = ['LIBRE', 'VACACIONES', 'CAPAC'];
+
+    // ============================================================================
+    // INICIALIZACIÓN
+    // ============================================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+      
+      // Cierre del popup flotante al tocar fuera o hacer scroll
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.record-chip-clickable')) {
+          hideRecordPopup();
+        }
+      });
+      const mainScrollContainer = document.querySelector('.main-content');
+      if (mainScrollContainer) {
+        mainScrollContainer.addEventListener('scroll', hideRecordPopup, { passive: true });
+      }
+
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) {
+            window.location.replace('../index.html');
+            return;
+        }
+      } catch (e) {
+        console.error('[Auth] Error verificando sesión:', e);
+        window.location.replace('../index.html');
+        return;
+      }
+
+      await loadData();
+    });
+
+    // ============================================================================
+    // POPUP FLOTANTE DE HORA EXACTA
+    // ============================================================================
+    function showRecordPopup(event, label, exactTime) {
+      event.stopPropagation();
+      const target = event.currentTarget;
+      const popup = document.getElementById('recordExactPopup');
+
+      // Si se vuelve a tocar el mismo registro, se cierra
+      if (activePopupTrigger === target && !popup.classList.contains('hidden')) {
+        hideRecordPopup();
+        return;
+      }
+
+      activePopupTrigger = target;
+      document.getElementById('popupRecordLabel').textContent = label;
+      document.getElementById('popupRecordTime').textContent = exactTime;
+
+      popup.classList.remove('hidden');
+
+      const rect = target.getBoundingClientRect();
+      const popupRect = popup.getBoundingClientRect();
+
+      let top = rect.top - popupRect.height - 8;
+      let left = rect.left + (rect.width / 2) - (popupRect.width / 2);
+
+      // Evitar que se salga de los bordes laterales de la pantalla
+      const padding = 10;
+      if (left < padding) left = padding;
+      if (left + popupRect.width > window.innerWidth - padding) {
+        left = window.innerWidth - popupRect.width - padding;
+      }
+      if (top < padding) {
+        top = rect.bottom + 8;
+      }
+
+      popup.style.top = `${top}px`;
+      popup.style.left = `${left}px`;
+    }
+
+    function hideRecordPopup() {
+      const popup = document.getElementById('recordExactPopup');
+      if (popup) popup.classList.add('hidden');
+      activePopupTrigger = null;
+    }
+
+    // ============================================================================
+    // MODAL TABLA GENERAL DE HORARIOS Y DESCARGA DE IMAGEN COMPLETA
+    // ============================================================================
+    const SCHEDULE_GROUPS = {
+      managers: [
+        { number: '6577', shortName: 'Ana Nabte' },
+        { number: '9691', shortName: 'Jesus Fritz' },
+        { number: '19199', shortName: 'Fernanda Icte' }
+      ],
+      staff: [
+        { number: '12302', shortName: 'Eduardo Palomo' },
+        { number: '14269', shortName: 'Aria Ramirez' },
+        { number: '15100', shortName: 'José Mondragon' },
+        { number: '28833', shortName: 'Habib Palomino' }
+      ]
+    };
+
+    function formatTime24To12Short(time24) {
+      if (!time24) return '';
+      const parts = String(time24).trim().split(':');
+      if (parts.length < 2) return String(time24).trim();
+      const h = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      if (isNaN(h) || isNaN(m)) return String(time24).trim();
+
+      const suffix = h >= 12 ? 'PM' : 'AM';
+      const hour12 = h % 12 === 0 ? 12 : h % 12;
+      const minPart = m === 0 ? '' : `:${String(m).padStart(2, '0')}`;
+      return `${hour12}${minPart} ${suffix}`;
+    }
+
+    function formatShiftForTableCell(sched) {
+      if (!sched || !sched.startTime) {
+        return { text: '--', isRest: false, isMuted: true };
+      }
+      const upper = String(sched.startTime).trim().toUpperCase();
+      if (upper === 'LIBRE') {
+        return { text: 'Descanso', isRest: true, isMuted: false };
+      }
+      if (upper === 'VACACIONES' || upper === 'VAC') {
+        return { text: 'Vacaciones', isRest: false, isMuted: false, badgeClass: 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300' };
+      }
+      if (upper.startsWith('CAPAC')) {
+        return { text: 'Capacitación', isRest: false, isMuted: false, badgeClass: 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300' };
+      }
+
+      const start12 = formatTime24To12Short(sched.startTime);
+      const end12 = sched.endTime ? formatTime24To12Short(sched.endTime) : '';
+      const formatted = end12 ? `${start12}-${end12}` : start12;
+      return { text: formatted, isRest: false, isMuted: false };
+    }
+
+    let currentWeekDatesForDownload = { filenameStr: 'Horarios' };
+
+    function openWeeklyScheduleModal() {
+      hideRecordPopup();
+      renderWeeklyScheduleTable();
+      document.getElementById('modalWeeklySchedule').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeWeeklyScheduleModal() {
+      document.getElementById('modalWeeklySchedule').classList.add('hidden');
+    }
+
+    function renderWeeklyScheduleTable() {
+      const { monday, sunday } = getWeekData(0);
+      const rangeOptions = { day: 'numeric', month: 'short' };
+      
+      const monDayNum = monday.getDate();
+      const monMonthShort = monday.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
+      const sunDayNum = sunday.getDate();
+      const sunMonthShort = sunday.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
+
+      currentWeekDatesForDownload = {
+        filenameStr: `Horarios ${monDayNum}${monMonthShort}-${sunDayNum}${sunMonthShort}`
+      };
+
+      document.getElementById('scheduleModalRange').textContent = `Semana Actual · ${monday.toLocaleDateString('es-MX', rangeOptions)} al ${sunday.toLocaleDateString('es-MX', rangeOptions)}`;
+
+      const weekDays = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const monthShort = d.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
+        weekDays.push({
+          dateStr,
+          dateLabel: `${d.getDate()} de ${monthShort}.`,
+          dayUpper: DAYS_OF_WEEK[i].toUpperCase()
+        });
+      }
+
+      const buildEmployeeRows = (groupList) => {
+        return groupList.map(item => {
+          const emp = employees.find(e => String(e.number).trim() === item.number);
+          const turnos = emp && emp.turnos ? emp.turnos : {};
+
+          const cellsHTML = weekDays.map(day => {
+            const sched = turnos[day.dateStr];
+            const cellInfo = formatShiftForTableCell(sched);
+
+            if (cellInfo.isRest) {
+              return `<td class="border border-slate-300 dark:border-slate-700 px-2.5 py-2 text-center font-bold text-[11px] whitespace-nowrap bg-[#FFF200] text-slate-900">Descanso</td>`;
+            }
+            if (cellInfo.badgeClass) {
+              return `<td class="border border-slate-300 dark:border-slate-700 px-2.5 py-2 text-center font-semibold text-[11px] whitespace-nowrap ${cellInfo.badgeClass}">${escapeHtml(cellInfo.text)}</td>`;
+            }
+            if (cellInfo.isMuted) {
+              return `<td class="border border-slate-300 dark:border-slate-700 px-2.5 py-2 text-center font-medium text-[11px] whitespace-nowrap bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-500">--</td>`;
+            }
+            return `<td class="border border-slate-300 dark:border-slate-700 px-2.5 py-2 text-center font-semibold text-[11px] whitespace-nowrap bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">${escapeHtml(cellInfo.text)}</td>`;
+          }).join('');
+
+          return `
+            <tr>
+              <td class="border border-slate-300 dark:border-slate-700 px-3 py-2 text-left font-bold text-[11px] whitespace-nowrap bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                ${escapeHtml(item.shortName)}
+              </td>
+              ${cellsHTML}
+            </tr>
+          `;
+        }).join('');
+      };
+
+      const dateHeaderCells = weekDays.map(day => `
+        <th class="border border-slate-400/50 dark:border-slate-700 px-3 py-1.5 text-center font-bold text-[11px] whitespace-nowrap bg-[#1B365D] text-white">
+          ${escapeHtml(day.dateLabel)}
+        </th>
+      `).join('');
+
+      const daySubHeaderCells = weekDays.map(day => `
+        <th class="border border-slate-400/50 dark:border-slate-700 px-3 py-1.5 text-center font-extrabold text-[11px] tracking-wide whitespace-nowrap bg-[#8FAADC] dark:bg-slate-700 text-white">
+          ${escapeHtml(day.dayUpper)}
+        </th>
+      `).join('');
+
+      const tableHTML = `
+        <table class="w-full border-collapse text-xs">
+          <thead>
+            <tr>
+              <th class="border border-slate-400/50 dark:border-slate-700 px-3 py-1.5 bg-[#1B365D] min-w-[130px]"></th>
+              ${dateHeaderCells}
+            </tr>
+            <tr>
+              <th class="border border-slate-400/50 dark:border-slate-700 px-3 py-1.5 bg-[#8FAADC] dark:bg-slate-700"></th>
+              ${daySubHeaderCells}
+            </tr>
+          </thead>
+          <tbody>
+            ${buildEmployeeRows(SCHEDULE_GROUPS.managers)}
+            <tr>
+              <td class="border border-slate-400/50 dark:border-slate-700 px-3 py-1.5 bg-[#8FAADC] dark:bg-slate-700"></td>
+              ${weekDays.map(day => `
+                <td class="border border-slate-400/50 dark:border-slate-700 px-3 py-1.5 text-center font-extrabold text-[11px] tracking-wide whitespace-nowrap bg-[#8FAADC] dark:bg-slate-700 text-white">
+                  ${escapeHtml(day.dayUpper)}
+                </td>
+              `).join('')}
+            </tr>
+            ${buildEmployeeRows(SCHEDULE_GROUPS.staff)}
+          </tbody>
+        </table>
+      `;
+
+      document.getElementById('weeklyScheduleTableWrapper').innerHTML = tableHTML;
+    }
+
+    async function downloadScheduleImage() {
+      const tableWrapper = document.getElementById('weeklyScheduleTableWrapper');
+      if (!tableWrapper) return;
+
+      const btn = document.getElementById('btnDownloadScheduleImg');
+      const originalHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Generando...</span>`;
+      lucide.createIcons();
+
+      // Forzar temporalmente ancho completo y quitar desbordamiento para que html2canvas capture todo (lunes a domingo)
+      const originalOverflow = tableWrapper.style.overflow;
+      const originalMaxWidth = tableWrapper.style.maxWidth;
+      const originalWidth = tableWrapper.style.width;
+
+      tableWrapper.style.overflow = 'visible';
+      tableWrapper.style.maxWidth = 'none';
+      tableWrapper.style.width = tableWrapper.scrollWidth + 'px';
+
+      try {
+        const canvas = await html2canvas(tableWrapper, {
+          scale: 2, // Alta resolución
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          windowWidth: tableWrapper.scrollWidth + 100
+        });
+
+        const imageURL = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = imageURL;
+        link.download = `${currentWeekDatesForDownload.filenameStr || 'Horarios'}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.error('Error al generar la imagen:', err);
+        alert('No se pudo generar la imagen de la tabla.');
+      } finally {
+        // Restaurar estilos originales
+        tableWrapper.style.overflow = originalOverflow;
+        tableWrapper.style.maxWidth = originalMaxWidth;
+        tableWrapper.style.width = originalWidth;
+
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        lucide.createIcons();
+      }
+    }
+
+    // ============================================================================
+    // LÓGICA DE NEGOCIO Y RENDER
+    // ============================================================================
+    function getWeekData(offset) {
+      const now = new Date();
+      const day = now.getDay() || 7; 
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - day + 1 + (offset * 7));
+      monday.setHours(0, 0, 0, 0);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      sunday.setHours(23, 59, 59, 999);
+      return { monday, sunday };
+    }
+
+    function changeWeek(dir) {
+      hideRecordPopup();
+      currentWeekOffset += dir;
+      renderAdminView();
+    }
+
+    async function loadData() {
+      const openAccordions = [];
+      employees.forEach(e => {
+        const el = document.getElementById(`content-${e.id}`);
+        if (el && el.classList.contains('open')) openAccordions.push(e.id);
+      });
+
+      employees = await syncEmployeesFromSupabase();
+      allRecords = await fetchAllRecordsFromSupabase();
+      renderAdminView();
+
+      openAccordions.forEach(id => {
+        const content = document.getElementById(`content-${id}`);
+        const icon = document.getElementById(`icon-${id}`);
+        if (content && icon) {
+          content.classList.add('open');
+          icon.style.transform = 'rotate(180deg)';
+        }
+      });
+    }
+
+    async function syncEmployeesFromSupabase() {
+      const { data, error } = await supabaseClient
+        .from('empleados')
+        .select('id, nombre, numero_empleado, puesto, foto_url, turnos')
+        .order('nombre', { ascending: true });
+      
+      if (error) {
+        console.error("Error cargando Minisers:", error);
+        return [];
+      }
+      
+      return data.map(emp => ({
+        id: emp.id,
+        name: emp.nombre,
+        number: String(emp.numero_empleado).trim(),
+        puesto: emp.puesto || '',
+        photoUrl: emp.foto_url || '',
+        turnos: emp.turnos || {}
+      }));
+    }
+
+    async function fetchAllRecordsFromSupabase() {
+      const { data, error } = await supabaseClient
+        .from('registros')
+        .select('*')
+        .order('timestamp', { ascending: true });
+      
+      if (error) {
+        console.error("Error cargando registros:", error);
+        return [];
+      }
+      
+      return data.map(r => ({
+        id: r.id,
+        employeeId: r.employee_id,
+        type: r.tipo,
+        timestamp: r.timestamp,
+        date: r.fecha,
+        photo: r.foto_url,
+        ocrName: r.ocr_nombre,
+        ocrDate: r.ocr_fecha
+      }));
+    }
+
+    function timeToSeconds(timeStr) {
+      if (!timeStr || NON_WORK_SHIFTS.includes(String(timeStr).toUpperCase())) return null;
+      const parts = String(timeStr).split(':').map(Number);
+      if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
+      return parts[0] * 3600 + parts[1] * 60 + (parts[2] || 0);
+    }
+
+    function renderAdminView() {
+      const { monday, sunday } = getWeekData(currentWeekOffset);
+      const options = { day: 'numeric', month: 'short' };
+      document.getElementById('weekRange').textContent = `${monday.toLocaleDateString('es-MX', options)} al ${sunday.toLocaleDateString('es-MX', options)}`;
+      
+      if (currentWeekOffset === 0) document.getElementById('weekLabel').textContent = 'Semana Actual';
+      else if (currentWeekOffset === -1) document.getElementById('weekLabel').textContent = 'Semana Anterior';
+      else if (currentWeekOffset === 1) document.getElementById('weekLabel').textContent = 'Próxima Semana';
+      else document.getElementById('weekLabel').textContent = `Semana (${currentWeekOffset > 0 ? '+' : ''}${currentWeekOffset})`;
+
+      if (employees.length === 0) {
+        document.getElementById('adminList').innerHTML = `
+          <div class="flex flex-col items-center justify-center py-12 text-app-sub dark:text-darkapp-sub bg-app-card dark:bg-darkapp-card rounded-xl shadow-sm mt-4">
+            <i data-lucide="users" class="w-12 h-12 mb-3 opacity-30"></i>
+            <p class="text-sm font-medium">No hay Minisers registrados en la Nube.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      const now = new Date();
+      const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      const weekRecords = allRecords.filter(r => {
+        const rDate = new Date(r.date + 'T12:00:00');
+        return rDate >= monday && rDate <= sunday;
+      });
+
+      const employeeListHTML = employees.map(emp => {
+        const empRecords = weekRecords.filter(r => r.employeeId === emp.id);
+        const empTurnos = emp.turnos || {};
+        
+        let daysHTML = '';
+        let completedDaysCount = 0;
+
+        DAYS_OF_WEEK.forEach((dayName, index) => {
+          const targetDate = new Date(monday);
+          targetDate.setDate(monday.getDate() + index);
+          const targetMidnight = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+          const dateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth()+1).padStart(2,'0')}-${String(targetDate.getDate()).padStart(2,'0')}`;
+          
+          const isFutureDay = targetMidnight > todayMidnight;
+          const isPastDay = targetMidnight < todayMidnight;
+
+          const sched = empTurnos[dateStr];
+          const dayRecords = empRecords.filter(r => r.date === dateStr).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+          
+          if (dayRecords.length === 4) completedDaysCount++;
+
+          const upperShift = sched && sched.startTime ? String(sched.startTime).toUpperCase() : '';
+          const isLibreDay = upperShift === 'LIBRE';
+          const isNonWorkDay = upperShift !== '' && NON_WORK_SHIFTS.includes(upperShift);
+          const lunchOutRec = dayRecords.find(r => r.type === 'lunch_out');
+
+          const greenClass = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+          const orangeClass = 'bg-orange-500/10 text-orange-600 dark:text-orange-400';
+          const redClass = 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+          const neutralClass = 'bg-app-bg/50 dark:bg-slate-800/50 text-app-sub dark:text-darkapp-sub';
+
+          let cellsHTML = '';
+
+          // Si el día está programado como LIBRE (Descanso) y no hay registros, no se muestran los "--:--"
+          if (!isFutureDay && !(isLibreDay && dayRecords.length === 0)) {
+            cellsHTML = CHECK_TYPES.map((type) => {
+              const rec = dayRecords.find(r => r.type === type.id);
+              let bgClass = neutralClass;
+              let displayTime = '--:--';
+              let title = `Sin registro: ${type.label}`;
+
+              if (rec) {
+                const actualDate = new Date(rec.timestamp);
+                displayTime = actualDate.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
+                const exactTimeStr = actualDate.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                const actualSecs = actualDate.getHours() * 3600 + actualDate.getMinutes() * 60 + actualDate.getSeconds();
+
+                if (type.id === 'entry') {
+                  if (sched && sched.startTime) {
+                    const startSecs = timeToSeconds(sched.startTime);
+                    if (startSecs !== null) {
+                      if (actualSecs > startSecs + 600) {
+                        bgClass = orangeClass;
+                        title = `Retardo (Turno: ${sched.startTime})`;
+                      } else {
+                        bgClass = greenClass;
+                        title = `A tiempo (Turno: ${sched.startTime})`;
+                      }
+                    } else {
+                      bgClass = greenClass;
+                      title = type.label;
+                    }
+                  } else {
+                    bgClass = greenClass;
+                    title = type.label;
+                  }
+                } else if (type.id === 'lunch_out') {
+                  bgClass = greenClass;
+                  title = type.label;
+                } else if (type.id === 'lunch_in') {
+                  if (lunchOutRec) {
+                    const lunchOutTimeMs = new Date(lunchOutRec.timestamp).getTime();
+                    const lunchInTimeMs = actualDate.getTime();
+                    const diffSecs = Math.floor((lunchInTimeMs - lunchOutTimeMs) / 1000);
+                    if (diffSecs >= 3601) {
+                      bgClass = orangeClass;
+                      title = 'Regreso de comida con retardo (+1h)';
+                    } else {
+                      bgClass = greenClass;
+                      title = 'Regreso de comida a tiempo';
+                    }
+                  } else {
+                    bgClass = greenClass;
+                    title = type.label;
+                  }
+                } else if (type.id === 'exit') {
+                  if (sched && sched.endTime) {
+                    const endSecs = timeToSeconds(sched.endTime);
+                    const startSecs = timeToSeconds(sched.startTime);
+                    if (endSecs !== null) {
+                      let effectiveEndSecs = endSecs;
+                      if (startSecs !== null && endSecs < startSecs) {
+                        effectiveEndSecs += 86400;
+                      }
+                      let effectiveActualSecs = actualSecs;
+                      if (startSecs !== null && endSecs < startSecs && actualSecs < startSecs) {
+                        effectiveActualSecs += 86400;
+                      }
+
+                      if (effectiveActualSecs < effectiveEndSecs - 600) {
+                        bgClass = orangeClass;
+                        title = `Salida anticipada (Salida programada: ${sched.endTime})`;
+                      } else {
+                        bgClass = greenClass;
+                        title = `Salida a tiempo (Salida programada: ${sched.endTime})`;
+                      }
+                    } else {
+                      bgClass = greenClass;
+                      title = type.label;
+                    }
+                  } else {
+                    bgClass = greenClass;
+                    title = type.label;
+                  }
+                }
+
+                return `<button type="button" onclick="showRecordPopup(event, '${escapeHtml(type.label)}', '${escapeHtml(exactTimeStr)}')" class="record-chip-clickable ${bgClass} px-1.5 py-1 rounded-md text-[10px] font-bold text-center transition-all active:scale-95 cursor-pointer" title="${title}">${displayTime}</button>`;
+            } else {
+              if (isPastDay && !isNonWorkDay) {
+                bgClass = redClass;
+              }
+
+              return `<div class="${bgClass} px-1.5 py-1 rounded-md text-[10px] font-bold text-center transition-colors" title="${title}">${displayTime}</div>`;
+            }
+
+            }).join('');
+          }
+
+          let shiftLabel = '';
+          if (sched && sched.startTime) {
+            if (upperShift === 'LIBRE') {
+              shiftLabel = '<span class="text-[10px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-700/50 px-2 py-0.5 rounded">Descanso</span>';
+            } else if (upperShift === 'VACACIONES') {
+              shiftLabel = '<span class="text-[10px] font-semibold text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">Vacaciones</span>';
+            } else if (upperShift.startsWith('CAPAC')) {
+              shiftLabel = '<span class="text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">Capacitación</span>';
+            } else {
+              const t = sched.endTime ? `${sched.startTime} - ${sched.endTime}` : sched.startTime;
+              shiftLabel = `<span class="text-[10px] font-bold text-app-brand dark:text-teal-400 bg-app-brand/10 dark:bg-teal-500/10 px-2 py-0.5 rounded">${t}</span>`;
+            }
+          } else {
+            shiftLabel = '<span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 italic">Sin horario</span>';
+          }
+
+          const bottomRowHTML = isLibreDay && dayRecords.length === 0
+            ? ''
+            : `<div class="grid grid-cols-4 gap-1.5 mt-1">
+                 ${cellsHTML || '<div class="col-span-4 text-[10px] text-app-sub dark:text-darkapp-sub italic text-center py-1">-- Sin registros --</div>'}
+               </div>`;
+
+          daysHTML += `
+            <div class="flex flex-col py-3 border-b border-app-border/30 dark:border-darkapp-border/30 last:border-0">
+              <div class="flex items-center justify-between ${bottomRowHTML ? 'mb-1.5' : ''}">
+                <div class="flex items-center gap-2">
+                  <p class="text-[11px] font-bold text-app-title dark:text-darkapp-title w-16">${dayName}</p>
+                  <p class="text-[10px] text-app-sub dark:text-darkapp-sub font-medium w-12">${targetDate.getDate()} ${targetDate.toLocaleDateString('es-MX', { month: 'short' })}</p>
+                  ${shiftLabel}
+                </div>
+                <button onclick="openEditShiftModal(${emp.id}, '${dateStr}', '${dayName}')" class="p-1.5 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 rounded-lg transition-colors" title="Editar turno">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+              ${bottomRowHTML}
+            </div>
+          `;
+        });
+
+        const avatarHTML = emp.photoUrl
+          ? `<img src="${escapeHtml(emp.photoUrl)}" class="w-9 h-9 rounded-full object-cover shrink-0 shadow-sm">`
+          : `<div class="w-9 h-9 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-sm">${escapeHtml(emp.name.charAt(0))}</div>`;
+
+        return `
+          <div class="bg-app-card dark:bg-darkapp-card rounded-xl shadow-sm overflow-hidden mb-3 transition-colors">
+            <div class="px-4 py-3 flex items-center justify-between hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
+              <button onclick="toggleAccordion(${emp.id})" class="flex items-center gap-3 flex-1 text-left min-w-0">
+                ${avatarHTML}
+                <div class="min-w-0">
+                  <p class="font-bold text-sm text-app-title dark:text-darkapp-title truncate">${escapeHtml(emp.name)}</p>
+                  <p class="text-[11px] text-app-sub dark:text-darkapp-sub">#${escapeHtml(emp.number)} · ${completedDaysCount} días completos</p>
+                </div>
+              </button>
+              <div class="flex items-center gap-2 shrink-0">
+                <button onclick="openEmployeePhotos(${emp.id})" class="p-2 text-app-brand dark:text-teal-400 hover:bg-app-brand/20 dark:hover:bg-teal-500/20 rounded-lg transition-colors" title="Ver galería de fotos">
+                  <i data-lucide="camera" class="w-5 h-5"></i>
+                </button>
+                <button onclick="toggleAccordion(${emp.id})" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 transition-colors">
+                  <i data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300" id="icon-${emp.id}"></i>
+                </button>
+              </div>
+            </div>
+            <div id="content-${emp.id}" class="accordion-content bg-transparent px-4">
+              <div class="py-2">${daysHTML}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('adminList').innerHTML = employeeListHTML;
+      lucide.createIcons();
+    }
+
+    function toggleAccordion(empId) {
+      hideRecordPopup();
+      const content = document.getElementById(`content-${empId}`);
+      const icon = document.getElementById(`icon-${empId}`);
+      if (content.classList.contains('open')) {
+        content.classList.remove('open');
+        icon.style.transform = 'rotate(0deg)';
+      } else {
+        content.classList.add('open');
+        icon.style.transform = 'rotate(180deg)';
+      }
+    }
+
+    // ============================================================================
+    // EDICIÓN DE TURNOS
+    // ============================================================================
+    function formatTo24HInput(timeStr) {
+      if (!timeStr) return '';
+      const parts = timeStr.split(':');
+      if (parts.length !== 2) return '';
+      return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
+    }
+
+    function openEditShiftModal(empId, dateStr, dayName) {
+      hideRecordPopup();
+      const emp = employees.find(e => e.id === empId);
+      if (!emp) return;
+
+      editingEmpId = empId;
+      editingDateStr = dateStr;
+
+      const [y, m, d] = dateStr.split('-');
+      const formattedDate = `${dayName} ${d}/${m}/${y}`;
+      document.getElementById('editShiftSubtitle').textContent = `${emp.name} · ${formattedDate}`;
+
+      const sched = (emp.turnos && emp.turnos[dateStr]) ? emp.turnos[dateStr] : null;
+
+      if (sched && String(sched.startTime).toUpperCase() === 'LIBRE') {
+        setShiftMode('LIBRE');
+        document.getElementById('editStartTime').value = '09:00';
+        document.getElementById('editEndTime').value = '18:00';
+      } else {
+        setShiftMode('WORK');
+        document.getElementById('editStartTime').value = sched && sched.startTime && !NON_WORK_SHIFTS.includes(String(sched.startTime).toUpperCase())
+          ? formatTo24HInput(sched.startTime)
+          : '09:00';
+        document.getElementById('editEndTime').value = sched && sched.endTime
+          ? formatTo24HInput(sched.endTime)
+          : '18:00';
+      }
+
+      document.getElementById('modalEditShift').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeEditShiftModal() {
+      document.getElementById('modalEditShift').classList.add('hidden');
+      editingEmpId = null;
+      editingDateStr = null;
+    }
+
+    function setShiftMode(mode) {
+      currentEditMode = mode;
+      const btnWork = document.getElementById('btnTypeWork');
+      const btnFree = document.getElementById('btnTypeFree');
+      const workContainer = document.getElementById('workHoursContainer');
+      const freeNotice = document.getElementById('freeDayNotice');
+
+      if (mode === 'LIBRE') {
+        btnFree.className = 'py-2.5 px-3 rounded-xl text-xs font-bold border border-app-brand dark:border-teal-500 bg-app-brand/10 dark:bg-teal-500/10 text-app-brand dark:text-teal-400 transition-all flex items-center justify-center gap-1.5';
+        btnWork.className = 'py-2.5 px-3 rounded-xl text-xs font-bold border border-transparent bg-app-bg dark:bg-slate-800 text-app-sub dark:text-darkapp-sub hover:bg-app-bg/80 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-1.5';
+        workContainer.classList.add('hidden');
+        freeNotice.classList.remove('hidden');
+      } else {
+        btnWork.className = 'py-2.5 px-3 rounded-xl text-xs font-bold border border-app-brand dark:border-teal-500 bg-app-brand/10 dark:bg-teal-500/10 text-app-brand dark:text-teal-400 transition-all flex items-center justify-center gap-1.5';
+        btnFree.className = 'py-2.5 px-3 rounded-xl text-xs font-bold border border-transparent bg-app-bg dark:bg-slate-800 text-app-sub dark:text-darkapp-sub hover:bg-app-bg/80 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-1.5';
+        workContainer.classList.remove('hidden');
+        freeNotice.classList.add('hidden');
+      }
+    }
+
+    async function saveEditedShift() {
+      if (!editingEmpId || !editingDateStr || !supabaseClient) return;
+
+      const emp = employees.find(e => e.id === editingEmpId);
+      if (!emp) return;
+
+      const btnSave = document.getElementById('btnSaveShift');
+      const originalText = btnSave.textContent;
+      btnSave.textContent = 'Guardando...';
+      btnSave.disabled = true;
+
+      try {
+        let updatedShiftData = null;
+
+        if (currentEditMode === 'LIBRE') {
+          updatedShiftData = { startTime: 'LIBRE', endTime: null };
+        } else {
+          const startVal = document.getElementById('editStartTime').value;
+          const endVal = document.getElementById('editEndTime').value;
+
+          if (!startVal) {
+            alert('Por favor ingresa una hora de ingreso válida.');
+            btnSave.textContent = originalText;
+            btnSave.disabled = false;
+            return;
+          }
+
+          updatedShiftData = {
+            startTime: startVal,
+            endTime: endVal || null
+          };
+        }
+
+        const updatedTurnos = { ...(emp.turnos || {}) };
+        updatedTurnos[editingDateStr] = updatedShiftData;
+
+        const { error } = await supabaseClient
+          .from('empleados')
+          .update({
+            turnos: updatedTurnos,
+            turnos_actualizados_at: new Date().toISOString()
+          })
+          .eq('id', editingEmpId);
+
+        if (error) throw new Error(error.message);
+
+        closeEditShiftModal();
+        await loadData();
+
+      } catch (err) {
+        alert('Error al guardar el turno: ' + err.message);
+      } finally {
+        btnSave.textContent = originalText;
+        btnSave.disabled = false;
+      }
+    }
+
+    // ============================================================================
+    // GALERÍA DE FOTOS Y DESCARGA ORIGINAL
+    // ============================================================================
+    function openEmployeePhotos(empId) {
+      hideRecordPopup();
+      const emp = employees.find(e => e.id === empId);
+      if (!emp) return;
+      document.getElementById('modalPhotosTitle').textContent = emp.name;
+      
+      const empRecords = allRecords.filter(r => r.employeeId === empId);
+      
+      const recordsByDate = {};
+      empRecords.forEach(r => {
+        if (!recordsByDate[r.date]) recordsByDate[r.date] = [];
+        recordsByDate[r.date].push(r);
+      });
+
+      const sortedDates = Object.keys(recordsByDate).sort((a, b) => new Date(b) - new Date(a));
+
+      let htmlContent = '';
+
+      if (sortedDates.length === 0) {
+        htmlContent = '<div class="flex flex-col items-center justify-center py-12 text-app-sub dark:text-darkapp-sub"><i data-lucide="image-off" class="w-12 h-12 mb-2 opacity-40"></i><p class="text-sm font-medium">No hay registros fotográficos en la nube.</p></div>';
+      } else {
+        sortedDates.forEach(dateStr => {
+          const dayRecords = recordsByDate[dateStr].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+          
+          const [y, m, d] = dateStr.split('-');
+          const dateObj = new Date(y, m - 1, d);
+          const formattedDateHeader = dateObj.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+          htmlContent += `
+            <div class="mb-4">
+              <div class="flex items-center gap-2 mb-3">
+                <div class="h-px bg-app-border/50 dark:bg-darkapp-border/50 flex-1"></div>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-app-brand dark:text-teal-400 bg-app-brand/10 dark:bg-teal-500/10 px-3 py-1 rounded-full">${escapeHtml(formattedDateHeader)}</span>
+                <div class="h-px bg-app-border/50 dark:bg-darkapp-border/50 flex-1"></div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+          `;
+
+          dayRecords.forEach(rec => {
+            const typeObj = CHECK_TYPES.find(t => t.id === rec.type);
+            const typeLabel = typeObj ? typeObj.label : rec.type;
+            const timeStr = new Date(rec.timestamp).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const safePhotoUrl = escapeHtml(rec.photo);
+            const cleanEmpName = emp.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+            const downloadName = `${cleanEmpName}_${dateStr}_${rec.type}.jpg`;
+            
+            htmlContent += `
+              <div class="bg-app-bg/50 dark:bg-slate-800/50 p-2.5 rounded-xl shadow-sm flex flex-col gap-2">
+                <div class="flex justify-between items-center text-[11px] font-bold gap-1">
+                  <span class="text-app-sub dark:text-darkapp-sub uppercase truncate flex-1 min-w-0">${escapeHtml(typeLabel)}</span>
+                  <span class="text-app-brand dark:text-teal-400 shrink-0 text-right">${escapeHtml(timeStr)}</span>
+                </div>
+                <img src="${safePhotoUrl}" data-photo="${safePhotoUrl}" data-filename="${escapeHtml(downloadName)}" class="photo-thumb w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" title="Toca para ver en tamaño completo">
+              </div>
+            `;
+          });
+
+          htmlContent += `</div></div>`;
+        });
+      }
+
+      const photosContentEl = document.getElementById('modalPhotosContent');
+      photosContentEl.innerHTML = htmlContent;
+      document.getElementById('modalPhotos').classList.remove('hidden');
+      
+      photosContentEl.onclick = (e) => {
+          const img = e.target.closest('.photo-thumb');
+          if (img) {
+              openLightbox(img.getAttribute('data-photo'), img.getAttribute('data-filename'));
+          }
+      };
+
+      lucide.createIcons();
+    }
+
+    function closeGalleryModal() {
+      document.getElementById('modalPhotos').classList.add('hidden');
+    }
+
+    function openLightbox(src, filename = 'registro.jpg') {
+      currentLightboxData = { url: src, filename };
+      document.getElementById('lightboxImage').src = src;
+      document.getElementById('modalLightbox').classList.remove('hidden');
+      lucide.createIcons();
+    }
+    
+    function closeLightbox() {
+      document.getElementById('modalLightbox').classList.add('hidden');
+      setTimeout(() => { document.getElementById('lightboxImage').src = ''; }, 200);
+    }
+
+    async function downloadLightboxPhoto() {
+      const { url, filename } = currentLightboxData;
+      if (!url) return;
+
+      const btn = document.getElementById('btnDownloadPhoto');
+      const originalHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<span>Descargando...</span>`;
+
+      try {
+        // Obtiene el archivo binario original sin recompresión desde Supabase
+        const response = await fetch(url, { mode: 'cors', cache: 'no-store' });
+        if (!response.ok) throw new Error('No se pudo obtener el archivo original');
+        
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename || 'registro.jpg';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+      } catch (err) {
+        console.warn('Descarga directa vía fetch falló, abriendo enlace directo:', err);
+        const fallbackLink = document.createElement('a');
+        fallbackLink.href = url;
+        fallbackLink.download = filename || 'registro.jpg';
+        fallbackLink.target = '_blank';
+        document.body.appendChild(fallbackLink);
+        fallbackLink.click();
+        document.body.removeChild(fallbackLink);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        lucide.createIcons();
+      }
+    }
+
+    // ===============
+    // IMPORTAR EXCEL
+    // ===============
+    function openImportModal() {
+      hideRecordPopup();
+      document.getElementById('importStatus').innerHTML = '';
+      document.getElementById('modalImport').classList.remove('hidden');
+    }
+    
+    function closeImportModal() {
+      document.getElementById('modalImport').classList.add('hidden');
+    }
+
+    function parseExcelDate(val) {
+      if (!val) return null;
+      if (val instanceof Date) {
+        if (isNaN(val.getTime())) return null;
+        return new Date(val.getFullYear(), val.getMonth(), val.getDate());
+      }
+      const str = String(val).trim();
+      let m = str.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+      if (m) {
+        const d = parseInt(m[1]), mo = parseInt(m[2]), y = parseInt(m[3]);
+        if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) return new Date(y, mo-1, d);
+      }
+      m = str.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);
+      if (m) return new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
+      return null;
+    }
+
+    function parseShiftCell(val) {
+      if (val === null || val === undefined) return null;
+      const str = String(val).trim();
+      if (!str) return null;
+      const upper = str.toUpperCase();
+
+      if (upper === 'LIBRE') return { startTime: 'LIBRE', endTime: null };
+      if (upper.startsWith('CAPAC')) return { startTime: 'CAPAC', endTime: null };
+      if (upper === 'VACACIONES' || upper === 'VAC') return { startTime: 'VACACIONES', endTime: null };
+
+      let m = str.match(/^(\d{1,2}:\d{2})\s*(?:a|-|–|to)\s*(\d{1,2}:\d{2})$/i);
+      if (m) return { startTime: m[1], endTime: m[2] };
+
+      m = str.match(/^(\d{1,2}:\d{2})$/);
+      if (m) return { startTime: m[1], endTime: null };
+
+      return { startTime: str, endTime: null };
+    }
+
+    async function handleExcelFile(file) {
+      if (!file) return;
+      const statusEl = document.getElementById('importStatus');
+      statusEl.innerHTML = '<div class="text-sm text-app-sub dark:text-darkapp-sub text-center py-2">Procesando y sincronizando con la Nube...</div>';
+
+      try {
+        if (typeof XLSX === 'undefined') throw new Error('Librería XLSX no disponible.');
+
+        const dbEmployees = await syncEmployeesFromSupabase();
+        if (!dbEmployees.length) throw new Error('No hay Minisers registrados en la Nube.');
+
+        const buffer = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = () => reject(new Error('Error al leer archivo.'));
+          reader.readAsArrayBuffer(file);
+        });
+
+        let workbook = XLSX.read(buffer, { cellDates: true });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: null });
+
+        let headerIdx = -1;
+        for (let i = 0; i < rows.length; i++) {
+          if (rows[i] && rows[i].some(c => c && String(c).trim().toLowerCase() === 'trabajador')) {
+            headerIdx = i; break;
+          }
+        }
+        if (headerIdx === -1) throw new Error('No se encontró la columna "Trabajador".');
+
+        const headerRow = rows[headerIdx];
+        const dateColumns = [];
+        for (let c = 5; c < headerRow.length; c++) {
+          const parsed = parseExcelDate(headerRow[c]);
+          if (parsed) dateColumns.push({ col: c, date: parsed });
+        }
+        if (!dateColumns.length) throw new Error('No se encontraron fechas válidas en columnas de turnos.');
+
+        const empByCode = {};
+        dbEmployees.forEach(e => { empByCode[e.number] = e; });
+
+        let updatedCount = 0;
+        const updatePromises = []; 
+
+        for (let r = headerIdx + 1; r < rows.length; r++) {
+          const row = rows[r];
+          if (!row) continue;
+          const code = row[1] ? String(row[1]).trim() : '';
+          if (!code || !empByCode[code]) continue;
+
+          const emp = empByCode[code];
+          let currentTurnos = emp.turnos || {};
+
+          for (const { col, date } of dateColumns) {
+            const shift = parseShiftCell(row[col]);
+            if (shift) {
+              const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+              currentTurnos[dateStr] = { startTime: shift.startTime, endTime: shift.endTime || null };
+            }
+          }
+
+          updatePromises.push(
+            supabaseClient.from('empleados')
+              .update({ turnos: currentTurnos, turnos_actualizados_at: new Date().toISOString() })
+              .eq('id', emp.id)
+          );
+          updatedCount++;
+        }
+
+        await Promise.all(updatePromises);
+
+        statusEl.innerHTML = `
+          <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-700 dark:text-emerald-400">
+            <strong>¡Éxito!</strong> Se actualizaron los turnos de ${updatedCount} Minisers.
+          </div>
+        `;
+        await loadData();
+        setTimeout(() => closeImportModal(), 2500);
+
+      } catch (err) {
+        statusEl.innerHTML = `
+          <div class="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 text-xs text-rose-700 dark:text-rose-400">
+            <strong>Error:</strong> ${err.message}
+          </div>
+        `;
+      }
+      document.getElementById('excelInput').value = '';
+    }
+  </script>
+</body>
+</html>

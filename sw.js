@@ -1,46 +1,72 @@
-const CACHE_NAME = 'Nexus-GP-v1.9.37';
-
-// Archivos y rutas estáticas esenciales (usar rutas absolutas)
+const CACHE_NAME = 'Nexus-T0151-v1.9.39';
 const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/manifest.json',
-    '/fonts.css',
-    '/src/teclado.js',
-    '/src/icons/corte-96.png',
-    '/src/icons/notas-96.png',
-    '/src/icons/tickets-96.png',
-    '/src/icons/ventas-96.png',
-    '/src/icons/fases-96.png',
-    '/src/icons/existencias-96.png',
-    '/src/icons/checks-96.png',
-    '/fonts/PlusJakartaSans-Regular.ttf',
-    '/fonts/PlusJakartaSans-SemiBold.ttf',
-    '/icon-192.png',
-    '/icon-512.png',
-    '/corte/index.html',
-    '/existencias/index.html',
-    '/fases/index.html',
-    '/tickets/index.html',
-    '/ventas/index.html',
-    '/notas/index.html',
-    '/checks/index.html',
-    '/minisers/index.html'
+    './',
+    'index.html',
+    'manifest.json',
+    'fonts.css',
+    'nexus.svg',
+    'icon-180.png',
+    'icon-192.png',
+    'icon-512.png',
+    'src/teclado.js',
+    'src/fonts/Geist-Regular.ttf',
+    'src/fonts/Geist-SemiBold.ttf',
+    'src/icons/checador-96.png',
+    'src/icons/corte-96.png',
+    'src/icons/ventas-96.png',
+    'corte/index.html',
+    'existencias/index.html',
+    'fases/index.html',
+    'tickets/index.html',
+    'ventas/index.html',
+    'notas/index.html',
+    'checks/index.html',
+    'minisers/index.html',
+    'checador/checador.html',
+    'checador/admin.html',
+    'corte/corte.svg',
+    'existencias/existencias.svg',
+    'fases/fases.svg',
+    'ventas/ventas.svg',
+    'tickets/tickets.svg',
+    'notas/notas.svg',
+    'checks/checks.svg',
+    'minisers/agenda.svg',
+    'checador/checador.svg',
+    'checador/admin.svg'
 ];
 
-// Instalación: Guardar recursos propios de forma segura
+// Resuelve cada ruta relativa contra el scope de registro del SW.
+function assetUrl(path) {
+    return new URL(path, self.registration.scope).href;
+}
+
+function indexUrl() {
+    return new URL('index.html', self.registration.scope).href;
+}
+
+// Instalación: guardar recursos propios.
+// Se cachea archivo por archivo (allSettled) para que un solo asset
+// que falle NO cancele todo el cacheo inicial, como pasaba con addAll().
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(STATIC_ASSETS).catch(err => {
-                console.warn('[SW] Error al cachear assets estáticos iniciales:', err);
+        caches.open(CACHE_NAME).then(async (cache) => {
+            const results = await Promise.allSettled(
+                STATIC_ASSETS.map((asset) => cache.add(assetUrl(asset)))
+            );
+            results.forEach((result, i) => {
+                if (result.status === 'rejected') {
+                    console.warn('[SW] No se pudo cachear:', STATIC_ASSETS[i], result.reason);
+                }
             });
+            const ok = results.filter((r) => r.status === 'fulfilled').length;
+            console.log(`[SW] Cache inicial: ${ok}/${STATIC_ASSETS.length} assets en ${CACHE_NAME}`);
         })
     );
     self.skipWaiting();
 });
 
-// Activación: Limpiar cachés antiguas y tomar control inmediato de las pestañas
+// Activación: limpiar cachés antiguas y tomar control inmediato de las pestañas
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) => {
@@ -61,7 +87,7 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(event.request.url);
     const acceptHeader = event.request.headers.get('accept') || '';
-    
+
     // Omitir peticiones a Supabase en tiempo real
     if (url.origin.includes('supabase.co')) {
         return;
@@ -86,10 +112,10 @@ self.addEventListener('fetch', (event) => {
                     if (cachedResponse) return cachedResponse;
 
                     // Fallback universal a index.html para soportar SPA / rutas hijas
-                    cachedResponse = await caches.match('/index.html', { ignoreSearch: true });
+                    cachedResponse = await caches.match(indexUrl(), { ignoreSearch: true });
                     if (cachedResponse) return cachedResponse;
 
-                    cachedResponse = await caches.match('/', { ignoreSearch: true });
+                    cachedResponse = await caches.match(assetUrl('./'), { ignoreSearch: true });
                     if (cachedResponse) return cachedResponse;
 
                     // Respuesta de emergencia si la caché está vacía
