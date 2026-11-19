@@ -586,6 +586,16 @@
 
         await loadSession();
         iniciarRealtime();
+
+        if (navigator.onLine && pendingRecords.length > 0) {
+          setTimeout(() => processPendingQueue(), 500);
+        }
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible' && navigator.onLine && pendingRecords.length > 0) {
+            processPendingQueue();
+          }
+        });
       } catch (error) {
         console.error("Error al iniciar la app:", error);
         document.getElementById('activeEmployeeName').textContent = "Error de conexión";
@@ -633,12 +643,12 @@
                     continue;
                 }
 
-                const fileName = `${item.employeeId}_${Date.now()}.jpg`;
+                const fileName = `${item.employeeId}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.jpg`;
                 const { error: uploadError } = await supabaseClient.storage
                     .from('registros-empleados')
                     .upload(fileName, item.photoBlob, { contentType: 'image/jpeg', upsert: false });
 
-                if (uploadError) throw uploadError;
+                if (uploadError) throw new Error(`Storage: ${uploadError.message}`);
 
                 const { data: publicUrlData } = supabaseClient.storage
                     .from('registros-empleados')
@@ -656,13 +666,15 @@
                         ocr_fecha: item.ocrDate || null
                     }]);
 
-                if (insertError) throw insertError;
+                if (insertError) throw new Error(`DB insert: ${insertError.message}`);
 
                 await dbDelete(STORE_PENDING, item.localId);
                 successCount++;
 
             } catch (err) {
-                console.error('[Sync] Error sincronizando pendiente:', err);
+                console.error('[Sync] Error sincronizando pendiente:', item.localId, err);
+                item.lastError = err?.message || String(err);
+                await dbPut(STORE_PENDING, item);
             }
         }
 
