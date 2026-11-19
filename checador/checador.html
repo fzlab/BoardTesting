@@ -5,25 +5,13 @@
   <link rel="stylesheet" href="../fonts.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Checador de Turnos - T0151</title>
+  
+  <!-- Iconos y PWA para iOS y Android -->
   <link rel="icon" type="image/svg+xml" href="./checador.svg">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://mifbcyxtafeacwkzqzsq.supabase.co; connect-src 'self' https://mifbcyxtafeacwkzqzsq.supabase.co wss://mifbcyxtafeacwkzqzsq.supabase.co; base-uri 'self'; form-action 'self'; object-src 'none';">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-
   <meta name="theme-color" content="#F8F9FA">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-  <script>
-      (function() {
-          const SESSION_KEY = 'sb-mifbcyxtafeacwkzqzsq-auth-token';
-          if (localStorage.getItem(SESSION_KEY) === null) {
-              document.documentElement.style.visibility = 'hidden';
-              window.location.replace('../index.html');
-          }
-      })();
-  </script>
-
-  <link rel="icon" type="image/svg+xml" href="./checador.svg">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@1.72.0"></script>
   <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
@@ -98,9 +86,7 @@
     
     <header class="px-5 py-4 flex items-center justify-between sticky top-0 bg-app-bg/95 dark:bg-darkapp-bg/95 backdrop-blur-md z-30 transition-colors">
       <div class="flex items-center space-x-3">
-        <a href="../index.html" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg transition-all cursor-pointer" title="Ir al Inicio">  
-          <i data-lucide="house" class="w-5 h-5"></i>  
-        </a>    
+        <i data-lucide="clock-2" class="w-7 h-7 text-app-brand dark:text-teal-400"></i>  
         <div>
           <h1 class="font-bold text-[17px] leading-tight text-app-title dark:text-darkapp-title">Checador</h1>
           <p class="text-[12px] text-app-sub dark:text-darkapp-sub flex items-center gap-1.5 font-medium mt-0.5">
@@ -111,7 +97,7 @@
       </div>
       
       <div class="flex items-center space-x-2">
-        <button id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors duration-200" title="Cambiar modo">
+        <button type="button" id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors duration-200" title="Cambiar modo">
             <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">
                 <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>
                 <i data-lucide="moon" class="w-3.5 h-3.5 text-slate-400 dark:text-indigo-400 opacity-100 dark:opacity-40"></i>
@@ -121,10 +107,8 @@
                 <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400 hidden dark:block"></i>
             </div>
         </button>
-        <a href="admin.html" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg transition-colors" title="Panel Administrador">
-          <i data-lucide="user-star" class="w-5 h-5"></i>
-        </a>
-        <button onclick="toggleSettings(event)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg transition-colors cursor-pointer relative z-50">
+
+        <button type="button" onclick="toggleSettings(event)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg transition-colors cursor-pointer relative z-50">
           <i data-lucide="settings" class="w-5 h-5"></i>
         </button>
       </div>
@@ -134,7 +118,7 @@
     <div id="syncBar" class="hidden mx-5 mb-2 rounded-xl border text-[11px] font-semibold overflow-hidden">
         <div class="flex items-center justify-between p-2.5 gap-2">
             <span id="syncIndicator" class="inline-flex items-center gap-1.5"></span>
-            <button id="btnSyncNow" onclick="processPendingQueue()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer hidden">
+            <button type="button" id="btnSyncNow" onclick="processPendingQueue()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer hidden">
                 Sincronizar ahora
             </button>
         </div>
@@ -142,15 +126,12 @@
 
     <!-- MENÚ DE AJUSTES -->
     <div id="settingsMenu" class="hidden fixed right-4 top-[72px] mt-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl min-w-[220px] shadow-xl border border-white/20 dark:border-slate-700/30 rounded-xl z-[45] py-2 flex flex-col fade-in">
-      <button onclick="openSwitchUserModal()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg/50 dark:hover:bg-slate-800/50 flex items-center gap-3 transition-colors">
-        <i data-lucide="user-plus" class="w-4 h-4 text-blue-500"></i> Registrar a otro usuario
-      </button>
-      <button onclick="logoutSession()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/20 flex items-center gap-3 transition-colors">
-        <i data-lucide="log-out" class="w-4 h-4"></i> Cerrar sesión
+      <button type="button" onclick="openSwitchUserModal()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg/50 dark:hover:bg-slate-800/50 flex items-center gap-3 transition-colors">
+        <i data-lucide="user-plus" class="w-4 h-4 text-blue-500"></i> Cambiar de Miniser
       </button>
       <div class="border-t border-app-border/50 dark:border-darkapp-border/50 my-1 mx-2"></div>
-      <button onclick="clearLocalStorage()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-900/20 flex items-center gap-3 transition-colors">
-        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refrescar sesión local
+      <button type="button" onclick="clearLocalStorage()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-900/20 flex items-center gap-3 transition-colors">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refrescar datos locales
       </button>
     </div>
 
@@ -160,7 +141,7 @@
         <i data-lucide="info" class="w-4 h-4"></i>
         Registrando turno para: <span id="otherUserName" class="font-bold"></span>
       </div>
-      <button onclick="returnToSessionUser()" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-bold text-xs bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg transition-colors">
+      <button type="button" onclick="returnToSessionUser()" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-bold text-xs bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg transition-colors">
         Volver a mi perfil
       </button>
     </div>
@@ -237,14 +218,14 @@
           </div>
 
           <div class="flex items-center justify-between bg-app-card dark:bg-darkapp-card rounded-xl p-2 shadow-sm">
-            <button id="btnPrevWeek" onclick="changeWeek(-1)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
+            <button type="button" id="btnPrevWeek" onclick="changeWeek(-1)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
               <i data-lucide="chevron-left" class="w-5 h-5"></i>
             </button>
             <div class="flex flex-col items-center">
               <span id="weekLabel" class="font-bold text-sm text-app-title dark:text-darkapp-title">Semana Actual</span>
               <span id="weekRange" class="text-[11px] text-app-sub dark:text-darkapp-sub font-medium">--/-- al --/--</span>
             </div>
-            <button id="btnNextWeek" onclick="changeWeek(1)" class="p-2 text-slate-300 dark:text-slate-600 rounded-lg cursor-not-allowed" disabled>
+            <button type="button" id="btnNextWeek" onclick="changeWeek(1)" class="p-2 text-slate-300 dark:text-slate-600 rounded-lg cursor-not-allowed" disabled>
               <i data-lucide="chevron-right" class="w-5 h-5"></i>
             </button>
           </div>
@@ -281,12 +262,12 @@
 
   <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
 
-  <!-- MODAL: Registrar a otro usuario -->
+  <!-- MODAL: Seleccionar o Cambiar Usuario -->
   <div id="modalSwitchUser" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl w-full max-w-sm rounded-3xl p-6 shadow-2xl slide-up border border-white/20 dark:border-slate-700/30">
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-lg font-bold text-app-title dark:text-darkapp-title">Seleccionar Miniser</h3>
-        <button onclick="closeAll()" class="text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <button type="button" onclick="closeAll()" class="text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <p class="text-xs text-app-sub dark:text-darkapp-sub mb-4">Selecciona al Miniser para registrar su checada.</p>
       <div id="switchUserList" class="max-h-60 overflow-y-auto flex flex-col gap-2"></div>
@@ -296,7 +277,7 @@
   <!-- MODAL: Resultado OCR / Registro -->
   <div id="modalOCRResult" class="fixed inset-0 z-[70] flex flex-col items-center justify-center p-4 hidden bg-slate-950/80 backdrop-blur-md">
     <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl w-full max-w-sm rounded-3xl p-5 shadow-2xl slide-up relative border border-white/20 dark:border-slate-700/30">
-      <button onclick="closeAll()" class="absolute top-4 right-4 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title"><i data-lucide="x" class="w-6 h-6"></i></button>
+      <button type="button" onclick="closeAll()" class="absolute top-4 right-4 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title"><i data-lucide="x" class="w-6 h-6"></i></button>
       
       <h3 class="text-lg font-bold text-app-title dark:text-darkapp-title mb-1 text-center">Registro Exitoso</h3>
       <p id="resStatus" class="text-[12px] text-app-sub dark:text-darkapp-sub text-center mb-4">Datos procesados</p>
@@ -320,7 +301,7 @@
         </div>
       </div>
       
-      <button onclick="closeAll()" class="w-full bg-transparent text-app-brand dark:text-teal-400 font-bold py-3.5 rounded-xl text-sm hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors">
+      <button type="button" onclick="closeAll()" class="w-full bg-transparent text-app-brand dark:text-teal-400 font-bold py-3.5 rounded-xl text-sm hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors">
         Entendido
       </button>
     </div>
@@ -330,12 +311,12 @@
   <div id="modalPhoto" class="fixed inset-0 z-[60] flex flex-col items-center justify-center p-4 hidden bg-slate-950/90 backdrop-blur-md">
     <div class="relative w-full max-w-md max-h-[90vh] flex flex-col">
       <div class="sticky top-0 z-20 flex justify-end pb-2">
-        <button onclick="closeAll()" class="bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-full backdrop-blur-md shadow-lg transition-colors border border-white/20">
+        <button type="button" onclick="closeAll()" class="bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-full backdrop-blur-md shadow-lg transition-colors border border-white/20">
           <i data-lucide="x" class="w-6 h-6"></i>
         </button>
       </div>
       <div class="overflow-y-auto flex-1 flex flex-col items-center pr-1">
-        <img id="photoViewer" src="" class="w-full rounded-2xl shadow-2xl mb-4 object-contain">
+        <img id="photoViewer" src="" onerror="this.alt='Imagen no disponible sin conexión'" class="w-full rounded-2xl shadow-2xl mb-4 object-contain text-white text-xs text-center">
         <div id="ocrResultData" class="text-white text-center bg-slate-800/80 p-4 rounded-xl hidden w-full mb-4 backdrop-blur-md">
           <p class="text-sm font-bold text-emerald-400 mb-2">Datos Detectados en la Foto</p>
           <p id="ocrNameText" class="text-sm">Nombre: --</p>
@@ -345,7 +326,7 @@
           <p class="text-xs font-semibold text-amber-200">Registro pendiente de subir</p>
           <p class="text-[11px] text-amber-100/80 mt-1">Se sincronizará automáticamente al recuperar conexión</p>
         </div>
-        <button id="deleteRecordBtn" onclick="deleteCurrentRecord()" class="w-full bg-transparent text-rose-500 hover:bg-rose-500/10 font-bold py-3 rounded-xl text-sm transition-colors mb-4">
+        <button type="button" id="deleteRecordBtn" onclick="deleteCurrentRecord()" class="w-full bg-transparent text-rose-500 hover:bg-rose-500/10 font-bold py-3 rounded-xl text-sm transition-colors mb-4">
           Borrar Registro
         </button>
       </div>
@@ -363,29 +344,31 @@
         }[c]));
     }
 
+    function renderAvatarFallback(el, initial, sizeClass) {
+        if (!el || !el.parentElement) return;
+        const fallback = document.createElement('div');
+        fallback.className = `${sizeClass} rounded-full bg-app-brand text-white flex items-center justify-center font-bold uppercase shrink-0 shadow-sm`;
+        fallback.textContent = initial || '?';
+        el.parentElement.replaceChild(fallback, el);
+    }
+
     // ============================================================================
     // SUPABASE
     // ============================================================================
     const SUPABASE_URL = "https://mifbcyxtafeacwkzqzsq.supabase.co";  
     const SUPABASE_ANON_KEY = "sb_publishable_O6EAbkSba1NQPq08k_7bHg_PZ_x4ZU5";  
 
-    if (!window.supabase) {
-        console.error('[Supabase] SDK no disponible.');
-        window.location.replace('../index.html');
-        throw new Error('Supabase SDK no disponible');
-    }
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    supabaseClient.auth.onAuthStateChange((event) => {
-        if (event === 'SIGNED_OUT') window.location.replace('../index.html');
-    });
+    const supabaseClient = (window.supabase && typeof window.supabase.createClient === 'function')
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
 
     // ============================================================================
-    // INDEXEDDB — COLA OFFLINE
+    // INDEXEDDB — COLA OFFLINE + CACHÉ DE DATOS
     // ============================================================================
     const DB_NAME = 'ChecadorOfflineDB';
-    const DB_VERSION = 1;
+    const DB_VERSION = 2;
     const STORE_PENDING = 'registros_pendientes';
+    const STORE_CACHE = 'cache_datos';
 
     function openOfflineDB() {
         return new Promise((resolve, reject) => {
@@ -396,6 +379,9 @@
                 const db = e.target.result;
                 if (!db.objectStoreNames.contains(STORE_PENDING)) {
                     db.createObjectStore(STORE_PENDING, { keyPath: 'localId' });
+                }
+                if (!db.objectStoreNames.contains(STORE_CACHE)) {
+                    db.createObjectStore(STORE_CACHE, { keyPath: 'key' });
                 }
             };
         });
@@ -429,6 +415,29 @@
             req.onsuccess = () => resolve();
             req.onerror = () => reject(req.error);
         });
+    }
+
+    async function setCachedData(key, value) {
+        try {
+            await dbPut(STORE_CACHE, { key, value, updatedAt: Date.now() });
+        } catch (err) {
+            console.warn('[Cache] No se pudo guardar en IndexedDB:', key, err);
+        }
+    }
+
+    async function getCachedData(key) {
+        try {
+            const db = await openOfflineDB();
+            return await new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_CACHE, 'readonly');
+                const req = tx.objectStore(STORE_CACHE).get(key);
+                req.onsuccess = () => resolve(req.result ? req.result.value : null);
+                req.onerror = () => reject(req.error);
+            });
+        } catch (err) {
+            console.warn('[Cache] No se pudo leer de IndexedDB:', key, err);
+            return null;
+        }
     }
 
     // ============================================================================
@@ -471,6 +480,8 @@
     let activePopupTrigger = null;
     let isSyncing = false;
     let pendingBlobUrls = {};
+    let currentOcrPreviewUrl = null;
+    let realtimeInitialized = false;
 
     const CHECK_TYPES = [
       { id: 'entry', label: 'Ingreso', icon: 'check', color: 'text-emerald-500' },
@@ -482,7 +493,7 @@
     const NON_WORK_SHIFTS = ['LIBRE', 'VACACIONES', 'CAPAC'];
 
     // ============================================================================
-    // HELPERS DE BLOB URLs
+    // HELPERS DE BLOB URLs Y SERVICE WORKER
     // ============================================================================
     function getBlobUrlForPending(p) {
         if (pendingBlobUrls[p.localId]) return pendingBlobUrls[p.localId];
@@ -501,10 +512,19 @@
         }
     }
 
+    function initServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                .then((registration) => console.log('[PWA] SW OK en Checador:', registration.scope))
+                .catch((error) => console.error('[PWA] SW error:', error));
+        }
+    }
+
     // ============================================================================
     // INICIALIZACIÓN
     // ============================================================================
     document.addEventListener('DOMContentLoaded', async () => {
+      initServiceWorker();
       lucide.createIcons();
       updateClock();
       setInterval(updateClock, 1000);
@@ -524,18 +544,6 @@
       window.addEventListener('offline', handleOfflineEvent);
 
       try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) {
-            window.location.replace('../index.html');
-            return;
-        }
-      } catch (e) {
-        console.error('[Auth] Error verificando sesión:', e);
-        window.location.replace('../index.html');
-        return;
-      }
-
-      try {
         pendingRecords = await dbGetAll(STORE_PENDING);
         cleanupOrphanBlobUrls();
         updateSyncStatusUI();
@@ -544,7 +552,7 @@
         iniciarRealtime();
       } catch (error) {
         console.error("Error al iniciar la app:", error);
-        document.getElementById('activeEmployeeName').textContent = "Error de conexión";
+        document.getElementById('activeEmployeeName').textContent = "Error local";
       }
     });
 
@@ -553,11 +561,25 @@
     // ============================================================================
     async function handleOnlineEvent() {
         updateSyncStatusUI();
+        iniciarRealtime();
+        if (employees.length === 0) {
+            await loadSession();
+        } else {
+            employees = await fetchEmployeesFromSupabase();
+            if (viewingUserId) {
+                updateUIForUser();
+                await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
+            }
+        }
         setTimeout(() => processPendingQueue(), 800);
     }
 
     function handleOfflineEvent() {
         updateSyncStatusUI();
+        if (viewingUserId) {
+            loadTodayRecords();
+            loadWeeklySchedule();
+        }
     }
 
     // ============================================================================
@@ -565,7 +587,7 @@
     // ============================================================================
     async function processPendingQueue() {
         if (isSyncing) return;
-        if (!navigator.onLine) {
+        if (!navigator.onLine || !supabaseClient) {
             updateSyncStatusUI();
             return;
         }
@@ -583,11 +605,6 @@
 
         for (const item of pending) {
             try {
-                if (!employees.find(e => e.id === item.employeeId)) {
-                    await dbDelete(STORE_PENDING, item.localId);
-                    continue;
-                }
-
                 const fileName = `${item.employeeId}_${Date.now()}.jpg`;
                 const { error: uploadError } = await supabaseClient.storage
                     .from('registros-empleados')
@@ -654,7 +671,7 @@
             indicator.className = 'inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400';
             indicator.innerHTML = pendingCount > 0
                 ? `<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Sin conexión · ${pendingCount} pendiente${pendingCount > 1 ? 's' : ''}`
-                : `<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Sin conexión`;
+                : `<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Modo sin conexión`;
             btnSync.classList.add('hidden');
         } else if (isSyncing) {
             syncBar.classList.remove('hidden');
@@ -729,60 +746,65 @@
     }
 
     // ============================================================================
-    // EMPLEADOS
+    // EMPLEADOS (CON CACHÉ EN INDEXEDDB)
     // ============================================================================
     async function fetchEmployeesFromSupabase() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('empleados')
-          .select('id, nombre, numero_empleado, foto_url, turnos')
-          .order('nombre', { ascending: true });
-        
-        if (error) {
-          console.warn("No se pudo conectar a la Nube:", error.message);
-          return [];
+      if (navigator.onLine && supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('empleados')
+            .select('id, nombre, numero_empleado, foto_url, turnos')
+            .order('nombre', { ascending: true });
+          
+          if (!error && Array.isArray(data)) {
+            const mapped = data.map(emp => ({
+              id: emp.id,
+              name: emp.nombre,
+              number: String(emp.numero_empleado).trim(),
+              photoUrl: emp.foto_url || '',
+              turnos: emp.turnos || {}
+            }));
+            await setCachedData('empleados_list', mapped);
+            return mapped;
+          }
+          if (error) {
+            console.warn("No se pudo conectar a la Nube:", error.message);
+          }
+        } catch (err) {
+          console.warn("Error de red al consultar Minisers, usando caché:", err);
         }
-
-        if (data) {
-          return data.map(emp => ({
-            id: emp.id,
-            name: emp.nombre,
-            number: String(emp.numero_empleado).trim(),
-            photoUrl: emp.foto_url || '',
-            turnos: emp.turnos || {}
-          }));
-        }
-      } catch (err) {
-        console.warn("Error de red al consultar Minisers:", err);
       }
-      return [];
+
+      const cached = await getCachedData('empleados_list');
+      return Array.isArray(cached) ? cached : [];
     }
 
     async function loadSession() {
       employees = await fetchEmployeesFromSupabase();
-
-      if (employees.length === 0 && !navigator.onLine) {
-        document.getElementById('activeEmployeeName').textContent = "Sin conexión";
-        document.getElementById('currentDate').textContent = "Conéctate para cargar datos";
-        return;
-      }
-
-      if (employees.length === 0) {
-        document.getElementById('activeEmployeeName').textContent = "Sin Minisers";
-        document.getElementById('currentDate').textContent = "Verifica tu base de datos";
-        return;
-      }
-
       const savedSession = localStorage.getItem('sessionUserId');
-      
+
       if (savedSession && employees.some(e => e.id == savedSession)) {
         sessionUserId = Number(savedSession);
         viewingUserId = sessionUserId;
         updateUIForUser();
         await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
-      } else {
-        openInitialUserModal();
+        return;
       }
+
+      if (employees.length > 0) {
+        openInitialUserModal();
+        return;
+      }
+
+      if (!navigator.onLine) {
+        document.getElementById('activeEmployeeName').textContent = "Sin conexión";
+        document.getElementById('assignedShiftText').textContent = "Turno asignado: Sin datos en caché";
+      } else {
+        document.getElementById('activeEmployeeName').textContent = "Sin Minisers";
+        document.getElementById('assignedShiftText').textContent = "Turno asignado: --";
+      }
+      renderRecordsUI();
+      renderWeeklySchedule();
     }
 
     function openInitialUserModal() {
@@ -790,12 +812,13 @@
       list.innerHTML = '';
 
       if (employees.length === 0) {
-        list.innerHTML = '<p class="text-center text-xs text-app-sub dark:text-darkapp-sub py-6">No hay Minisers registrados en la Nube.</p>';
+        list.innerHTML = '<p class="text-center text-xs text-app-sub dark:text-darkapp-sub py-6">No hay Minisers en caché ni en la Nube.</p>';
       } else {
         employees.forEach(emp => {
+          const initial = escapeHtml(emp.name ? emp.name.charAt(0) : '?');
           const avatar = emp.photoUrl 
-            ? `<img src="${escapeHtml(emp.photoUrl)}" class="w-12 h-12 rounded-full object-cover shrink-0 shadow-sm">` 
-            : `<div class="w-12 h-12 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-sm uppercase shrink-0 shadow-sm">${escapeHtml(emp.name.charAt(0))}</div>`;
+            ? `<img src="${escapeHtml(emp.photoUrl)}" onerror="renderAvatarFallback(this, '${initial}', 'w-12 h-12 text-sm')" class="w-12 h-12 rounded-full object-cover shrink-0 shadow-sm">` 
+            : `<div class="w-12 h-12 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-sm uppercase shrink-0 shadow-sm">${initial}</div>`;
 
           list.innerHTML += `
             <div class="p-3 bg-app-bg/50 dark:bg-slate-800/50 rounded-2xl cursor-pointer hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-all flex items-center justify-between" onclick="selectInitialUser(${emp.id})">
@@ -824,23 +847,16 @@
       await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
     }
 
-    async function logoutSession() {
-      closeAll();
-      localStorage.removeItem('sessionUserId');
-      sessionUserId = null;
-      viewingUserId = null;
-      openInitialUserModal();
-    }
-
     function updateUIForUser() {
       const user = employees.find(e => e.id === viewingUserId);
       const nameEl = document.getElementById('activeEmployeeName');
       const avatarEl = document.getElementById('activeEmployeeAvatar');
       
       if (user) {
+        const initial = escapeHtml(user.name ? user.name.charAt(0) : '?');
         const avatar = user.photoUrl 
-          ? `<img src="${escapeHtml(user.photoUrl)}" class="w-11 h-11 rounded-full object-cover shrink-0 shadow-sm">` 
-          : `<div class="w-11 h-11 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-sm uppercase shrink-0 shadow-sm">${escapeHtml(user.name.charAt(0))}</div>`;
+          ? `<img src="${escapeHtml(user.photoUrl)}" onerror="renderAvatarFallback(this, '${initial}', 'w-11 h-11 text-sm')" class="w-11 h-11 rounded-full object-cover shrink-0 shadow-sm">` 
+          : `<div class="w-11 h-11 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-sm uppercase shrink-0 shadow-sm">${initial}</div>`;
         
         avatarEl.innerHTML = avatar;
         nameEl.textContent = user.name;
@@ -895,19 +911,24 @@
     }
 
     // ============================================================================
-    // REGISTROS DEL DÍA
+    // REGISTROS DEL DÍA (CON CACHÉ EN INDEXEDDB)
     // ============================================================================
     async function loadTodayRecords() {
-      if (!viewingUserId) return;
+      if (!viewingUserId) {
+        todayRecords = [];
+        renderRecordsUI();
+        return;
+      }
 
       const now = new Date();
       const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      const cacheKey = `today_${viewingUserId}_${todayStr}`;
 
       pendingRecords = await dbGetAll(STORE_PENDING);
       cleanupOrphanBlobUrls();
 
-      let serverRecords = [];
-      if (navigator.onLine) {
+      let serverRecords = null;
+      if (navigator.onLine && supabaseClient) {
         try {
           const { data, error } = await supabaseClient
             .from('registros')
@@ -916,7 +937,7 @@
             .eq('fecha', todayStr)
             .order('timestamp', { ascending: true });
 
-          if (!error && data) {
+          if (!error && Array.isArray(data)) {
             serverRecords = data.map(r => ({
               id: r.id,
               employeeId: r.employee_id,
@@ -928,10 +949,16 @@
               ocrDate: r.ocr_fecha,
               isPending: false
             }));
+            await setCachedData(cacheKey, serverRecords);
           }
         } catch (err) {
           console.error("Excepción al consultar registros del día:", err);
         }
+      }
+
+      if (!Array.isArray(serverRecords)) {
+        const cached = await getCachedData(cacheKey);
+        serverRecords = Array.isArray(cached) ? cached : [];
       }
 
       const pendingToday = pendingRecords
@@ -968,8 +995,8 @@
           await loadWeeklySchedule();
         }
       } else {
-        if (!navigator.onLine) {
-          alert('Sin conexión. No se puede eliminar el registro hasta recuperar la conexión.');
+        if (!navigator.onLine || !supabaseClient) {
+          alert('Sin conexión. No se puede eliminar un registro ya subido hasta recuperar la conexión.');
           return;
         }
         if (confirm('¿Deseas eliminar este registro de la nube?')) {
@@ -1022,7 +1049,7 @@
 
       CHECK_TYPES.forEach((type, index) => {
         const record = todayRecords.find(r => r.type === type.id);
-        const canRegister = !record;
+        const canRegister = !record && Boolean(viewingUserId);
         const isPending = record && record.isPending;
 
         let leftIcon;
@@ -1034,16 +1061,18 @@
           leftIcon = `<div class="w-10 h-10 rounded-full ${canRegister ? 'bg-app-brand/10 text-app-brand dark:bg-teal-500/20 dark:text-teal-400' : 'text-app-sub dark:text-darkapp-sub bg-app-bg/50 dark:bg-slate-800/50'} flex items-center justify-center shrink-0 font-bold text-sm">${index + 1}</div>`;
         }
 
-        let imgSrc = record && record.photo ? escapeHtml(record.photo) : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
+        const imgSrc = record && record.photo
+          ? escapeHtml(record.photo)
+          : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
 
         let rightAction;
         if (record) {
           rightAction = `<div class="relative flex items-center gap-2">
-               <img src="${imgSrc}" onclick="viewPhoto('${record.id}', '${escapeHtml(record.photo)}', ${isPending})" class="w-12 h-12 rounded-xl object-cover cursor-pointer border ${isPending ? 'border-amber-400 dark:border-amber-500' : 'border-transparent'} shadow-sm bg-slate-100 dark:bg-slate-800">
+               <img src="${imgSrc}" onclick="viewPhoto(${JSON.stringify(String(record.id))}, ${Boolean(isPending)})" class="w-12 h-12 rounded-xl object-cover cursor-pointer border ${isPending ? 'border-amber-400 dark:border-amber-500' : 'border-transparent'} shadow-sm bg-slate-100 dark:bg-slate-800">
                ${isPending ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center shadow-md pending-pulse"><i data-lucide="arrow-up" class="w-2.5 h-2.5 text-white"></i></span>` : ''}
              </div>`;
         } else if (canRegister) {
-          rightAction = `<button onclick="triggerFileInput(${index})" class="text-app-brand dark:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 px-3 py-2 rounded-xl font-bold text-[12px] flex items-center gap-1.5 transition-colors"><i data-lucide="camera" class="w-4 h-4"></i> Registrar</button>`;
+          rightAction = `<button type="button" onclick="triggerFileInput(${index})" class="text-app-brand dark:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 px-3 py-2 rounded-xl font-bold text-[12px] flex items-center gap-1.5 transition-colors"><i data-lucide="camera" class="w-4 h-4"></i> Registrar</button>`;
         } else {
           rightAction = '';
         }
@@ -1110,7 +1139,7 @@
     }
 
     // ============================================================================
-    // SEMANA Y DESCARGA DE HORARIO EN IMAGEN
+    // SEMANA Y DESCARGA DE HORARIO EN IMAGEN (CON CACHÉ EN INDEXEDDB)
     // ============================================================================
     function getWeekData(offset) {
       const now = new Date();
@@ -1196,11 +1225,6 @@
         const shiftInfo = formatShiftForDownloadCell(sched);
         const monthShort = targetDate.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
 
-        // CORRECCIÓN FINAL DE ALINEACIÓN:
-        // Usando CSS Grid (12 columnas) para forzar proporciones exactas y separación garantizada.
-        // - Día: 4 columnas (33% ancho)
-        // - Fecha: 3 columnas (25% ancho)
-        // - Turno: 5 columnas (41% ancho) alineado a la derecha
         exportDaysHTML += `
           <div class="grid grid-cols-12 items-center py-4 px-5 bg-slate-50/80 rounded-2xl border border-slate-200 mb-3">
             <div class="col-span-4 flex items-center">
@@ -1250,17 +1274,22 @@
 
     async function loadWeeklySchedule() {
       const targetUserId = sessionUserId || viewingUserId;
-      if (!targetUserId) return;
+      if (!targetUserId) {
+        weekRecords = [];
+        renderWeeklySchedule();
+        return;
+      }
 
       const { monday, sunday } = getWeekData(currentWeekOffset);
       const startStr = `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
       const endStr = `${sunday.getFullYear()}-${String(sunday.getMonth()+1).padStart(2,'0')}-${String(sunday.getDate()).padStart(2,'0')}`;
+      const cacheKey = `week_${targetUserId}_${startStr}_${endStr}`;
 
       pendingRecords = await dbGetAll(STORE_PENDING);
       cleanupOrphanBlobUrls();
 
-      let serverRecords = [];
-      if (navigator.onLine) {
+      let serverRecords = null;
+      if (navigator.onLine && supabaseClient) {
         try {
           const { data, error } = await supabaseClient
             .from('registros')
@@ -1270,7 +1299,7 @@
             .lte('fecha', endStr)
             .order('timestamp', { ascending: true });
 
-          if (!error && data) {
+          if (!error && Array.isArray(data)) {
             serverRecords = data.map(r => ({
               id: r.id,
               employeeId: r.employee_id,
@@ -1279,10 +1308,16 @@
               date: r.fecha,
               isPending: false
             }));
+            await setCachedData(cacheKey, serverRecords);
           }
         } catch (err) {
           console.error("Excepción al consultar registros semanales:", err);
         }
+      }
+
+      if (!Array.isArray(serverRecords)) {
+        const cached = await getCachedData(cacheKey);
+        serverRecords = Array.isArray(cached) ? cached : [];
       }
 
       const pendingInRange = pendingRecords
@@ -1306,7 +1341,7 @@
       const targetUserId = sessionUserId || viewingUserId;
       const emp = employees.find(e => e.id === targetUserId);
       const container = document.getElementById('weeklyScheduleContainer');
-      if (!emp || !container) return;
+      if (!container) return;
 
       const { monday, sunday } = getWeekData(currentWeekOffset);
       const options = { day: 'numeric', month: 'short' };
@@ -1327,6 +1362,11 @@
         btnPrev.disabled = true;
         btnNext.className = 'p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer';
         btnNext.disabled = false;
+      }
+
+      if (!emp) {
+        container.innerHTML = '<p class="text-center text-xs text-app-sub dark:text-darkapp-sub py-4">Sin horarios disponibles sin conexión.</p>';
+        return;
       }
 
       const empTurnos = emp.turnos || {};
@@ -1589,7 +1629,7 @@
         loaderText.textContent = "Comprimiendo imagen...";
         imageBlob = await resizeImage(file);
 
-        if (navigator.onLine) {
+        if (navigator.onLine && typeof Tesseract !== 'undefined') {
           loaderText.textContent = "Analizando con OCR...";
           try {
             const reader = new FileReader();
@@ -1616,9 +1656,12 @@
 
         loaderText.textContent = navigator.onLine ? "Guardando registro..." : "Guardando sin conexión...";
         await saveRecord(imageBlob, detectedName, detectedDate);
-        
-        const previewUrl = URL.createObjectURL(imageBlob);
-        document.getElementById('ocrPreviewImage').src = previewUrl;
+
+        if (currentOcrPreviewUrl) {
+          URL.revokeObjectURL(currentOcrPreviewUrl);
+        }
+        currentOcrPreviewUrl = URL.createObjectURL(imageBlob);
+        document.getElementById('ocrPreviewImage').src = currentOcrPreviewUrl;
         document.getElementById('resName').textContent = detectedName || (employees.find(e => e.id === viewingUserId)?.name || 'Usuario Actual');
         
         const now = new Date();
@@ -1647,7 +1690,7 @@
       const localDateStr = `${exactNow.getFullYear()}-${String(exactNow.getMonth()+1).padStart(2,'0')}-${String(exactNow.getDate()).padStart(2,'0')}`;
       const localId = `local_${viewingUserId}_${Date.now()}_${type}`;
 
-      if (!navigator.onLine) {
+      if (!navigator.onLine || !supabaseClient) {
         await guardarEnColaLocal(localId, viewingUserId, type, timestamp, localDateStr, photoBlob, ocrName, ocrDate);
         return;
       }
@@ -1710,14 +1753,16 @@
       return new Date(isoStr).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
     }
 
-    async function viewPhoto(id, photoUrl, isPending) {
+    async function viewPhoto(id, isPending) {
+      const rec = todayRecords.find(r => String(r.id) === String(id));
+      const photoUrl = rec && rec.photo ? rec.photo : '';
       if (!photoUrl) return;
-      currentViewingRecordId = id;
+
+      currentViewingRecordId = rec.id;
       currentViewingIsPending = !!isPending;
       
       document.getElementById('photoViewer').src = photoUrl;
       
-      const rec = todayRecords.find(r => r.id == id);
       const resultDiv = document.getElementById('ocrResultData');
       const pendingNotice = document.getElementById('pendingNotice');
       
@@ -1762,24 +1807,31 @@
       document.getElementById('modalSwitchUser').classList.add('hidden');
       document.getElementById('modalPhoto').classList.add('hidden');
       document.getElementById('modalOCRResult').classList.add('hidden');
+
+      if (currentOcrPreviewUrl) {
+        URL.revokeObjectURL(currentOcrPreviewUrl);
+        currentOcrPreviewUrl = null;
+      }
     }
 
     async function openSwitchUserModal() {
+      if (employees.length === 0) {
+        employees = await fetchEmployeesFromSupabase();
+      }
       const list = document.getElementById('switchUserList');
       list.innerHTML = '';
       
-      const otherUsers = employees.filter(emp => emp.id !== sessionUserId);
-      
-      if (otherUsers.length === 0) {
-        list.innerHTML = '<p class="text-center text-sm text-app-sub dark:text-darkapp-sub py-4">No hay otros Minisers registrados en el sistema.</p>';
+      if (employees.length === 0) {
+        list.innerHTML = '<p class="text-center text-sm text-app-sub dark:text-darkapp-sub py-4">No hay Minisers disponibles.</p>';
       } else {
-        otherUsers.forEach(emp => {
+        employees.forEach(emp => {
+          const initial = escapeHtml(emp.name ? emp.name.charAt(0) : '?');
           const avatar = emp.photoUrl 
-            ? `<img src="${escapeHtml(emp.photoUrl)}" class="w-10 h-10 rounded-full object-cover shrink-0">` 
-            : `<div class="w-10 h-10 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-xs uppercase shrink-0">${escapeHtml(emp.name.charAt(0))}</div>`;
+            ? `<img src="${escapeHtml(emp.photoUrl)}" onerror="renderAvatarFallback(this, '${initial}', 'w-10 h-10 text-xs')" class="w-10 h-10 rounded-full object-cover shrink-0">` 
+            : `<div class="w-10 h-10 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-xs uppercase shrink-0">${initial}</div>`;
 
           list.innerHTML += `
-            <div class="p-3 bg-app-bg/50 dark:bg-slate-800/50 rounded-xl cursor-pointer hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors flex items-center justify-between" onclick="switchViewingUser(${emp.id})">
+            <div class="p-3 bg-app-bg/50 dark:bg-slate-800/50 rounded-xl cursor-pointer hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors flex items-center justify-between" onclick="selectInitialUser(${emp.id})">
               <div class="flex items-center gap-3">
                 ${avatar}
                 <div class="flex flex-col">
@@ -1797,15 +1849,8 @@
       openModal('modalSwitchUser');
     }
 
-    async function switchViewingUser(id) {
-      viewingUserId = id;
-      updateUIForUser();
-      await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
-      closeAll();
-    }
-
     function clearLocalStorage() {
-      const msg = '¿Refrescar la sesión local de este dispositivo?\n\nNota: los registros pendientes en IndexedDB NO se perderán.';
+      const msg = '¿Refrescar la sesión y datos locales de este dispositivo?';
       if(confirm(msg)) {
         localStorage.removeItem('sessionUserId');
         window.location.reload();
@@ -1816,6 +1861,7 @@
     // REALTIME
     // ============================================================================
     function iniciarRealtime() {
+      if (realtimeInitialized || !navigator.onLine || !supabaseClient) return;
       try {
         supabaseClient
           .channel('checador-realtime')
@@ -1827,6 +1873,7 @@
             }
           })
           .subscribe();
+        realtimeInitialized = true;
       } catch (err) {
         console.warn('Realtime no disponible:', err);
       }

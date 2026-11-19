@@ -2,7 +2,7 @@
 <html lang="es" class="h-full">
 <head>
   <meta charset="UTF-8">
-        <link rel="stylesheet" href="../fonts.css">
+  <link rel="stylesheet" href="../fonts.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Panel Gerencial - Checador</title>
   <link rel="icon" type="image/svg+xml" href="./admin.svg">
@@ -97,7 +97,7 @@
       
       <div class="flex items-center gap-2">
         <!-- Toggle Tema -->
-        <button id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors duration-200" title="Cambiar modo">
+        <button type="button" id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors duration-200" title="Cambiar modo">
             <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">
                 <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>
                 <i data-lucide="moon" class="w-3.5 h-3.5 text-slate-400 dark:text-indigo-400 opacity-100 dark:opacity-40"></i>
@@ -108,7 +108,7 @@
             </div>
         </button>
 
-        <button onclick="openImportModal()" class="text-[11px] font-semibold text-app-brand dark:text-teal-400 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/10 px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5">
+        <button type="button" onclick="openImportModal()" class="text-[11px] font-semibold text-app-brand dark:text-teal-400 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/10 px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5" title="Importar horarios desde Excel">
           <i data-lucide="upload" class="w-4 h-4"></i>
           <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
         </button>
@@ -116,30 +116,41 @@
     </header>
 
     <main class="px-5 flex-1 flex flex-col gap-4 mt-2">
+
+      <!-- Banner de Estado Offline / Caché -->
+      <div id="offlineBanner" class="hidden bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 px-3.5 py-2.5 rounded-xl flex items-center justify-between text-xs font-medium">
+        <div class="flex items-center gap-2">
+          <i data-lucide="wifi-off" class="w-4 h-4 shrink-0"></i>
+          <span id="offlineBannerText">Modo sin conexión · Mostrando datos guardados en caché</span>
+        </div>
+      </div>
       
       <div class="flex items-center justify-between bg-app-card dark:bg-darkapp-card rounded-xl p-2 shadow-sm">
-        <button onclick="changeWeek(-1)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
+        <button type="button" onclick="changeWeek(-1)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
           <i data-lucide="chevron-left" class="w-5 h-5"></i>
         </button>
         <div class="flex flex-col items-center">
           <span id="weekLabel" class="font-bold text-sm text-app-title dark:text-darkapp-title">Cargando...</span>
           <span id="weekRange" class="text-[11px] text-app-sub dark:text-darkapp-sub font-medium">--/-- al --/--</span>
         </div>
-        <button onclick="changeWeek(1)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
+        <button type="button" onclick="changeWeek(1)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
           <i data-lucide="chevron-right" class="w-5 h-5"></i>
         </button>
       </div>
 
       <div class="flex items-center justify-center gap-4 text-[11px] font-semibold text-app-sub dark:text-darkapp-sub bg-app-card dark:bg-darkapp-card py-2 rounded-xl shadow-sm">
         <div class="flex items-center gap-1.5">
-                <i data-lucide="clock-check" class="w-4 h-4 text-emerald-500"></i>
-A tiempo</div>
+          <i data-lucide="clock-check" class="w-4 h-4 text-emerald-500"></i>
+          A tiempo
+        </div>
         <div class="flex items-center gap-1.5">
-              <i data-lucide="clock-fading" class="w-4 h-4 text-orange-400"></i>
-Retardo</div>
+          <i data-lucide="clock-fading" class="w-4 h-4 text-orange-400"></i>
+          Retardo
+        </div>
         <div class="flex items-center gap-1.5">
           <i data-lucide="clock-exclamation-point" class="w-4 h-4 text-rose-500"></i>
-Sin Registro</div>
+          Sin Registro
+        </div>
       </div>
 
       <div class="mt-2">
@@ -209,7 +220,7 @@ Sin Registro</div>
     <div class="glass-modal w-full max-w-sm rounded-3xl shadow-2xl relative z-10 p-6 fade-in border border-white/20 dark:border-slate-700/30">
       <div class="flex justify-between items-center mb-1">
         <h3 class="text-base font-bold text-app-title dark:text-darkapp-title">Editar Turno</h3>
-        <button onclick="closeEditShiftModal()" class="p-1.5 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title bg-app-bg dark:bg-slate-800 rounded-full transition-colors">
+        <button type="button" onclick="closeEditShiftModal()" class="p-1.5 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title bg-app-bg dark:bg-slate-800 rounded-full transition-colors">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
@@ -259,7 +270,7 @@ Sin Registro</div>
     <div class="glass-modal w-full max-w-md rounded-3xl shadow-2xl relative z-10 p-5 fade-in border border-white/20 dark:border-slate-700/30">
       <div class="flex justify-between items-center mb-1">
         <h3 class="text-base font-bold text-app-title dark:text-darkapp-title">Actualizar Turnos por Excel</h3>
-        <button onclick="closeImportModal()" class="p-1.5 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title bg-app-bg dark:bg-slate-800 rounded-full transition-colors">
+        <button type="button" onclick="closeImportModal()" class="p-1.5 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title bg-app-bg dark:bg-slate-800 rounded-full transition-colors">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
@@ -285,7 +296,7 @@ Sin Registro</div>
           <h3 class="text-base font-bold text-app-title dark:text-darkapp-title">Galería de Registros</h3>
           <p id="modalPhotosTitle" class="text-xs text-app-sub dark:text-darkapp-sub mt-0.5">Nombre del Miniser</p>
         </div>
-        <button onclick="closeGalleryModal()" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title bg-app-bg dark:bg-slate-800 rounded-full transition-colors">
+        <button type="button" onclick="closeGalleryModal()" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title bg-app-bg dark:bg-slate-800 rounded-full transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -295,7 +306,7 @@ Sin Registro</div>
 
   <!-- MODAL: Lightbox -->
   <div id="modalLightbox" class="fixed inset-0 z-[70] bg-black/95 flex flex-col items-center justify-center hidden fade-in">
-    <button onclick="closeLightbox()" class="absolute top-6 right-6 p-2.5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors z-10">
+    <button type="button" onclick="closeLightbox()" class="absolute top-6 right-6 p-2.5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors z-10">
       <i data-lucide="x" class="w-6 h-6"></i>
     </button>
     
@@ -304,7 +315,7 @@ Sin Registro</div>
     </div>
 
     <div class="pb-8 pt-2 px-4 flex flex-col items-center gap-2.5 z-10 w-full max-w-xs" onclick="event.stopPropagation()">
-      <button id="btnDownloadPhoto" onclick="downloadLightboxPhoto()" class="w-full bg-app-brand hover:bg-teal-600 active:scale-[0.98] text-white font-bold py-3 px-5 rounded-2xl text-xs shadow-lg flex items-center justify-center gap-2 transition-all">
+      <button type="button" id="btnDownloadPhoto" onclick="downloadLightboxPhoto()" class="w-full bg-app-brand hover:bg-teal-600 active:scale-[0.98] text-white font-bold py-3 px-5 rounded-2xl text-xs shadow-lg flex items-center justify-center gap-2 transition-all">
         <i data-lucide="download" class="w-4 h-4"></i>
         <span>Descargar imagen original</span>
       </button>
@@ -316,12 +327,68 @@ Sin Registro</div>
     // ============================================================================
     // HELPERS DE SEGURIDAD Y UTILIDADES
     // ============================================================================
-    
     function escapeHtml(str) {
         if (str == null) return '';
         return String(str).replace(/[&<>"']/g, c => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         }[c]));
+    }
+
+    // --- REGISTRO DEL SERVICE WORKER ---
+    function initServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                .then((registration) => console.log('[PWA] SW OK en Panel Gerencial:', registration.scope))
+                .catch((error) => console.error('[PWA] SW error:', error));
+        }
+    }
+
+    // ============================================================================
+    // CACHÉ LOCAL EN INDEXEDDB (PARA SOPORTE OFFLINE EN PANEL GERENCIAL)
+    // ============================================================================
+    const ADMIN_CACHE_DB = 'ChecadorAdminOfflineDB';
+    const ADMIN_CACHE_STORE = 'cache';
+
+    function openAdminCacheDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(ADMIN_CACHE_DB, 1);
+            req.onerror = () => reject(req.error);
+            req.onsuccess = () => resolve(req.result);
+            req.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(ADMIN_CACHE_STORE)) {
+                    db.createObjectStore(ADMIN_CACHE_STORE, { keyPath: 'key' });
+                }
+            };
+        });
+    }
+
+    async function setAdminCache(key, value) {
+        try {
+            const db = await openAdminCacheDB();
+            await new Promise((resolve, reject) => {
+                const tx = db.transaction(ADMIN_CACHE_STORE, 'readwrite');
+                const req = tx.objectStore(ADMIN_CACHE_STORE).put({ key, value, updatedAt: Date.now() });
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        } catch (e) {
+            console.warn('[Cache Admin] Error guardando:', e);
+        }
+    }
+
+    async function getAdminCache(key) {
+        try {
+            const db = await openAdminCacheDB();
+            return await new Promise((resolve, reject) => {
+                const tx = db.transaction(ADMIN_CACHE_STORE, 'readonly');
+                const req = tx.objectStore(ADMIN_CACHE_STORE).get(key);
+                req.onsuccess = () => resolve(req.result ? req.result.value : null);
+                req.onerror = () => reject(req.error);
+            });
+        } catch (e) {
+            return null;
+        }
     }
 
     // ==== CONFIGURACIÓN DE SUPABASE ====
@@ -381,11 +448,38 @@ Sin Registro</div>
     const DAYS_OF_WEEK = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
     const NON_WORK_SHIFTS = ['LIBRE', 'VACACIONES', 'CAPAC'];
 
+    function updateOfflineBanner(isUsingCache = false) {
+        const banner = document.getElementById('offlineBanner');
+        const text = document.getElementById('offlineBannerText');
+        if (!banner) return;
+
+        if (!navigator.onLine || isUsingCache) {
+            text.textContent = !navigator.onLine
+                ? 'Modo sin conexión · Consultando datos guardados en caché'
+                : 'Sin respuesta de la nube · Mostrando datos en caché';
+            banner.classList.remove('hidden');
+            lucide.createIcons();
+        } else {
+            banner.classList.add('hidden');
+        }
+    }
+
     // ============================================================================
     // INICIALIZACIÓN
     // ============================================================================
     document.addEventListener('DOMContentLoaded', async () => {
+      initServiceWorker();
       lucide.createIcons();
+      updateOfflineBanner();
+
+      window.addEventListener('online', async () => {
+        updateOfflineBanner(false);
+        await loadData();
+      });
+
+      window.addEventListener('offline', () => {
+        updateOfflineBanner(true);
+      });
       
       // Cierre del popup flotante al tocar fuera o hacer scroll
       document.addEventListener('click', (e) => {
@@ -406,8 +500,10 @@ Sin Registro</div>
         }
       } catch (e) {
         console.error('[Auth] Error verificando sesión:', e);
-        window.location.replace('../index.html');
-        return;
+        if (navigator.onLine) {
+            window.location.replace('../index.html');
+            return;
+        }
       }
 
       await loadData();
@@ -525,7 +621,8 @@ Sin Registro</div>
     }
 
     function renderWeeklyScheduleTable() {
-      const { monday, sunday } = getWeekData(0);
+      // Usa currentWeekOffset para mostrar exactamente la semana seleccionada en el panel
+      const { monday, sunday } = getWeekData(currentWeekOffset);
       const rangeOptions = { day: 'numeric', month: 'short' };
       
       const monDayNum = monday.getDate();
@@ -537,7 +634,15 @@ Sin Registro</div>
         filenameStr: `Horarios ${monDayNum}${monMonthShort}-${sunDayNum}${sunMonthShort}`
       };
 
-      document.getElementById('scheduleModalRange').textContent = `Semana Actual · ${monday.toLocaleDateString('es-MX', rangeOptions)} al ${sunday.toLocaleDateString('es-MX', rangeOptions)}`;
+      const weekTitleText = currentWeekOffset === 0
+        ? 'Semana Actual'
+        : currentWeekOffset === -1
+          ? 'Semana Anterior'
+          : currentWeekOffset === 1
+            ? 'Próxima Semana'
+            : `Semana (${currentWeekOffset > 0 ? '+' : ''}${currentWeekOffset})`;
+
+      document.getElementById('scheduleModalRange').textContent = `${weekTitleText} · ${monday.toLocaleDateString('es-MX', rangeOptions)} al ${sunday.toLocaleDateString('es-MX', rangeOptions)}`;
 
       const weekDays = [];
       for (let i = 0; i < 7; i++) {
@@ -718,47 +823,70 @@ Sin Registro</div>
     }
 
     async function syncEmployeesFromSupabase() {
-      const { data, error } = await supabaseClient
-        .from('empleados')
-        .select('id, nombre, numero_empleado, puesto, foto_url, turnos')
-        .order('nombre', { ascending: true });
-      
-      if (error) {
-        console.error("Error cargando Minisers:", error);
-        return [];
+      if (navigator.onLine) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('empleados')
+            .select('id, nombre, numero_empleado, puesto, foto_url, turnos')
+            .order('nombre', { ascending: true });
+          
+          if (!error && Array.isArray(data)) {
+            const mapped = data.map(emp => ({
+              id: emp.id,
+              name: emp.nombre,
+              number: String(emp.numero_empleado).trim(),
+              puesto: emp.puesto || '',
+              photoUrl: emp.foto_url || '',
+              turnos: emp.turnos || {}
+            }));
+            await setAdminCache('empleados', mapped);
+            updateOfflineBanner(false);
+            return mapped;
+          }
+          console.error("Error cargando Minisers:", error);
+        } catch (err) {
+          console.warn("Fallo de red cargando Minisers, usando caché local:", err);
+        }
       }
-      
-      return data.map(emp => ({
-        id: emp.id,
-        name: emp.nombre,
-        number: String(emp.numero_empleado).trim(),
-        puesto: emp.puesto || '',
-        photoUrl: emp.foto_url || '',
-        turnos: emp.turnos || {}
-      }));
+
+      const cached = await getAdminCache('empleados');
+      if (cached) {
+        updateOfflineBanner(true);
+        return cached;
+      }
+      return [];
     }
 
     async function fetchAllRecordsFromSupabase() {
-      const { data, error } = await supabaseClient
-        .from('registros')
-        .select('*')
-        .order('timestamp', { ascending: true });
-      
-      if (error) {
-        console.error("Error cargando registros:", error);
-        return [];
+      if (navigator.onLine) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('registros')
+            .select('*')
+            .order('timestamp', { ascending: true });
+          
+          if (!error && Array.isArray(data)) {
+            const mapped = data.map(r => ({
+              id: r.id,
+              employeeId: r.employee_id,
+              type: r.tipo,
+              timestamp: r.timestamp,
+              date: r.fecha,
+              photo: r.foto_url,
+              ocrName: r.ocr_nombre,
+              ocrDate: r.ocr_fecha
+            }));
+            await setAdminCache('registros', mapped);
+            return mapped;
+          }
+          console.error("Error cargando registros:", error);
+        } catch (err) {
+          console.warn("Fallo de red cargando registros, usando caché local:", err);
+        }
       }
-      
-      return data.map(r => ({
-        id: r.id,
-        employeeId: r.employee_id,
-        type: r.tipo,
-        timestamp: r.timestamp,
-        date: r.fecha,
-        photo: r.foto_url,
-        ocrName: r.ocr_nombre,
-        ocrDate: r.ocr_fecha
-      }));
+
+      const cached = await getAdminCache('registros');
+      return cached || [];
     }
 
     function timeToSeconds(timeStr) {
@@ -782,7 +910,7 @@ Sin Registro</div>
         document.getElementById('adminList').innerHTML = `
           <div class="flex flex-col items-center justify-center py-12 text-app-sub dark:text-darkapp-sub bg-app-card dark:bg-darkapp-card rounded-xl shadow-sm mt-4">
             <i data-lucide="users" class="w-12 h-12 mb-3 opacity-30"></i>
-            <p class="text-sm font-medium">No hay Minisers registrados en la Nube.</p>
+            <p class="text-sm font-medium">${navigator.onLine ? 'No hay Minisers registrados en la Nube.' : 'Sin conexión y sin datos guardados en caché.'}</p>
           </div>
         `;
         lucide.createIcons();
@@ -914,13 +1042,13 @@ Sin Registro</div>
                 }
 
                 return `<button type="button" onclick="showRecordPopup(event, '${escapeHtml(type.label)}', '${escapeHtml(exactTimeStr)}')" class="record-chip-clickable ${bgClass} px-1.5 py-1 rounded-md text-[10px] font-bold text-center transition-all active:scale-95 cursor-pointer" title="${title}">${displayTime}</button>`;
-            } else {
-              if (isPastDay && !isNonWorkDay) {
-                bgClass = redClass;
-              }
+              } else {
+                if (isPastDay && !isNonWorkDay) {
+                  bgClass = redClass;
+                }
 
-              return `<div class="${bgClass} px-1.5 py-1 rounded-md text-[10px] font-bold text-center transition-colors" title="${title}">${displayTime}</div>`;
-            }
+                return `<div class="${bgClass} px-1.5 py-1 rounded-md text-[10px] font-bold text-center transition-colors" title="${title}">${displayTime}</div>`;
+              }
 
             }).join('');
           }
@@ -935,7 +1063,7 @@ Sin Registro</div>
               shiftLabel = '<span class="text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">Capacitación</span>';
             } else {
               const t = sched.endTime ? `${sched.startTime} - ${sched.endTime}` : sched.startTime;
-              shiftLabel = `<span class="text-[10px] font-bold text-app-brand dark:text-teal-400 bg-app-brand/10 dark:bg-teal-500/10 px-2 py-0.5 rounded">${t}</span>`;
+              shiftLabel = `<span class="text-[10px] font-bold text-app-brand dark:text-teal-400 bg-app-brand/10 dark:bg-teal-500/10 px-2 py-0.5 rounded">${escapeHtml(t)}</span>`;
             }
           } else {
             shiftLabel = '<span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 italic">Sin horario</span>';
@@ -955,7 +1083,7 @@ Sin Registro</div>
                   <p class="text-[10px] text-app-sub dark:text-darkapp-sub font-medium w-12">${targetDate.getDate()} ${targetDate.toLocaleDateString('es-MX', { month: 'short' })}</p>
                   ${shiftLabel}
                 </div>
-                <button onclick="openEditShiftModal(${emp.id}, '${dateStr}', '${dayName}')" class="p-1.5 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 rounded-lg transition-colors" title="Editar turno">
+                <button type="button" onclick="openEditShiftModal(${emp.id}, '${dateStr}', '${dayName}')" class="p-1.5 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 rounded-lg transition-colors" title="Editar turno">
                   <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
@@ -964,14 +1092,19 @@ Sin Registro</div>
           `;
         });
 
+        const initialChar = escapeHtml(emp.name.charAt(0));
+        const fallbackAvatar = `<div class="w-9 h-9 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-sm">${initialChar}</div>`;
         const avatarHTML = emp.photoUrl
-          ? `<img src="${escapeHtml(emp.photoUrl)}" class="w-9 h-9 rounded-full object-cover shrink-0 shadow-sm">`
-          : `<div class="w-9 h-9 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-sm">${escapeHtml(emp.name.charAt(0))}</div>`;
+          ? `<div class="relative w-9 h-9 shrink-0">
+               <img src="${escapeHtml(emp.photoUrl)}" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');" class="w-9 h-9 rounded-full object-cover shadow-sm">
+               <div class="hidden w-9 h-9 rounded-full bg-app-brand text-white flex items-center justify-center font-bold text-xs uppercase shadow-sm">${initialChar}</div>
+             </div>`
+          : fallbackAvatar;
 
         return `
           <div class="bg-app-card dark:bg-darkapp-card rounded-xl shadow-sm overflow-hidden mb-3 transition-colors">
             <div class="px-4 py-3 flex items-center justify-between hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
-              <button onclick="toggleAccordion(${emp.id})" class="flex items-center gap-3 flex-1 text-left min-w-0">
+              <button type="button" onclick="toggleAccordion(${emp.id})" class="flex items-center gap-3 flex-1 text-left min-w-0">
                 ${avatarHTML}
                 <div class="min-w-0">
                   <p class="font-bold text-sm text-app-title dark:text-darkapp-title truncate">${escapeHtml(emp.name)}</p>
@@ -979,10 +1112,10 @@ Sin Registro</div>
                 </div>
               </button>
               <div class="flex items-center gap-2 shrink-0">
-                <button onclick="openEmployeePhotos(${emp.id})" class="p-2 text-app-brand dark:text-teal-400 hover:bg-app-brand/20 dark:hover:bg-teal-500/20 rounded-lg transition-colors" title="Ver galería de fotos">
+                <button type="button" onclick="openEmployeePhotos(${emp.id})" class="p-2 text-app-brand dark:text-teal-400 hover:bg-app-brand/20 dark:hover:bg-teal-500/20 rounded-lg transition-colors" title="Ver galería de fotos">
                   <i data-lucide="camera" class="w-5 h-5"></i>
                 </button>
-                <button onclick="toggleAccordion(${emp.id})" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 transition-colors">
+                <button type="button" onclick="toggleAccordion(${emp.id})" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 transition-colors">
                   <i data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300" id="icon-${emp.id}"></i>
                 </button>
               </div>
@@ -1023,6 +1156,11 @@ Sin Registro</div>
 
     function openEditShiftModal(empId, dateStr, dayName) {
       hideRecordPopup();
+      if (!navigator.onLine) {
+        alert('Necesitas conexión a internet para editar turnos en la nube.');
+        return;
+      }
+
       const emp = employees.find(e => e.id === empId);
       if (!emp) return;
 
@@ -1081,6 +1219,10 @@ Sin Registro</div>
 
     async function saveEditedShift() {
       if (!editingEmpId || !editingDateStr || !supabaseClient) return;
+      if (!navigator.onLine) {
+        alert('Sin conexión a internet. No se pueden guardar los cambios.');
+        return;
+      }
 
       const emp = employees.find(e => e.id === editingEmpId);
       if (!emp) return;
@@ -1158,7 +1300,7 @@ Sin Registro</div>
       let htmlContent = '';
 
       if (sortedDates.length === 0) {
-        htmlContent = '<div class="flex flex-col items-center justify-center py-12 text-app-sub dark:text-darkapp-sub"><i data-lucide="image-off" class="w-12 h-12 mb-2 opacity-40"></i><p class="text-sm font-medium">No hay registros fotográficos en la nube.</p></div>';
+        htmlContent = '<div class="flex flex-col items-center justify-center py-12 text-app-sub dark:text-darkapp-sub"><i data-lucide="image-off" class="w-12 h-12 mb-2 opacity-40"></i><p class="text-sm font-medium">No hay registros fotográficos disponibles.</p></div>';
       } else {
         sortedDates.forEach(dateStr => {
           const dayRecords = recordsByDate[dateStr].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
@@ -1191,7 +1333,7 @@ Sin Registro</div>
                   <span class="text-app-sub dark:text-darkapp-sub uppercase truncate flex-1 min-w-0">${escapeHtml(typeLabel)}</span>
                   <span class="text-app-brand dark:text-teal-400 shrink-0 text-right">${escapeHtml(timeStr)}</span>
                 </div>
-                <img src="${safePhotoUrl}" data-photo="${safePhotoUrl}" data-filename="${escapeHtml(downloadName)}" class="photo-thumb w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" title="Toca para ver en tamaño completo">
+                <img src="${safePhotoUrl}" data-photo="${safePhotoUrl}" data-filename="${escapeHtml(downloadName)}" onerror="this.alt='Imagen no disponible sin conexión'; this.classList.add('opacity-40');" class="photo-thumb w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" title="Toca para ver en tamaño completo">
               </div>
             `;
           });
@@ -1276,6 +1418,10 @@ Sin Registro</div>
     // ===============
     function openImportModal() {
       hideRecordPopup();
+      if (!navigator.onLine) {
+        alert('Necesitas conexión a internet para importar y sincronizar horarios en la nube.');
+        return;
+      }
       document.getElementById('importStatus').innerHTML = '';
       document.getElementById('modalImport').classList.remove('hidden');
     }
@@ -1323,6 +1469,17 @@ Sin Registro</div>
     async function handleExcelFile(file) {
       if (!file) return;
       const statusEl = document.getElementById('importStatus');
+
+      if (!navigator.onLine) {
+        statusEl.innerHTML = `
+          <div class="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 text-xs text-rose-700 dark:text-rose-400">
+            <strong>Error:</strong> Sin conexión a internet. Conéctate para sincronizar horarios.
+          </div>
+        `;
+        document.getElementById('excelInput').value = '';
+        return;
+      }
+
       statusEl.innerHTML = '<div class="text-sm text-app-sub dark:text-darkapp-sub text-center py-2">Procesando y sincronizando con la Nube...</div>';
 
       try {
@@ -1402,7 +1559,7 @@ Sin Registro</div>
       } catch (err) {
         statusEl.innerHTML = `
           <div class="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 text-xs text-rose-700 dark:text-rose-400">
-            <strong>Error:</strong> ${err.message}
+            <strong>Error:</strong> ${escapeHtml(err.message)}
           </div>
         `;
       }

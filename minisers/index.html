@@ -7,7 +7,7 @@
   <title>Gestor de Minisers</title>    
   <link rel="icon" type="image/svg+xml" href="./agenda.svg">
     
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://wa.me; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; img-src 'self' data: blob: https://mifbcyxtafeacwkzqzsq.supabase.co; connect-src 'self' https://mifbcyxtafeacwkzqzsq.supabase.co wss://mifbcyxtafeacwkzqzsq.supabase.co; base-uri 'self'; form-action 'self'; object-src 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; img-src 'self' data: blob: https://mifbcyxtafeacwkzqzsq.supabase.co; connect-src 'self' https://mifbcyxtafeacwkzqzsq.supabase.co wss://mifbcyxtafeacwkzqzsq.supabase.co; base-uri 'self'; form-action 'self'; object-src 'none';">
   <meta name="referrer" content="strict-origin-when-cross-origin">
 
   <meta name="theme-color" content="#F5F7FA">  
@@ -79,7 +79,7 @@
           </div>  
         </div>  
         <div class="flex items-center gap-2">  
-          <button id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors" title="Cambiar modo">  
+          <button type="button" id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors" title="Cambiar modo">  
               <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">  
                   <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>  
                   <i data-lucide="moon" class="w-3.5 h-3.5 text-slate-400 dark:text-indigo-400 opacity-100 dark:opacity-40"></i>  
@@ -90,14 +90,14 @@
               </div>  
           </button>  
           <div class="relative">  
-            <button onclick="toggleToolsMenu(event)" class="p-2 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 hover:bg-app-card dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer relative z-50">  
+            <button type="button" onclick="toggleToolsMenu(event)" class="p-2 text-app-sub hover:text-app-brand dark:text-darkapp-sub dark:hover:text-teal-400 hover:bg-app-card dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer relative z-50" title="Más opciones">  
               <i data-lucide="more-vertical" class="w-5 h-5"></i>  
             </button>  
             <div id="toolsDropdown" class="hidden absolute right-0 top-full mt-2 bg-app-card/90 dark:bg-darkapp-card/90 backdrop-blur-md min-w-[220px] shadow-lg border border-transparent rounded-xl z-50 py-1 flex flex-col gap-0.5">  
-              <button onclick="exportarExcelGeneral(); closeAllMenus();" class="w-full px-4 py-2.5 text-left text-xs font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer">
+              <button type="button" onclick="exportarExcelGeneral(); closeAllMenus();" class="w-full px-4 py-2.5 text-left text-xs font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer">
                   <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-500"></i> Exportar Todo a Excel
               </button>  
-              <button onclick="compartirWhatsappGeneral(); closeAllMenus();" class="w-full px-4 py-2.5 text-left text-xs font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer">
+              <button type="button" onclick="compartirWhatsappGeneral(); closeAllMenus();" class="w-full px-4 py-2.5 text-left text-xs font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer">
                   <i data-lucide="share-2" class="w-4 h-4 text-teal-500"></i> Compartir Agenda Global (WA)
               </button>  
             </div>  
@@ -114,7 +114,7 @@
               <span class="flex items-center gap-1 px-2 py-1"><i data-lucide="users" class="w-3.5 h-3.5 text-app-brand"></i> <span id="totalEmployees">0</span> Minisers</span>
               
               <!-- BOTÓN GHOST DE EVENTOS (CUMPLEAÑOS/ANIVERSARIOS) -->
-              <button id="btnEventsIndicator" onclick="openEventsModal()" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-lg text-app-brand dark:text-teal-400 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors cursor-pointer">
+              <button type="button" id="btnEventsIndicator" onclick="openEventsModal()" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-lg text-app-brand dark:text-teal-400 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors cursor-pointer">
                   <i data-lucide="calendar-heart" class="w-4 h-4"></i> 
                   <span id="eventsButtonText">0 Eventos (Mes)</span>
               </button>
@@ -135,7 +135,7 @@
                   <i data-lucide="search" class="w-4 h-4 text-app-sub absolute left-3.5 top-3"></i>
                   <input type="text" id="inputBuscar" oninput="filtrarEmpleados()" placeholder="Buscar por nombre o número..." class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl input-ghost font-medium shadow-sm">
               </div>
-              <button onclick="abrirModalEmpleado()" class="bg-transparent text-app-brand hover:bg-app-brand/10 dark:text-teal-400 dark:hover:bg-teal-500/10 font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer">
+              <button type="button" onclick="abrirModalEmpleado()" class="bg-transparent text-app-brand hover:bg-app-brand/10 dark:text-teal-400 dark:hover:bg-teal-500/10 font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer">
                   <i data-lucide="user-plus" class="w-4 h-4"></i> Agregar Miniser
               </button>
           </div>
@@ -152,11 +152,11 @@
                       <i data-lucide="chevron-down" class="w-3.5 h-3.5 shrink-0"></i>
                   </button>
                   <div id="dropdownPuesto" class="hidden absolute top-full left-0 mt-1 w-full bg-app-card/95 dark:bg-darkapp-card/95 backdrop-blur-xl shadow-xl border border-white/20 dark:border-slate-700/30 rounded-xl z-[999] py-1 flex flex-col">
-                      <button onclick="selectFilterOption('puesto', '', 'Todos los puestos')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Todos los puestos</button>
-                      <button onclick="selectFilterOption('puesto', 'Gerente', 'Gerente')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Gerente</button>
-                      <button onclick="selectFilterOption('puesto', 'Subgerente', 'Subgerente')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Subgerente</button>
-                      <button onclick="selectFilterOption('puesto', 'Promotor', 'Promotor')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Promotor</button>
-                      <button onclick="selectFilterOption('puesto', 'Promotor de temporada', 'Promotor de temporada')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Promotor de temporada</button>
+                      <button type="button" onclick="selectFilterOption('puesto', '', 'Todos los puestos')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Todos los puestos</button>
+                      <button type="button" onclick="selectFilterOption('puesto', 'Gerente', 'Gerente')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Gerente</button>
+                      <button type="button" onclick="selectFilterOption('puesto', 'Subgerente', 'Subgerente')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Subgerente</button>
+                      <button type="button" onclick="selectFilterOption('puesto', 'Promotor', 'Promotor')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Promotor</button>
+                      <button type="button" onclick="selectFilterOption('puesto', 'Promotor de temporada', 'Promotor de temporada')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Promotor de temporada</button>
                   </div>
               </div>
 
@@ -170,10 +170,10 @@
                       <i data-lucide="chevron-down" class="w-3.5 h-3.5 shrink-0"></i>
                   </button>
                   <div id="dropdownOrden" class="hidden absolute top-full left-0 mt-1 w-full bg-app-card/95 dark:bg-darkapp-card/95 backdrop-blur-xl shadow-xl border border-white/20 dark:border-slate-700/30 rounded-xl z-[999] py-1 flex flex-col">
-                      <button onclick="selectFilterOption('orden', 'name_asc', 'Nombre (A-Z)')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Nombre (A-Z)</button>
-                      <button onclick="selectFilterOption('orden', 'name_desc', 'Nombre (Z-A)')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Nombre (Z-A)</button>
-                      <button onclick="selectFilterOption('orden', 'date_desc', 'Ingreso reciente')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Ingreso reciente</button>
-                      <button onclick="selectFilterOption('orden', 'date_asc', 'Ingreso antiguo')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Ingreso antiguo</button>
+                      <button type="button" onclick="selectFilterOption('orden', 'name_asc', 'Nombre (A-Z)')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Nombre (A-Z)</button>
+                      <button type="button" onclick="selectFilterOption('orden', 'name_desc', 'Nombre (Z-A)')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Nombre (Z-A)</button>
+                      <button type="button" onclick="selectFilterOption('orden', 'date_desc', 'Ingreso reciente')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Ingreso reciente</button>
+                      <button type="button" onclick="selectFilterOption('orden', 'date_asc', 'Ingreso antiguo')" class="px-3 py-2 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 transition-colors">Ingreso antiguo</button>
                   </div>
               </div>
           </div>
@@ -185,8 +185,8 @@
           <div class="w-16 h-16 rounded-2xl bg-app-card/50 dark:bg-darkapp-card/50 border border-transparent flex items-center justify-center text-app-sub mb-3 shadow-sm">
               <i data-lucide="users" class="w-8 h-8 opacity-40"></i>
           </div>
-          <p class="text-sm font-bold text-app-title dark:text-darkapp-title">No hay Minisers registrados</p>
-          <p class="text-xs text-app-sub mt-1">Comienza agregando un nuevo Miniser a la agenda.</p>
+          <p id="emptyStateTitle" class="text-sm font-bold text-app-title dark:text-darkapp-title">No hay Minisers registrados</p>
+          <p id="emptyStateSubtitle" class="text-xs text-app-sub mt-1">Comienza agregando un nuevo Miniser a la agenda.</p>
       </div>
     </div>
   </div>    
@@ -199,7 +199,7 @@
                   <i data-lucide="party-popper" class="w-5 h-5 text-amber-500"></i>
                   Eventos del Mes
               </h3>
-              <span onclick="closeEventsModal()" class="text-app-sub hover:text-app-title cursor-pointer text-2xl leading-none">&times;</span>
+              <button type="button" onclick="closeEventsModal()" class="text-app-sub hover:text-app-title cursor-pointer text-2xl leading-none">&times;</button>
           </div>
           <div id="eventsListContainer" class="overflow-y-auto flex-1 space-y-2 pr-1">
               <!-- Inyectado dinámicamente -->
@@ -212,7 +212,7 @@
     <div class="glass-modal border border-white/20 dark:border-slate-700/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">  
       <div class="flex items-center justify-between pb-2 border-b border-app-border/50 dark:border-darkapp-border/50">  
         <h3 id="modalTitulo" class="text-base font-bold text-app-title dark:text-darkapp-title">Nuevo Miniser</h3>  
-        <span onclick="cerrarModalEmpleado()" class="text-app-sub hover:text-app-title cursor-pointer text-2xl leading-none">&times;</span>  
+        <button type="button" onclick="cerrarModalEmpleado()" class="text-app-sub hover:text-app-title cursor-pointer text-2xl leading-none">&times;</button>  
       </div>  
 
       <form id="formEmpleado" onsubmit="guardarEmpleado(event)" class="space-y-3 text-xs">  
@@ -222,7 +222,7 @@
 
         <div class="flex flex-col items-center gap-2 py-2">
             <div class="relative w-24 h-24 rounded-full overflow-hidden bg-app-bg dark:bg-slate-800 border-2 border-transparent flex items-center justify-center shadow-inner">
-                <img id="imgPreview" src="" class="w-full h-full object-cover hidden">
+                <img id="imgPreview" src="" onerror="this.classList.add('hidden'); document.getElementById('imgPlaceholder').classList.remove('hidden');" class="w-full h-full object-cover hidden">
                 <i data-lucide="user" id="imgPlaceholder" class="w-8 h-8 text-app-sub"></i>
             </div>
             <div class="flex items-center gap-2">
@@ -265,11 +265,11 @@
                 </button>
                 <input type="hidden" id="empPuestoSelect" required>
                 <div id="puestoDropdownList" class="hidden absolute left-0 right-0 bottom-full mb-1 bg-app-card/95 dark:bg-darkapp-card/95 backdrop-blur-md shadow-xl border border-white/20 dark:border-slate-700/30 rounded-xl z-[999] py-1 flex flex-col">
-                    <div onclick="seleccionarPuesto('Gerente')" class="px-4 py-2.5 text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Gerente</div>
-                    <div onclick="seleccionarPuesto('Subgerente')" class="px-4 py-2.5 text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Subgerente</div>
-                    <div onclick="seleccionarPuesto('Promotor')" class="px-4 py-2.5 text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Promotor</div>
-                    <div onclick="seleccionarPuesto('Promotor de temporada')" class="px-4 py-2.5 text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Promotor de temporada</div>
-                    <div onclick="seleccionarPuesto('Otro')" class="px-4 py-2.5 text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer text-app-brand">Otro</div>
+                    <button type="button" onclick="seleccionarPuesto('Gerente')" class="px-4 py-2.5 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Gerente</button>
+                    <button type="button" onclick="seleccionarPuesto('Subgerente')" class="px-4 py-2.5 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Subgerente</button>
+                    <button type="button" onclick="seleccionarPuesto('Promotor')" class="px-4 py-2.5 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Promotor</button>
+                    <button type="button" onclick="seleccionarPuesto('Promotor de temporada')" class="px-4 py-2.5 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer">Promotor de temporada</button>
+                    <button type="button" onclick="seleccionarPuesto('Otro')" class="px-4 py-2.5 text-left text-xs font-semibold hover:bg-app-bg dark:hover:bg-slate-800 cursor-pointer text-app-brand">Otro</button>
                 </div>
             </div>
         </div>
@@ -281,7 +281,7 @@
 
         <div class="pt-3 flex justify-end gap-2">
             <button type="button" onclick="cerrarModalEmpleado()" class="px-4 py-2 bg-transparent text-app-sub hover:text-app-title dark:text-darkapp-sub dark:hover:text-darkapp-title rounded-xl font-semibold hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">Cancelar</button>
-            <button type="submit" class="px-5 py-2 bg-transparent text-app-brand hover:bg-app-brand/10 dark:text-teal-400 dark:hover:bg-teal-500/10 font-semibold rounded-xl transition-colors cursor-pointer">Guardar Miniser</button>
+            <button type="submit" id="btnGuardarEmpleado" class="px-5 py-2 bg-transparent text-app-brand hover:bg-app-brand/10 dark:text-teal-400 dark:hover:bg-teal-500/10 font-semibold rounded-xl transition-colors cursor-pointer">Guardar Miniser</button>
         </div>
       </form>  
     </div>  
@@ -309,7 +309,7 @@
               <i data-lucide="check-circle-2" class="w-8 h-8"></i>  
           </div>  
           <p id="alertModalText" class="text-sm font-semibold text-app-title dark:text-darkapp-title leading-relaxed">Operación exitosa</p>  
-          <button onclick="cerrarModalAlerta()" class="w-full py-2.5 rounded-xl bg-transparent hover:bg-app-brand/10 text-app-brand text-xs font-semibold cursor-pointer transition-colors">Aceptar</button>  
+          <button type="button" onclick="cerrarModalAlerta()" class="w-full py-2.5 rounded-xl bg-transparent hover:bg-app-brand/10 text-app-brand text-xs font-semibold cursor-pointer transition-colors">Aceptar</button>  
       </div>  
   </div>    
 
@@ -320,13 +320,70 @@
           </div>  
           <p id="confirmModalText" class="text-sm font-semibold text-app-title dark:text-darkapp-title leading-relaxed">¿Desea continuar?</p>  
           <div class="flex items-center gap-2 pt-2">
-              <button onclick="cerrarModalConfirmacion(false)" class="flex-1 py-2.5 rounded-xl bg-transparent hover:bg-app-bg/50 dark:hover:bg-slate-700/50 text-app-sub dark:text-darkapp-sub text-xs font-semibold cursor-pointer transition-colors">Cancelar</button>
-              <button onclick="cerrarModalConfirmacion(true)" class="flex-1 py-2.5 rounded-xl bg-transparent hover:bg-rose-500/10 text-rose-500 text-xs font-semibold cursor-pointer transition-colors">Confirmar</button>
+              <button type="button" onclick="cerrarModalConfirmacion(false)" class="flex-1 py-2.5 rounded-xl bg-transparent hover:bg-app-bg/50 dark:hover:bg-slate-700/50 text-app-sub dark:text-darkapp-sub text-xs font-semibold cursor-pointer transition-colors">Cancelar</button>
+              <button type="button" onclick="cerrarModalConfirmacion(true)" class="flex-1 py-2.5 rounded-xl bg-transparent hover:bg-rose-500/10 text-rose-500 text-xs font-semibold cursor-pointer transition-colors">Confirmar</button>
           </div>
       </div>  
   </div>    
 
   <script>  
+    // --- REGISTRO DEL SERVICE WORKER ---  
+    function initServiceWorker() {  
+        if ('serviceWorker' in navigator) {  
+            navigator.serviceWorker.register('/sw.js', { scope: '/' })  
+                .then((registration) => console.log('[PWA] SW OK en Gestor de Minisers:', registration.scope))  
+                .catch((error) => console.error('[PWA] SW error:', error));  
+        }  
+    }
+
+    // ============================================================================
+    // CACHÉ LOCAL EN INDEXEDDB (PARA SOPORTE OFFLINE EN GESTOR DE MINISERS)
+    // ============================================================================
+    const MINISERS_CACHE_DB = 'MinisersOfflineDB';
+    const MINISERS_CACHE_STORE = 'cache';
+
+    function openMinisersCacheDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(MINISERS_CACHE_DB, 1);
+            req.onerror = () => reject(req.error);
+            req.onsuccess = () => resolve(req.result);
+            req.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(MINISERS_CACHE_STORE)) {
+                    db.createObjectStore(MINISERS_CACHE_STORE, { keyPath: 'key' });
+                }
+            };
+        });
+    }
+
+    async function setMinisersCache(key, value) {
+        try {
+            const db = await openMinisersCacheDB();
+            await new Promise((resolve, reject) => {
+                const tx = db.transaction(MINISERS_CACHE_STORE, 'readwrite');
+                const req = tx.objectStore(MINISERS_CACHE_STORE).put({ key, value, updatedAt: Date.now() });
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        } catch (e) {
+            console.warn('[Cache Minisers] Error guardando:', e);
+        }
+    }
+
+    async function getMinisersCache(key) {
+        try {
+            const db = await openMinisersCacheDB();
+            return await new Promise((resolve, reject) => {
+                const tx = db.transaction(MINISERS_CACHE_STORE, 'readonly');
+                const req = tx.objectStore(MINISERS_CACHE_STORE).get(key);
+                req.onsuccess = () => resolve(req.result ? req.result.value : null);
+                req.onerror = () => reject(req.error);
+            });
+        } catch (e) {
+            return null;
+        }
+    }
+
     const SUPABASE_URL = "https://mifbcyxtafeacwkzqzsq.supabase.co";  
     const SUPABASE_ANON_KEY = "sb_publishable_O6EAbkSba1NQPq08k_7bHg_PZ_x4ZU5";  
 
@@ -345,6 +402,13 @@
         return String(str).replace(/[&<>"']/g, c => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         }[c]));
+    }
+
+    function parseLocalDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = String(dateStr).split('-').map(Number);
+        if (parts.length !== 3 || parts.some(isNaN)) return null;
+        return new Date(parts[0], parts[1] - 1, parts[2]);
     }
 
     let allEmployees = [];
@@ -448,15 +512,18 @@
     }  
 
     window.addEventListener('click', (e) => { 
-        if (!e.target.closest('button') && !e.target.closest('[id^="dropdown"]')) closeAllMenus();
+        if (!e.target.closest('button') && !e.target.closest('[id^="dropdown"]') && !e.target.closest('#puestoDropdownList')) closeAllMenus();
     });
 
-    function actualizarEstadoConexionUI() {  
+    function actualizarEstadoConexionUI(isUsingCache = false) {  
         const statusEl = document.getElementById('conexionStatus');  
         if (!statusEl) return;  
         if (!navigator.onLine) {  
             statusEl.className = "inline-flex items-center gap-1.5 text-[11px] text-amber-500 font-semibold uppercase tracking-wider";  
-            statusEl.innerHTML = `<i class="fa-solid fa-wifi"></i> Sin Conexión`;  
+            statusEl.innerHTML = `<i class="fa-solid fa-wifi"></i> Sin Conexión (Caché)`;  
+        } else if (isUsingCache) {
+            statusEl.className = "inline-flex items-center gap-1.5 text-[11px] text-amber-500 font-semibold uppercase tracking-wider";  
+            statusEl.innerHTML = `<i class="fa-solid fa-circle-dot"></i> Caché Local`;  
         } else {  
             statusEl.className = "inline-flex items-center gap-1.5 text-[11px] text-emerald-500 font-semibold uppercase tracking-wider";  
             statusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> En Línea`;  
@@ -500,7 +567,6 @@
         if (monthlyEvents.length === 0) {
             container.innerHTML = '<p class="text-center text-xs text-app-sub py-4">No hay eventos este mes.</p>';
         } else {
-            // Ordenar por día
             monthlyEvents.sort((a, b) => a.day - b.day);
 
             monthlyEvents.forEach(ev => {
@@ -539,11 +605,13 @@
     let archivoFotoSeleccionado = null;
 
     function comprimirImagenFile(file) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             const reader = new FileReader();
+            reader.onerror = () => reject(new Error('Error al leer imagen'));
             reader.readAsDataURL(file);
             reader.onload = (event) => {
                 const img = new Image();
+                img.onerror = () => reject(new Error('Imagen inválida'));
                 img.src = event.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
@@ -553,7 +621,10 @@
                     else { if (h > MAX) { w *= MAX / h; h = MAX; } }
                     canvas.width = w; canvas.height = h;
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    canvas.toBlob((blob) => resolve(new File([blob], "foto_comprimida.jpg", { type: "image/jpeg" })), 'image/jpeg', 0.75);
+                    canvas.toBlob((blob) => {
+                        if (!blob) return reject(new Error('No se pudo comprimir la imagen'));
+                        resolve(new File([blob], "foto_comprimida.jpg", { type: "image/jpeg" }));
+                    }, 'image/jpeg', 0.75);
                 };
             };
         });
@@ -561,10 +632,14 @@
 
     async function seleccionarArchivoFoto(input) {
         if (input.files && input.files[0]) {
-            archivoFotoSeleccionado = await comprimirImagenFile(input.files[0]);
-            const reader = new FileReader();
-            reader.onload = (e) => mostrarPreviewFoto(e.target.result);
-            reader.readAsDataURL(archivoFotoSeleccionado);
+            try {
+                archivoFotoSeleccionado = await comprimirImagenFile(input.files[0]);
+                const reader = new FileReader();
+                reader.onload = (e) => mostrarPreviewFoto(e.target.result);
+                reader.readAsDataURL(archivoFotoSeleccionado);
+            } catch (err) {
+                mostrarAlerta("No se pudo procesar la imagen seleccionada.", true);
+            }
         }
     }
 
@@ -615,6 +690,7 @@
         canvas.height = video.videoHeight || 400;
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
         canvas.toBlob(async (blob) => {
+            if (!blob) return;
             const rawFile = new File([blob], "captura_camara.jpg", { type: "image/jpeg" });
             archivoFotoSeleccionado = await comprimirImagenFile(rawFile);
             mostrarPreviewFoto(canvas.toDataURL('image/jpeg', 0.75));
@@ -623,13 +699,13 @@
     }
 
     function calcularAniosAntiguedad(fechaIngreso) {
-        if (!fechaIngreso) return '0 años';
-        const ingreso = new Date(fechaIngreso);
+        const ingreso = parseLocalDate(fechaIngreso);
+        if (!ingreso) return '0 meses';
         const hoy = new Date();
         let anos = hoy.getFullYear() - ingreso.getFullYear();
         const m = hoy.getMonth() - ingreso.getMonth();
         if (m < 0 || (m === 0 && hoy.getDate() < ingreso.getDate())) anos--;
-        const meses = (hoy.getFullYear() - ingreso.getFullYear()) * 12 + (hoy.getMonth() - ingreso.getMonth());
+        const meses = (hoy.getFullYear() - ingreso.getFullYear()) * 12 + (hoy.getMonth() - ingreso.getMonth()) - (hoy.getDate() < ingreso.getDate() ? 1 : 0);
         if (anos < 1) return `${Math.max(0, meses)} meses`;
         return `${anos} año${anos > 1 ? 's' : ''}`;
     }
@@ -649,7 +725,7 @@
         const btnEventsIndicator = document.getElementById('btnEventsIndicator');
         
         listaAlertas.innerHTML = '';
-        monthlyEvents = []; // Resetear eventos del mes
+        monthlyEvents = [];
         
         let alertasHoy = 0;
         let birthdaysMonth = 0;
@@ -660,9 +736,8 @@
         const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
         empleados.forEach(emp => {
-            // Cumpleaños
             if (emp.nacimiento) {
-                const partesNac = emp.nacimiento.split('-');
+                const partesNac = String(emp.nacimiento).split('-');
                 if (partesNac.length === 3) {
                     const m = parseInt(partesNac[1], 10);
                     const d = parseInt(partesNac[2], 10);
@@ -683,9 +758,8 @@
                 }
             }
 
-            // Aniversarios
             if (emp.ingreso) {
-                const partesIng = emp.ingreso.split('-');
+                const partesIng = String(emp.ingreso).split('-');
                 if (partesIng.length === 3) {
                     const anioIng = parseInt(partesIng[0], 10);
                     const m = parseInt(partesIng[1], 10);
@@ -711,7 +785,6 @@
 
         document.getElementById('totalEmployees').textContent = empleados.length;
 
-        // Lógica del botón de eventos
         if (birthdaysMonth > 0 || anniversariesMonth > 0) {
             btnEventsIndicator.classList.remove('hidden');
             btnEventsIndicator.classList.add('flex');
@@ -740,6 +813,11 @@
     }
 
     async function abrirModalEmpleado(id = null) {
+        if (!navigator.onLine) {
+            mostrarAlerta('Necesitas conexión a internet para crear o editar Minisers.', true);
+            return;
+        }
+
         document.getElementById('formEmpleado').reset();
         inicializarFechasMaximas();
         document.getElementById('empId').value = '';
@@ -782,58 +860,77 @@
 
     async function guardarEmpleado(event) {
         event.preventDefault();
-        const idVal = document.getElementById('empId').value;
-        const numeroIngresado = document.getElementById('empNumero').value.trim();
-        const puestoSelect = document.getElementById('empPuestoSelect').value;
-        const fechaNacimiento = document.getElementById('empNacimiento').value;
-        const fechaIngreso = document.getElementById('empIngreso').value;
-
-        const hoy = new Date();
-        const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
-
-        if (fechaNacimiento > hoyStr) { mostrarAlerta('La fecha de nacimiento no puede ser una fecha a futuro.', true); return; }
-        if (fechaIngreso > hoyStr) { mostrarAlerta('La fecha de ingreso no puede ser una fecha a futuro.', true); return; }
-        if (!puestoSelect) { mostrarAlerta('Por favor seleccione un puesto válido.', true); return; }
-
-        const puestoFinal = puestoSelect === 'Otro' ? document.getElementById('empPuestoOtro').value.trim() : puestoSelect;
-
-        const { data: existing, error: errCheck } = await supabaseClient.from('empleados').select('id, numero_empleado').eq('numero_empleado', numeroIngresado);
-        if (!errCheck && existing) {
-            const existe = existing.some(emp => !idVal || emp.id !== Number(idVal));
-            if (existe) { mostrarAlerta('El número de Miniser ingresado ya existe.', true); return; }
+        if (!navigator.onLine) {
+            mostrarAlerta('Sin conexión a internet. Conéctate para guardar cambios.', true);
+            return;
         }
 
-        let fotoUrlFinal = document.getElementById('empFotoUrl').value;
-        if (archivoFotoSeleccionado) {
-            try { fotoUrlFinal = await subirFotoASupabase(archivoFotoSeleccionado, numeroIngresado); }
-            catch (err) { mostrarAlerta('Error al subir la imagen al bucket.', true); return; }
-        }
+        const btnGuardar = document.getElementById('btnGuardarEmpleado');
+        const originalBtnText = btnGuardar.textContent;
+        btnGuardar.disabled = true;
+        btnGuardar.textContent = 'Guardando...';
 
-        const empleadoObj = {
-            nombre: document.getElementById('empNombre').value.trim(),
-            numero_empleado: numeroIngresado,
-            correo: document.getElementById('empCorreo').value.trim(),
-            telefono: document.getElementById('empTelefono').value.trim(),
-            nacimiento: fechaNacimiento,
-            ingreso: fechaIngreso,
-            puesto: puestoFinal,
-            foto_url: fotoUrlFinal
-        };
+        try {
+            const idVal = document.getElementById('empId').value;
+            const numeroIngresado = document.getElementById('empNumero').value.trim();
+            const puestoSelect = document.getElementById('empPuestoSelect').value;
+            const fechaNacimiento = document.getElementById('empNacimiento').value;
+            const fechaIngreso = document.getElementById('empIngreso').value;
 
-        let res = idVal
-            ? await supabaseClient.from('empleados').update(empleadoObj).eq('id', Number(idVal))
-            : await supabaseClient.from('empleados').insert([empleadoObj]);
+            const hoy = new Date();
+            const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
 
-        if (res.error) {
-            mostrarAlerta('Error al guardar al Miniser en la Nube.', true);
-        } else {
-            cerrarModalEmpleado();
-            await cargarEmpleados();
-            mostrarAlerta(idVal ? 'Miniser actualizado correctamente' : 'Miniser registrado con éxito');
+            if (fechaNacimiento > hoyStr) { mostrarAlerta('La fecha de nacimiento no puede ser una fecha a futuro.', true); return; }
+            if (fechaIngreso > hoyStr) { mostrarAlerta('La fecha de ingreso no puede ser una fecha a futuro.', true); return; }
+            if (!puestoSelect) { mostrarAlerta('Por favor seleccione un puesto válido.', true); return; }
+
+            const puestoFinal = puestoSelect === 'Otro' ? document.getElementById('empPuestoOtro').value.trim() : puestoSelect;
+
+            const { data: existing, error: errCheck } = await supabaseClient.from('empleados').select('id, numero_empleado').eq('numero_empleado', numeroIngresado);
+            if (!errCheck && existing) {
+                const existe = existing.some(emp => !idVal || emp.id !== Number(idVal));
+                if (existe) { mostrarAlerta('El número de Miniser ingresado ya existe.', true); return; }
+            }
+
+            let fotoUrlFinal = document.getElementById('empFotoUrl').value;
+            if (archivoFotoSeleccionado) {
+                try { fotoUrlFinal = await subirFotoASupabase(archivoFotoSeleccionado, numeroIngresado); }
+                catch (err) { mostrarAlerta('Error al subir la imagen al bucket.', true); return; }
+            }
+
+            const empleadoObj = {
+                nombre: document.getElementById('empNombre').value.trim(),
+                numero_empleado: numeroIngresado,
+                correo: document.getElementById('empCorreo').value.trim(),
+                telefono: document.getElementById('empTelefono').value.trim(),
+                nacimiento: fechaNacimiento,
+                ingreso: fechaIngreso,
+                puesto: puestoFinal,
+                foto_url: fotoUrlFinal
+            };
+
+            let res = idVal
+                ? await supabaseClient.from('empleados').update(empleadoObj).eq('id', Number(idVal))
+                : await supabaseClient.from('empleados').insert([empleadoObj]);
+
+            if (res.error) {
+                mostrarAlerta('Error al guardar al Miniser en la Nube.', true);
+            } else {
+                cerrarModalEmpleado();
+                await cargarEmpleados();
+                mostrarAlerta(idVal ? 'Miniser actualizado correctamente' : 'Miniser registrado con éxito');
+            }
+        } finally {
+            btnGuardar.disabled = false;
+            btnGuardar.textContent = originalBtnText;
         }
     }
 
     async function eliminarEmpleado(id) {
+        if (!navigator.onLine) {
+            mostrarAlerta('Necesitas conexión a internet para eliminar registros.', true);
+            return;
+        }
         mostrarConfirmacion('¿Está seguro de eliminar a este Miniser?', async (confirmado) => {
             if (confirmado) {
                 const { error } = await supabaseClient.from('empleados').delete().eq('id', Number(id));
@@ -844,13 +941,38 @@
     }
 
     async function cargarEmpleados() {
-        const { data: empleados, error } = await supabaseClient.from('empleados').select('*').order('nombre', { ascending: true });
-        if (!error && empleados) {
-            allEmployees = empleados;
-            filtrarEmpleados();
-            evaluarAlertasYNotificaciones(allEmployees);
+        let isUsingCache = false;
+
+        if (navigator.onLine) {
+            try {
+                const { data: empleados, error } = await supabaseClient.from('empleados').select('*').order('nombre', { ascending: true });
+                if (!error && Array.isArray(empleados)) {
+                    allEmployees = empleados;
+                    await setMinisersCache('empleados', empleados);
+                } else {
+                    const cached = await getMinisersCache('empleados');
+                    if (cached) {
+                        allEmployees = cached;
+                        isUsingCache = true;
+                    }
+                }
+            } catch (err) {
+                console.warn('[Minisers] Error de red, cargando caché:', err);
+                const cached = await getMinisersCache('empleados');
+                if (cached) {
+                    allEmployees = cached;
+                    isUsingCache = true;
+                }
+            }
+        } else {
+            const cached = await getMinisersCache('empleados');
+            allEmployees = cached || [];
+            isUsingCache = true;
         }
-        actualizarEstadoConexionUI();
+
+        filtrarEmpleados();
+        evaluarAlertasYNotificaciones(allEmployees);
+        actualizarEstadoConexionUI(isUsingCache);
     }
 
     function filtrarEmpleados() {
@@ -860,8 +982,8 @@
 
         let lista = allEmployees.filter(emp => {
             const matchQuery = emp.nombre.toLowerCase().includes(query) || 
-                               emp.numero_empleado.toLowerCase().includes(query) || 
-                               emp.puesto.toLowerCase().includes(query);
+                               String(emp.numero_empleado).toLowerCase().includes(query) || 
+                               (emp.puesto || '').toLowerCase().includes(query);
             const matchPuesto = !puestoFilter || emp.puesto === puestoFilter;
             return matchQuery && matchPuesto;
         });
@@ -869,8 +991,8 @@
         lista.sort((a, b) => {
             if (sortBy === 'name_asc') return a.nombre.localeCompare(b.nombre);
             if (sortBy === 'name_desc') return b.nombre.localeCompare(a.nombre);
-            if (sortBy === 'date_desc') return new Date(b.ingreso) - new Date(a.ingreso);
-            if (sortBy === 'date_asc') return new Date(a.ingreso) - new Date(b.ingreso);
+            if (sortBy === 'date_desc') return (parseLocalDate(b.ingreso)?.getTime() || 0) - (parseLocalDate(a.ingreso)?.getTime() || 0);
+            if (sortBy === 'date_asc') return (parseLocalDate(a.ingreso)?.getTime() || 0) - (parseLocalDate(b.ingreso)?.getTime() || 0);
             return 0;
         });
 
@@ -887,22 +1009,33 @@
     }
 
     function getAvatarHTML(emp) {
-        if (emp.foto_url) {
-            return `<img src="${escapeHtml(emp.foto_url)}" class="w-full h-full object-cover">`;
-        }
-        const initials = emp.nombre.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+        const initials = emp.nombre.split(' ').filter(Boolean).map(n => n[0]).slice(0, 2).join('').toUpperCase();
         const colorIndex = emp.nombre.length % AVATAR_COLORS.length;
         const bgColor = AVATAR_COLORS[colorIndex];
-        return `<div class="w-full h-full ${bgColor} text-white flex items-center justify-center font-bold text-lg avatar-initials rounded-full">${initials}</div>`;
+        const fallbackDiv = `<div class="w-full h-full ${bgColor} text-white flex items-center justify-center font-bold text-lg avatar-initials rounded-full">${escapeHtml(initials)}</div>`;
+
+        if (emp.foto_url) {
+            return `<img src="${escapeHtml(emp.foto_url)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), {className:'w-full h-full ${bgColor} text-white flex items-center justify-center font-bold text-lg avatar-initials rounded-full', textContent:'${escapeHtml(initials)}'}));" class="w-full h-full object-cover">`;
+        }
+        return fallbackDiv;
     }
 
     function renderizarAgenda(empleados) {
         const grid = document.getElementById('gridEmpleados');
         const emptyState = document.getElementById('emptyState');
+        const emptyTitle = document.getElementById('emptyStateTitle');
+        const emptySub = document.getElementById('emptyStateSubtitle');
         grid.innerHTML = '';
 
         if (empleados.length === 0) {
             emptyState.classList.remove('hidden'); emptyState.classList.add('flex');
+            if (!navigator.onLine && allEmployees.length === 0) {
+                emptyTitle.textContent = 'Sin conexión y sin caché local';
+                emptySub.textContent = 'Conéctate a internet para cargar la agenda de Minisers.';
+            } else {
+                emptyTitle.textContent = 'No hay Minisers registrados';
+                emptySub.textContent = 'Comienza agregando un nuevo Miniser a la agenda.';
+            }
             return;
         }
         emptyState.classList.remove('flex'); emptyState.classList.add('hidden');
@@ -918,6 +1051,7 @@
             const safeNumero = escapeHtml(emp.numero_empleado);
             const safeCorreo = escapeHtml(emp.correo || 'No registrado');
             const safeTelefono = escapeHtml(emp.telefono || 'No registrado');
+            const safeIngreso = escapeHtml(emp.ingreso);
             
             card.innerHTML = `
                 <div class="flex items-center justify-between">
@@ -940,16 +1074,16 @@
                     <div class="space-y-1 text-xs">
                         <div class="flex items-center gap-2 text-app-sub"><i data-lucide="mail" class="w-3.5 h-3.5"></i> <span class="truncate">${safeCorreo}</span></div>
                         <div class="flex items-center gap-2 text-app-sub"><i data-lucide="phone" class="w-3.5 h-3.5"></i> <span>${safeTelefono}</span></div>
-                        <div class="flex items-center gap-2 text-app-sub"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> <span>Ingreso: ${emp.ingreso} (${antiguedad})</span></div>
+                        <div class="flex items-center gap-2 text-app-sub"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> <span>Ingreso: ${safeIngreso} (${escapeHtml(antiguedad)})</span></div>
                     </div>
                     <div class="flex items-center justify-end gap-1 pt-1">
-                        <button data-action="share" data-id="${emp.id}" class="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition-colors cursor-pointer" title="Compartir WhatsApp">
+                        <button type="button" data-action="share" data-id="${emp.id}" class="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition-colors cursor-pointer" title="Compartir WhatsApp">
                             <i data-lucide="share-2" class="w-4 h-4"></i>
                         </button>
-                        <button data-action="edit" data-id="${emp.id}" class="p-2 text-app-sub hover:text-app-brand rounded-lg transition-colors cursor-pointer" title="Editar">
+                        <button type="button" data-action="edit" data-id="${emp.id}" class="p-2 text-app-sub hover:text-app-brand rounded-lg transition-colors cursor-pointer" title="Editar">
                             <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
-                        <button data-action="delete" data-id="${emp.id}" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors cursor-pointer" title="Eliminar">
+                        <button type="button" data-action="delete" data-id="${emp.id}" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors cursor-pointer" title="Eliminar">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -1012,21 +1146,27 @@
     }
 
     function iniciarSuscripcionRealtime() {
-        if (channelInstance) return;
+        if (channelInstance || !navigator.onLine) return;
         channelInstance = supabaseClient
             .channel('cambios-empleados-miniser')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'empleados' }, () => cargarEmpleados())
             .subscribe();
     }
 
-    window.addEventListener('online', () => cargarEmpleados());
-    window.addEventListener('offline', () => actualizarEstadoConexionUI());
+    window.addEventListener('online', () => {
+        cargarEmpleados();
+        iniciarSuscripcionRealtime();
+    });
+    window.addEventListener('offline', () => actualizarEstadoConexionUI(true));
 
     window.addEventListener('DOMContentLoaded', async () => {
+        initServiceWorker();
         try {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) { window.location.replace('../index.html'); return; }
-        } catch (e) { window.location.replace('../index.html'); return; }
+        } catch (e) {
+            if (navigator.onLine) { window.location.replace('../index.html'); return; }
+        }
 
         inicializarFechasMaximas();
         await cargarEmpleados();
