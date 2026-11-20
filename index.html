@@ -235,7 +235,7 @@
         // --- REGISTRO DEL SERVICE WORKER PARA MODO OFFLINE ---
         function initServiceWorker() {
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                navigator.serviceWorker.register('./sw.js')
                     .then((registration) => {
                         console.log('[PWA] Service Worker registrado correctamente, scope:', registration.scope);
                     })
