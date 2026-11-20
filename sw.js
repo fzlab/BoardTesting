@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Nexus-T0151-v1.9.50.1';
+const CACHE_NAME = 'Nexus-T0151-v1.9.48';
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -132,22 +132,29 @@ self.addEventListener('fetch', (event) => {
     }
 
     // 1. Navegación / HTML: Network First con resolución inteligente offline
-    if (event.request.mode === 'navigate' || acceptHeader.includes('text/html')) {
-        event.respondWith(
-            fetch(event.request)
-                .then((networkResponse) => {
-                    if (networkResponse && networkResponse.status === 200) {
-                        const responseClone = networkResponse.clone();
-                        caches.open(CACHE_NAME).then((cache) => {
-                            cache.put(event.request, responseClone);
-                        }).catch(() => {});
-                    }
-                    return networkResponse;
-                })
-                .catch(() => resolveOfflineHtml(event.request))
-        );
+// 1. Navegación / HTML: Cache First si estamos sin conexión, Network First con conexión
+if (event.request.mode === 'navigate' || acceptHeader.includes('text/html')) {
+    if (!self.navigator.onLine) {
+        event.respondWith(resolveOfflineHtml(event.request));
         return;
     }
+
+    event.respondWith(
+        fetch(event.request)
+            .then((networkResponse) => {
+                if (networkResponse && networkResponse.status === 200) {
+                    const responseClone = networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseClone);
+                    }).catch(() => {});
+                }
+                return networkResponse;
+            })
+            .catch(() => resolveOfflineHtml(event.request))
+    );
+    return;
+}
+
 
     // 2. Assets / CDNs: Stale-While-Revalidate
     event.respondWith(
