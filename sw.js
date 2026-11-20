@@ -1,39 +1,39 @@
-const CACHE_NAME = 'Nexus-T0151-v1.9.42';
+const CACHE_NAME = 'Nexus-T0151-v1.9.43';
 const STATIC_ASSETS = [
     './',
-    'index.html',
-    'manifest.json',
-    'fonts.css',
-    'nexus.svg',
-    'icon-180.png',
-    'icon-192.png',
-    'icon-512.png',
-    'src/teclado.js',
-    'src/fonts/Geist-Regular.ttf',
-    'src/fonts/Geist-SemiBold.ttf',
-    'src/icons/checador-96.png',
-    'src/icons/corte-96.png',
-    'src/icons/ventas-96.png',
-    'corte/index.html',
-    'existencias/index.html',
-    'fases/index.html',
-    'tickets/index.html',
-    'ventas/index.html',
-    'notas/index.html',
-    'checks/index.html',
-    'minisers/index.html',
-    'checador/checador.html',
-    'checador/admin.html',
-    'corte/corte.svg',
-    'existencias/existencias.svg',
-    'fases/fases.svg',
-    'ventas/ventas.svg',
-    'tickets/tickets.svg',
-    'notas/notas.svg',
-    'checks/checks.svg',
-    'minisers/agenda.svg',
-    'checador/checador.svg',
-    'checador/admin.svg'
+    './index.html',
+    './manifest.json',
+    './fonts.css',
+    './nexus.svg',
+    './icon-180.png',
+    './icon-192.png',
+    './icon-512.png',
+    './src/teclado.js',
+    './src/fonts/Geist-Regular.ttf',
+    './src/fonts/Geist-SemiBold.ttf',
+    './src/icons/checador-96.png',
+    './src/icons/corte-96.png',
+    './src/icons/ventas-96.png',
+    './corte/index.html',
+    './existencias/index.html',
+    './fases/index.html',
+    './tickets/index.html',
+    './ventas/index.html',
+    './notas/index.html',
+    './checks/index.html',
+    './minisers/index.html',
+    './checador/checador.html',
+    './checador/admin.html',
+    './corte/corte.svg',
+    './existencias/existencias.svg',
+    './fases/fases.svg',
+    './ventas/ventas.svg',
+    './tickets/tickets.svg',
+    './notas/notas.svg',
+    './checks/checks.svg',
+    './minisers/agenda.svg',
+    './checador/checador.svg',
+    './checador/admin.svg'
 ];
 
 function assetUrl(path) {
@@ -41,7 +41,7 @@ function assetUrl(path) {
 }
 
 function indexUrl() {
-    return new URL('index.html', self.registration.scope).href;
+    return new URL('./index.html', self.registration.scope).href;
 }
 
 async function resolveOfflineHtml(request) {
@@ -56,9 +56,9 @@ async function resolveOfflineHtml(request) {
         const candidates = [];
 
         if (cleanPath.endsWith('/')) {
-            candidates.push(`${cleanPath}index.html`);
+            candidates.push(`${cleanPath}./index.html`);
         } else if (cleanPath && !cleanPath.includes('.')) {
-            candidates.push(`${cleanPath}/index.html`, `${cleanPath}.html`);
+            candidates.push(`${cleanPath}./index.html`, `${cleanPath}.html`);
         }
 
         for (const candidate of candidates) {
