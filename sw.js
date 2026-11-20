@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Nexus-T0151-v1.9.46';
+const CACHE_NAME = 'Nexus-T0151-v1.9.47';
 const STATIC_ASSETS = [
     './',
     './index.html',
