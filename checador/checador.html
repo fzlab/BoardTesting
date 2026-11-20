@@ -16,9 +16,12 @@
   <script>
       (function() {
           const SESSION_KEY = 'sb-mifbcyxtafeacwkzqzsq-auth-token';
-          if (localStorage.getItem(SESSION_KEY) === null) {
+          // Solo redirigir si hay conexión y no existe token de sesión
+          if (navigator.onLine && localStorage.getItem(SESSION_KEY) === null) {
               document.documentElement.style.visibility = 'hidden';
               window.location.replace('../index.html');
+          } else {
+              document.documentElement.style.visibility = 'visible';
           }
       })();
   </script>
@@ -371,21 +374,22 @@
     }
 
     // ============================================================================
-    // SUPABASE
+    // SUPABASE (NO BLOQUEANTE EN MODO OFFLINE)
     // ============================================================================
     const SUPABASE_URL = "https://mifbcyxtafeacwkzqzsq.supabase.co";  
     const SUPABASE_ANON_KEY = "sb_publishable_O6EAbkSba1NQPq08k_7bHg_PZ_x4ZU5";  
 
-    if (!window.supabase) {
-        console.error('[Supabase] SDK no disponible.');
-        window.location.replace('../index.html');
-        throw new Error('Supabase SDK no disponible');
-    }
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = (window.supabase && typeof window.supabase.createClient === 'function')
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
 
-    supabaseClient.auth.onAuthStateChange((event) => {
-        if (event === 'SIGNED_OUT') window.location.replace('../index.html');
-    });
+    if (supabaseClient?.auth) {
+        supabaseClient.auth.onAuthStateChange((event) => {
+            if (event === 'SIGNED_OUT' && navigator.onLine) {
+                window.location.replace('../index.html');
+            }
+        });
+    }
 
     // ============================================================================
     // INDEXEDDB — COLA OFFLINE Y CACHÉ DE LECTURA
@@ -505,6 +509,7 @@
     let isSyncing = false;
     let pendingBlobUrls = {};
     let ocrPreviewBlobUrl = null;
+    let realtimeInitialized = false;
 
     const CHECK_TYPES = [
       { id: 'entry', label: 'Ingreso', icon: 'check', color: 'text-emerald-500' },
@@ -546,8 +551,9 @@
     // INICIALIZACIÓN
     // ============================================================================
     document.addEventListener('DOMContentLoaded', async () => {
+      document.documentElement.style.visibility = 'visible';
       initServiceWorker();
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
       updateClock();
       setInterval(updateClock, 1000);
       setInterval(updateShiftTime, 60000);
@@ -565,17 +571,15 @@
       window.addEventListener('online', handleOnlineEvent);
       window.addEventListener('offline', handleOfflineEvent);
 
-      try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session && navigator.onLine) {
+      if (navigator.onLine && supabaseClient?.auth) {
+        try {
+          const { data: { session } } = await supabaseClient.auth.getSession();
+          if (!session) {
             window.location.replace('../index.html');
             return;
-        }
-      } catch (e) {
-        console.warn('[Auth] Error verificando sesión:', e);
-        if (navigator.onLine) {
-            window.location.replace('../index.html');
-            return;
+          }
+        } catch (e) {
+          console.warn('[Auth] Error verificando sesión:', e);
         }
       }
 
@@ -598,7 +602,7 @@
         });
       } catch (error) {
         console.error("Error al iniciar la app:", error);
-        document.getElementById('activeEmployeeName').textContent = "Error de conexión";
+        document.getElementById('activeEmployeeName').textContent = "Error local";
       }
     });
 
@@ -607,12 +611,17 @@
     // ============================================================================
     async function handleOnlineEvent() {
         updateSyncStatusUI();
+        iniciarRealtime();
         await loadSession();
         setTimeout(() => processPendingQueue(), 600);
     }
 
     function handleOfflineEvent() {
         updateSyncStatusUI();
+        if (viewingUserId) {
+            loadTodayRecords();
+            loadWeeklySchedule();
+        }
     }
 
     // ============================================================================
@@ -620,7 +629,7 @@
     // ============================================================================
     async function processPendingQueue() {
         if (isSyncing) return;
-        if (!navigator.onLine) {
+        if (!navigator.onLine || !supabaseClient) {
             updateSyncStatusUI();
             return;
         }
@@ -730,7 +739,7 @@
             btnSync.classList.add('hidden');
         }
 
-        lucide.createIcons({ root: syncBar });
+        if (window.lucide) lucide.createIcons({ root: syncBar });
     }
 
     // ============================================================================
@@ -789,7 +798,7 @@
     // EMPLEADOS (CON CACHÉ OFFLINE)
     // ============================================================================
     async function fetchEmployeesFromSupabase() {
-      if (navigator.onLine) {
+      if (navigator.onLine && supabaseClient) {
         try {
           const { data, error } = await supabaseClient
             .from('empleados')
@@ -822,7 +831,9 @@
 
       if (employees.length === 0) {
         document.getElementById('activeEmployeeName').textContent = navigator.onLine ? "Sin Minisers" : "Sin conexión";
-        document.getElementById('currentDate').textContent = navigator.onLine ? "Verifica tu base de datos" : "Sin caché de Minisers";
+        document.getElementById('assignedShiftText').textContent = navigator.onLine ? "Turno asignado: --" : "Turno asignado: Sin caché de Minisers";
+        renderRecordsUI();
+        renderWeeklySchedule();
         return;
       }
 
@@ -860,7 +871,7 @@
           `;
         });
       }
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
       document.getElementById('modalInitialUser').classList.remove('hidden');
     }
 
@@ -943,7 +954,11 @@
     // REGISTROS DEL DÍA (CON CACHÉ OFFLINE)
     // ============================================================================
     async function loadTodayRecords() {
-      if (!viewingUserId) return;
+      if (!viewingUserId) {
+        todayRecords = [];
+        renderRecordsUI();
+        return;
+      }
 
       const now = new Date();
       const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
@@ -953,7 +968,7 @@
       cleanupOrphanBlobUrls();
 
       let serverRecords = [];
-      if (navigator.onLine) {
+      if (navigator.onLine && supabaseClient) {
         try {
           const { data, error } = await supabaseClient
             .from('registros')
@@ -1020,7 +1035,7 @@
           await loadWeeklySchedule();
         }
       } else {
-        if (!navigator.onLine) {
+        if (!navigator.onLine || !supabaseClient) {
           alert('Sin conexión. No se puede eliminar el registro hasta recuperar la conexión.');
           return;
         }
@@ -1074,7 +1089,7 @@
 
       CHECK_TYPES.forEach((type, index) => {
         const record = todayRecords.find(r => r.type === type.id);
-        const canRegister = !record;
+        const canRegister = !record && Boolean(viewingUserId);
         const isPending = record && record.isPending;
 
         let leftIcon;
@@ -1091,7 +1106,7 @@
         let rightAction;
         if (record) {
           rightAction = `<div class="relative flex items-center gap-2">
-               <img src="${imgSrc}" onerror="this.classList.add('opacity-40');" onclick="viewPhoto('${escapeHtml(record.id)}', '${escapeHtml(record.photo)}', ${isPending})" class="w-12 h-12 rounded-xl object-cover cursor-pointer border ${isPending ? 'border-amber-400 dark:border-amber-500' : 'border-transparent'} shadow-sm bg-slate-100 dark:bg-slate-800">
+               <img src="${imgSrc}" onerror="this.classList.add('opacity-40');" onclick="viewPhoto('${escapeHtml(String(record.id))}', '${escapeHtml(record.photo)}', ${isPending})" class="w-12 h-12 rounded-xl object-cover cursor-pointer border ${isPending ? 'border-amber-400 dark:border-amber-500' : 'border-transparent'} shadow-sm bg-slate-100 dark:bg-slate-800">
                ${isPending ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center shadow-md pending-pulse"><i data-lucide="arrow-up" class="w-2.5 h-2.5 text-white"></i></span>` : ''}
              </div>`;
         } else if (canRegister) {
@@ -1117,7 +1132,7 @@
           </div>
         `;
       });
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     function updateStatusBadge() {
@@ -1147,7 +1162,7 @@
 
       badge.className = `flex items-center gap-1.5 font-semibold text-xs mt-1 ${colorClass}`;
       badge.innerHTML = `<i data-lucide="${icon}" class="w-3.5 h-3.5"></i> <span>${text}</span>`;
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     function updateShiftTime() {
@@ -1221,7 +1236,7 @@
     async function downloadEmployeeScheduleImage() {
       const targetUserId = viewingUserId || sessionUserId;
       const emp = employees.find(e => e.id === targetUserId);
-      if (!emp) return;
+      if (!emp || typeof html2canvas === 'undefined') return;
 
       const { monday, sunday } = getWeekData(currentWeekOffset);
       const rangeOptions = { day: 'numeric', month: 'short' };
@@ -1297,7 +1312,11 @@
 
     async function loadWeeklySchedule() {
       const targetUserId = viewingUserId || sessionUserId;
-      if (!targetUserId) return;
+      if (!targetUserId) {
+        weekRecords = [];
+        renderWeeklySchedule();
+        return;
+      }
 
       const { monday, sunday } = getWeekData(currentWeekOffset);
       const startStr = `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
@@ -1308,7 +1327,7 @@
       cleanupOrphanBlobUrls();
 
       let serverRecords = [];
-      if (navigator.onLine) {
+      if (navigator.onLine && supabaseClient) {
         try {
           const { data, error } = await supabaseClient
             .from('registros')
@@ -1360,7 +1379,7 @@
       const targetUserId = viewingUserId || sessionUserId;
       const emp = employees.find(e => e.id === targetUserId);
       const container = document.getElementById('weeklyScheduleContainer');
-      if (!emp || !container) return;
+      if (!container) return;
 
       const { monday, sunday } = getWeekData(currentWeekOffset);
       const options = { day: 'numeric', month: 'short' };
@@ -1381,6 +1400,11 @@
         btnPrev.disabled = true;
         btnNext.className = 'p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer';
         btnNext.disabled = false;
+      }
+
+      if (!emp) {
+        container.innerHTML = '<p class="text-center text-xs text-app-sub dark:text-darkapp-sub py-4">Sin horarios disponibles sin conexión.</p>';
+        return;
       }
 
       const empTurnos = emp.turnos || {};
@@ -1548,7 +1572,7 @@
       });
 
       container.innerHTML = daysHTML;
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     // ============================================================================
@@ -1704,7 +1728,7 @@
       const localDateStr = `${exactNow.getFullYear()}-${String(exactNow.getMonth()+1).padStart(2,'0')}-${String(exactNow.getDate()).padStart(2,'0')}`;
       const localId = `local_${viewingUserId}_${Date.now()}_${type}`;
 
-      if (!navigator.onLine) {
+      if (!navigator.onLine || !supabaseClient) {
         await guardarEnColaLocal(localId, viewingUserId, type, timestamp, localDateStr, photoBlob, ocrName, ocrDate);
         return;
       }
@@ -1829,6 +1853,9 @@
     }
 
     async function openSwitchUserModal() {
+      if (employees.length === 0) {
+        employees = await fetchEmployeesFromSupabase();
+      }
       const list = document.getElementById('switchUserList');
       list.innerHTML = '';
       
@@ -1853,7 +1880,7 @@
         });
       }
       
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
       openModal('modalSwitchUser');
     }
 
@@ -1876,6 +1903,7 @@
     // REALTIME
     // ============================================================================
     function iniciarRealtime() {
+      if (realtimeInitialized || !navigator.onLine || !supabaseClient) return;
       try {
         supabaseClient
           .channel('checador-realtime')
@@ -1887,6 +1915,7 @@
             }
           })
           .subscribe();
+        realtimeInitialized = true;
       } catch (err) {
         console.warn('Realtime no disponible:', err);
       }
