@@ -398,6 +398,7 @@
     const DB_VERSION = 2;
     const STORE_PENDING = 'registros_pendientes';
     const STORE_CACHE = 'cache_lectura';
+    const BACKUP_EMPLOYEES_KEY = 'checador_empleados_backup_v1';
 
     function openOfflineDB() {
         return new Promise((resolve, reject) => {
@@ -450,22 +451,45 @@
         try {
             await dbPut(STORE_CACHE, { key, value, updatedAt: Date.now() });
         } catch (e) {
-            console.warn('[Cache Checador] No se pudo guardar caché:', e);
+            console.warn('[Cache Checador] Error guardando en IndexedDB:', key, e);
+        }
+
+        if (key === 'empleados') {
+            try {
+                localStorage.setItem(BACKUP_EMPLOYEES_KEY, JSON.stringify(value));
+            } catch (e) {
+                console.warn('[Cache Checador] Error guardando respaldo de empleados en localStorage:', e);
+            }
         }
     }
 
     async function getReadCache(key) {
         try {
             const db = await openOfflineDB();
-            return await new Promise((resolve, reject) => {
+            const idbVal = await new Promise((resolve, reject) => {
                 const tx = db.transaction(STORE_CACHE, 'readonly');
                 const req = tx.objectStore(STORE_CACHE).get(key);
                 req.onsuccess = () => resolve(req.result ? req.result.value : null);
                 req.onerror = () => reject(req.error);
             });
+            if (idbVal != null) return idbVal;
         } catch (e) {
-            return null;
+            console.warn('[Cache Checador] Error leyendo IndexedDB:', key, e);
         }
+
+        if (key === 'empleados') {
+            try {
+                const raw = localStorage.getItem(BACKUP_EMPLOYEES_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                }
+            } catch (e) {
+                console.warn('[Cache Checador] Error leyendo respaldo de empleados:', e);
+            }
+        }
+
+        return null;
     }
 
     // ============================================================================
@@ -795,7 +819,7 @@
     }
 
     // ============================================================================
-    // EMPLEADOS (CON CACHÉ OFFLINE)
+    // EMPLEADOS (CON CACHÉ OFFLINE + RESPALDO LOCALSTORAGE)
     // ============================================================================
     async function fetchEmployeesFromSupabase() {
       if (navigator.onLine && supabaseClient) {
@@ -823,7 +847,7 @@
       }
 
       const cached = await getReadCache('empleados');
-      return cached || [];
+      return Array.isArray(cached) ? cached : [];
     }
 
     async function loadSession() {
@@ -879,6 +903,9 @@
       sessionUserId = id;
       viewingUserId = id;
       localStorage.setItem('sessionUserId', sessionUserId);
+      if (Array.isArray(employees) && employees.length > 0) {
+        await setReadCache('empleados', employees);
+      }
       document.getElementById('modalInitialUser').classList.add('hidden');
       updateUIForUser();
       await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
