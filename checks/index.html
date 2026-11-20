@@ -410,7 +410,7 @@
     // ============================================================================
     function initServiceWorker() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
+            navigator.serviceWorker.register('../sw.js')
                 .then((registration) => console.log('[PWA] SW OK:', registration.scope))
                 .catch((error) => console.error('[PWA] SW error:', error));
         }
