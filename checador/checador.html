@@ -392,13 +392,13 @@
     }
 
     // ============================================================================
-    // INDEXEDDB — COLA OFFLINE Y CACHÉ DE LECTURA
+    // INDEXEDDB — COLA OFFLINE Y CACHÉ DE LECTURA (CON RESPALDO LOCALSTORAGE)
     // ============================================================================
     const DB_NAME = 'ChecadorOfflineDB';
     const DB_VERSION = 2;
     const STORE_PENDING = 'registros_pendientes';
     const STORE_CACHE = 'cache_lectura';
-    const BACKUP_EMPLOYEES_KEY = 'checador_empleados_backup_v1';
+    const CACHE_PREFIX = 'checador_cache_v1_';
 
     function openOfflineDB() {
         return new Promise((resolve, reject) => {
@@ -454,12 +454,10 @@
             console.warn('[Cache Checador] Error guardando en IndexedDB:', key, e);
         }
 
-        if (key === 'empleados') {
-            try {
-                localStorage.setItem(BACKUP_EMPLOYEES_KEY, JSON.stringify(value));
-            } catch (e) {
-                console.warn('[Cache Checador] Error guardando respaldo de empleados en localStorage:', e);
-            }
+        try {
+            localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(value));
+        } catch (e) {
+            console.warn('[Cache Checador] Error guardando en localStorage:', key, e);
         }
     }
 
@@ -477,16 +475,11 @@
             console.warn('[Cache Checador] Error leyendo IndexedDB:', key, e);
         }
 
-        if (key === 'empleados') {
-            try {
-                const raw = localStorage.getItem(BACKUP_EMPLOYEES_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-                }
-            } catch (e) {
-                console.warn('[Cache Checador] Error leyendo respaldo de empleados:', e);
-            }
+        try {
+            const raw = localStorage.getItem(CACHE_PREFIX + key);
+            if (raw) return JSON.parse(raw);
+        } catch (e) {
+            console.warn('[Cache Checador] Error leyendo localStorage:', key, e);
         }
 
         return null;
@@ -850,6 +843,18 @@
       return Array.isArray(cached) ? cached : [];
     }
 
+    async function precacheUserSchedules() {
+      if (!viewingUserId) return;
+      await loadTodayRecords();
+      await loadWeeklySchedule();
+      if (navigator.onLine && currentWeekOffset === 0) {
+        currentWeekOffset = -1;
+        await loadWeeklySchedule();
+        currentWeekOffset = 0;
+        await loadWeeklySchedule();
+      }
+    }
+
     async function loadSession() {
       employees = await fetchEmployeesFromSupabase();
 
@@ -867,7 +872,7 @@
         sessionUserId = Number(savedSession);
         viewingUserId = sessionUserId;
         updateUIForUser();
-        await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
+        await precacheUserSchedules();
       } else {
         openInitialUserModal();
       }
@@ -908,7 +913,7 @@
       }
       document.getElementById('modalInitialUser').classList.add('hidden');
       updateUIForUser();
-      await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
+      await precacheUserSchedules();
     }
 
     async function logoutSession() {
@@ -1914,7 +1919,7 @@
     async function switchViewingUser(id) {
       viewingUserId = id;
       updateUIForUser();
-      await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
+      await precacheUserSchedules();
       closeAll();
     }
 
