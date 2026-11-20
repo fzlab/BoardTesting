@@ -15,7 +15,7 @@
     <meta name="description" content="Dashboard centralizador de proyectos web y PWAs">
       <link rel="apple-touch-icon" href="./icon-180.png">
     <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
-    <link rel="manifest" href="/manifest.json" id="manifestLink">
+    <link rel="manifest" href="./manifest.json" id="manifestLink">
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -376,37 +376,45 @@
         }
 
         // FIX #3: eliminada la comprobación manual `hasLocalSession` (redundante y frágil)
-        async function initAuth() {
-            try {
-                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-                if (!session || sessionError) {
-                    document.getElementById('loginModal').classList.remove('hidden');
-                    renderProjects();
-                } else {
-                    await fetchUserRoleAndInit(session.user);
-                }
-            } catch (e) {
-                console.log("Sin conexión a internet, operando en modo local:", e);
-                renderProjects();
-            }
-        }
+async function initAuth() {
+    renderProjects();
 
-        async function fetchUserRoleAndInit(user) {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('user_profiles')
-                    .select('role')
-                    .eq('email', user.email)
-                    .single();
-                if (!error && data) {
-                    currentUserRole = data.role;
-                    localStorage.setItem('fzboard_user_role', currentUserRole);
-                }
-            } catch (err) {
-                console.log("Error obteniendo rol, usando rol local:", err);
-            }
-            renderProjects();
+    if (!navigator.onLine) {
+        return;
+    }
+
+    try {
+        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+        if (!session || sessionError) {
+            document.getElementById('loginModal').classList.remove('hidden');
+        } else {
+            await fetchUserRoleAndInit(session.user);
         }
+    } catch (e) {
+        console.log("Sin conexión a internet, operando en modo local:", e);
+    }
+}
+
+async function fetchUserRoleAndInit(user) {
+    const previousRole = currentUserRole;
+    try {
+        const { data, error } = await supabaseClient
+            .from('user_profiles')
+            .select('role')
+            .eq('email', user.email)
+            .single();
+        if (!error && data && data.role) {
+            currentUserRole = data.role;
+            localStorage.setItem('fzboard_user_role', currentUserRole);
+        }
+    } catch (err) {
+        console.log("Error obteniendo rol, usando rol local:", err);
+    }
+    if (currentUserRole !== previousRole) {
+        renderProjects();
+    }
+}
+
 
         async function cerrarSesionSupabase() {
             localStorage.removeItem('fzboard_user_role');
