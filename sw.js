@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Nexus-T0151-v1.9.44';
+const CACHE_NAME = 'Nexus-T0151-v1.9.45';
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -122,7 +122,15 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
     const acceptHeader = event.request.headers.get('accept') || '';
 
-    if (url.origin.includes('supabase.co')) {
+    // Fases descarga el CSV desde Google Sheets: la URL publicada en
+    // docs.google.com responde 307 hacia una URL temporal de
+    // *.googleusercontent.com (cambia en cada peticion) con
+    // Cache-Control: no-cache, no-store. El SW no debe interceptarla
+    // ni cachearla: se deja pasar directo al navegador, igual que
+    // Supabase. Sin este bypass, PapaParse recibe la respuesta del
+    // SW (cacheada o 404 sintetico) y muestra "Error al conectar
+    // con la Base de Datos".
+    if (url.origin.includes('supabase.co') || url.origin.includes('docs.google.com') || url.origin.includes('googleusercontent.com')) {
         return;
     }
 
