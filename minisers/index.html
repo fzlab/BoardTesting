@@ -330,7 +330,7 @@
     // --- REGISTRO DEL SERVICE WORKER ---  
     function initServiceWorker() {  
         if ('serviceWorker' in navigator) {  
-            navigator.serviceWorker.register('/sw.js', { scope: '/' })  
+            navigator.serviceWorker.register('./sw.js')  
                 .then((registration) => console.log('[PWA] SW OK en Gestor de Minisers:', registration.scope))  
                 .catch((error) => console.error('[PWA] SW error:', error));  
         }  
