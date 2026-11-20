@@ -281,7 +281,7 @@
     </div>
   </div>
 
-  <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
+  <input type="file" id="cameraInput" accept="image/*" class="opacity-0 pointer-events-none fixed -top-96 w-px h-px">
 
   <!-- MODAL: Registrar a otro usuario -->
   <div id="modalSwitchUser" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
@@ -1611,8 +1611,22 @@
     // CAPTURA DE FOTO + OCR + GUARDADO
     // ============================================================================
     function triggerFileInput(index) {
-      currentCheckIndexToCapture = index;
-      document.getElementById('cameraInput').click();
+      try {
+        if (!viewingUserId) {
+          alert('Selecciona un usuario antes de registrar una checada.');
+          return;
+        }
+        const input = document.getElementById('cameraInput');
+        if (!input) {
+          throw new Error('No se encontró el campo de selección de foto.');
+        }
+        currentCheckIndexToCapture = index;
+        input.value = '';
+        input.click();
+      } catch (err) {
+        console.error('Error al abrir la cámara/selector:', err);
+        alert('No se pudo abrir la cámara o selector de foto: ' + (err?.message || err));
+      }
     }
 
     async function resizeImage(file, maxWidth = 1200) {
