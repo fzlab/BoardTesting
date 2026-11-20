@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Nexus-T0151-v1.9.45';
+const CACHE_NAME = 'Nexus-T0151-v1.9.46';
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -33,7 +33,12 @@ const STATIC_ASSETS = [
     './checks/checks.svg',
     './minisers/agenda.svg',
     './checador/checador.svg',
-    './checador/admin.svg'
+    './checador/admin.svg',
+    'https://cdn.tailwindcss.com',
+    'https://unpkg.com/lucide@1.72.0',
+    'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+    'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'
 ];
 
 function assetUrl(path) {
@@ -49,16 +54,16 @@ async function resolveOfflineHtml(request) {
     let match = await caches.match(request, { ignoreSearch: true });
     if (match) return match;
 
-    // 2. Si la ruta termina en '/', probar '<ruta>index.html'
+    // 2. Resolver rutas de carpeta o sin extensión
     const url = new URL(request.url);
     if (url.origin === self.location.origin) {
         const cleanPath = url.pathname.replace(/^\/+/, '');
         const candidates = [];
 
         if (cleanPath.endsWith('/')) {
-            candidates.push(`${cleanPath}./index.html`);
+            candidates.push(`${cleanPath}index.html`);
         } else if (cleanPath && !cleanPath.includes('.')) {
-            candidates.push(`${cleanPath}./index.html`, `${cleanPath}.html`);
+            candidates.push(`${cleanPath}/index.html`, `${cleanPath}.html`);
         }
 
         for (const candidate of candidates) {
@@ -122,14 +127,6 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
     const acceptHeader = event.request.headers.get('accept') || '';
 
-    // Fases descarga el CSV desde Google Sheets: la URL publicada en
-    // docs.google.com responde 307 hacia una URL temporal de
-    // *.googleusercontent.com (cambia en cada peticion) con
-    // Cache-Control: no-cache, no-store. El SW no debe interceptarla
-    // ni cachearla: se deja pasar directo al navegador, igual que
-    // Supabase. Sin este bypass, PapaParse recibe la respuesta del
-    // SW (cacheada o 404 sintetico) y muestra "Error al conectar
-    // con la Base de Datos".
     if (url.origin.includes('supabase.co') || url.origin.includes('docs.google.com') || url.origin.includes('googleusercontent.com')) {
         return;
     }
