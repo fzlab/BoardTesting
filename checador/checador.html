@@ -104,7 +104,7 @@
           <i data-lucide="house" class="w-5 h-5"></i>  
         </a>    
         <div>
-          <h1 class="font-bold text-[17px] leading-tight text-app-title dark:text-darkapp-title">Checador</h1>
+          <h1 class="font-bold text-[17px] leading-tight text-app-title dark:text-darkapp-title">Checador Gcial</h1>
           <p class="text-[12px] text-app-sub dark:text-darkapp-sub flex items-center gap-1.5 font-medium mt-0.5">
             <span class="w-1.5 h-1.5 rounded-full bg-app-brand inline-block"></span> 
             <span>Gran Plaza Mérida</span>
@@ -234,10 +234,10 @@
               <h3 class="font-bold text-[13px] uppercase tracking-wide">Registros de la Semana</h3>
             </div>
             <button type="button" onclick="downloadEmployeeScheduleImage()" class="p-2 text-app-brand dark:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 rounded-xl transition-colors cursor-pointer" title="Descargar horarios de la semana">
-              <i data-lucide="calendar-arrow-down" class="w-5 h-5"></i>
+              <i data-lucide="calendar-arrow-down" class="w-5 h-5"></i>  
             </button>
           </div>
-
+ 
           <div class="flex items-center justify-between bg-app-card dark:bg-darkapp-card rounded-xl p-2 shadow-sm">
             <button type="button" id="btnPrevWeek" onclick="changeWeek(-1)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
               <i data-lucide="chevron-left" class="w-5 h-5"></i>
@@ -303,7 +303,7 @@
       <h3 class="text-lg font-bold text-app-title dark:text-darkapp-title mb-1 text-center">Registro Exitoso</h3>
       <p id="resStatus" class="text-[12px] text-app-sub dark:text-darkapp-sub text-center mb-4">Datos procesados</p>
       
-      <img id="ocrPreviewImage" src="" class="w-full h-48 object-contain bg-slate-100 dark:bg-slate-800 rounded-xl mb-4 border border-transparent">
+      <img id="ocrPreviewImage" src="" alt="Vista previa de checada" class="w-full h-48 object-contain bg-slate-100 dark:bg-slate-800 rounded-xl mb-4 border border-transparent">
       
       <div class="bg-slate-50/50 dark:bg-slate-800/50 rounded-xl p-4 mb-4 space-y-3">
         <div class="flex items-start gap-3">
@@ -345,7 +345,7 @@
         </div>
         <div id="pendingNotice" class="hidden text-white text-center bg-amber-500/20 p-3 rounded-xl w-full mb-4 backdrop-blur-md border border-amber-500/40">
           <p class="text-xs font-semibold text-amber-200">Registro pendiente de subir</p>
-          <p class="text-[11px] text-amber-100/80 mt-1">Se sincronizará automáticamente al recuperar conexión</p>
+          <p class="text-[11px] text-amber-100/80 mt-1">Se sincronizará automáticamente al recuperar la conexión</p>
         </div>
         <button type="button" id="deleteRecordBtn" onclick="deleteCurrentRecord()" class="w-full bg-transparent text-rose-500 hover:bg-rose-500/10 font-bold py-3 rounded-xl text-sm transition-colors mb-4">
           Borrar Registro
@@ -1276,7 +1276,7 @@
                ${isPending ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center shadow-md pending-pulse"><i data-lucide="arrow-up" class="w-2.5 h-2.5 text-white"></i></span>` : ''}
              </div>`;
         } else if (canRegister) {
-          rightAction = `<button type="button" onclick="triggerFileInput(${index})" class="text-app-brand dark:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 px-3 py-2 rounded-xl font-bold text-[12px] flex items-center gap-1.5 transition-colors"><i data-lucide="camera" class="w-4 h-4"></i> Registrar</button>`;
+          rightAction = `<button type="button" onclick="this.blur(); triggerFileInput(${index})" onpointerup="this.blur()" ontouchend="this.blur()" class="text-app-brand dark:text-teal-400 active:bg-transparent focus:bg-transparent md:hover:bg-app-brand/10 dark:md:hover:bg-teal-500/10 px-3 py-2 rounded-xl font-bold text-[12px] flex items-center gap-1.5 transition-colors"><i data-lucide="camera" class="w-4 h-4"></i> Registrar</button>`;
         } else {
           rightAction = '';
         }
@@ -1285,7 +1285,7 @@
           ? (isPending 
               ? `${formatTime(record.timestamp)} · <span class="text-amber-600 dark:text-amber-400 font-semibold">Pendiente de subir</span>`
               : formatTime(record.timestamp))
-          : (canRegister ? 'Toma una foto' : 'Pendiente');
+          : (canRegister ? ' ' : 'Pendiente');
 
         list.innerHTML += `
           <div class="flex items-center gap-4 py-3 border-b border-app-border/30 dark:border-darkapp-border/30 last:border-0">
@@ -1746,6 +1746,9 @@
     // ============================================================================
     function triggerFileInput(index) {
       try {
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
         if (!viewingUserId) {
           alert('Selecciona un usuario antes de registrar una checada.');
           return;
@@ -1831,6 +1834,15 @@
       this.value = ''; 
     });
 
+    function blobToDataUrl(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = () => reject(new Error('No se pudo convertir el Blob a DataURL'));
+        reader.readAsDataURL(blob);
+      });
+    }
+
     async function handleSelectedFile(file) {
       if (!file) return;
 
@@ -1850,11 +1862,7 @@
         if (navigator.onLine && typeof Tesseract !== 'undefined') {
           loaderText.textContent = "Analizando con OCR...";
           try {
-            const reader = new FileReader();
-            const base64Data = await new Promise((res) => {
-              reader.onload = (e) => res(e.target.result);
-              reader.readAsDataURL(imageBlob);
-            });
+            const base64Data = await blobToDataUrl(imageBlob);
 
             worker = await Tesseract.createWorker('spa');
             const ret = await worker.recognize(base64Data);
@@ -1877,9 +1885,20 @@
         
         if (ocrPreviewBlobUrl) {
           URL.revokeObjectURL(ocrPreviewBlobUrl);
+          ocrPreviewBlobUrl = null;
         }
-        ocrPreviewBlobUrl = URL.createObjectURL(imageBlob);
-        document.getElementById('ocrPreviewImage').src = ocrPreviewBlobUrl;
+        const previewImg = document.getElementById('ocrPreviewImage');
+        const previewDataUrl = await blobToDataUrl(imageBlob);
+        previewImg.onload = null;
+        previewImg.onerror = () => {
+          previewImg.onerror = null;
+          if (!ocrPreviewBlobUrl) {
+            ocrPreviewBlobUrl = URL.createObjectURL(imageBlob);
+          }
+          previewImg.src = ocrPreviewBlobUrl;
+        };
+        previewImg.src = previewDataUrl;
+
         document.getElementById('resName').textContent = detectedName || (employees.find(e => e.id === viewingUserId)?.name || 'Usuario Actual');
         
         const now = new Date();
@@ -2030,7 +2049,6 @@
       if (ocrPreviewBlobUrl) {
         URL.revokeObjectURL(ocrPreviewBlobUrl);
         ocrPreviewBlobUrl = null;
-        document.getElementById('ocrPreviewImage').src = '';
       }
     }
 
@@ -2077,8 +2095,8 @@
       document.getElementById('settingsMenu').classList.add('hidden');
       document.getElementById('overlay').classList.add('hidden');
       const confirmed = await showCustomConfirm({
-        title: 'Refrescar sesión local',
-        message: '¿Refrescar la sesión local de este dispositivo?\n\nNota: los registros pendientes en IndexedDB NO se perderán.',
+        title: '¿Refrescar sesión local?',
+        message: 'Los registros pendientes en la memoria NO se perderán.',
         confirmText: 'Refrescar',
         cancelText: 'Cancelar',
         confirmColor: 'green',
