@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Nexus-T0151-v1.9.50.13';
+const CACHE_NAME = 'Nexus-T0151-v1.9.50.14';
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -49,10 +49,25 @@ function indexUrl() {
     return new URL('./index.html', self.registration.scope).href;
 }
 
+// FIX offline: Cloudflare responde 307 a las .html (URLs limpias), así que la
+// respuesta cacheada queda marcada como "redirected" y su URL es la del destino
+// del redirect (p. ej. '/'), no la pedida ('/index.html'). Chrome rechaza usar
+// esa respuesta para una navegación y la petición falla con ERR_FAILED. Al
+// re-servirla como una Response nueva ya no está marcada como redirect y la
+// navegación offline funciona.
+async function deRedirect(match) {
+    if (!match || !match.redirected) return match;
+    return new Response(await match.blob(), {
+        status: match.status,
+        statusText: match.statusText,
+        headers: match.headers,
+    });
+}
+
 async function resolveOfflineHtml(request) {
     // 1. Coincidencia exacta ignorando query string
     let match = await caches.match(request, { ignoreSearch: true });
-    if (match) return match;
+    if (match) return deRedirect(match);
 
     // 2. Resolver rutas de carpeta o sin extensión
     const url = new URL(request.url);
@@ -68,16 +83,16 @@ async function resolveOfflineHtml(request) {
 
         for (const candidate of candidates) {
             match = await caches.match(assetUrl(candidate), { ignoreSearch: true });
-            if (match) return match;
+            if (match) return deRedirect(match);
         }
     }
 
     // 3. Fallback a index.html o './'
     match = await caches.match(indexUrl(), { ignoreSearch: true });
-    if (match) return match;
+    if (match) return deRedirect(match);
 
     match = await caches.match(assetUrl('./'), { ignoreSearch: true });
-    if (match) return match;
+    if (match) return deRedirect(match);
 
     return new Response(
         '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Nexus G.P. Sin Conexión</title></head><body style="font-family:sans-serif;text-align:center;padding-top:50px;background:#f8fafc;color:#334155;"><h2>Aplicación sin conexión</h2><p>No se encontraron archivos en la caché local. Conéctate a internet una vez para sincronizar los recursos.</p></body></html>',
