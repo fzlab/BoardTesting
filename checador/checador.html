@@ -283,9 +283,9 @@
 
   <input type="file" id="cameraInput" accept="image/*" capture="environment" class="opacity-0 pointer-events-none fixed -top-96 w-px h-px">
 
-  <!-- MODAL: Registrar a otro usuario -->
-  <div id="modalSwitchUser" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl w-full max-w-sm rounded-3xl p-6 shadow-2xl slide-up border border-white/20 dark:border-slate-700/30">
+  <!-- MODAL: Registrar a otro usuario (Glassmorphism) -->
+  <div id="modalSwitchUser" onclick="if(event.target === this) closeAll()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/55 backdrop-blur-md fade-in hidden">
+    <div class="bg-white/75 dark:bg-slate-900/75 backdrop-blur-2xl w-full max-w-sm rounded-3xl p-6 shadow-2xl slide-up border border-white/30 dark:border-slate-700/40">
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-lg font-bold text-app-title dark:text-darkapp-title">Seleccionar Miniser</h3>
         <button type="button" onclick="closeAll()" class="text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -2066,7 +2066,7 @@
       } else {
         otherUsers.forEach(emp => {
           list.innerHTML += `
-            <div class="p-3 bg-app-bg/50 dark:bg-slate-800/50 rounded-xl cursor-pointer hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors flex items-center justify-between" onclick="switchViewingUser(${emp.id})">
+            <div class="p-3 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-slate-700/40 rounded-xl cursor-pointer hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors flex items-center justify-between" onclick="switchViewingUser(${emp.id})">
               <div class="flex items-center gap-3">
                 ${buildAvatarHTML(emp, 'w-10 h-10', 'text-xs')}
                 <div class="flex flex-col">
