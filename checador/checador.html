@@ -1,2135 +1,2131 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full">
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="../fonts.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Checador Gerencial - T0151</title>
-  <link rel="icon" type="image/svg+xml" href="./checador.svg">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://mifbcyxtafeacwkzqzsq.supabase.co; connect-src 'self' https://mifbcyxtafeacwkzqzsq.supabase.co wss://mifbcyxtafeacwkzqzsq.supabase.co; base-uri 'self'; form-action 'self'; object-src 'none';">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-
-  <meta name="theme-color" content="#F8F9FA">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-  <script>
-      (function() {
-          const SESSION_KEY = 'sb-mifbcyxtafeacwkzqzsq-auth-token';
-          // Solo redirigir si hay conexión y no existe token de sesión
-          if (navigator.onLine && localStorage.getItem(SESSION_KEY) === null) {
-              document.documentElement.style.visibility = 'hidden';
-              window.location.replace('../index.html');
-          } else {
-              document.documentElement.style.visibility = 'visible';
-          }
-      })();
-  </script>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@1.72.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <!-- html2canvas para descargar la tarjeta de horarios del empleado -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Geist', 'sans-serif'] },
-          colors: {
-            app: { bg: '#F8F9FA', card: '#FFFFFF', border: '#E5E7EB', title: '#111827', sub: '#6B7280', brand: '#0D9488', accent: '#E6F6F4' },
-            darkapp: { bg: '#0F172A', card: '#1E293B', border: '#334155', title: '#F8FAFC', sub: '#94A3B8' }
-          }
-        }
-      }
-    }
-  </script>
-
-  <style>
-    ::-webkit-scrollbar { display: none; }
-    body { -webkit-tap-highlight-color: transparent; user-select: none; }
-    input { user-select: text; }
-    .blur-overlay { backdrop-filter: blur(4px); background-color: rgba(15, 23, 42, 0.5); }
-    .fade-in { animation: fadeIn 0.2s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    .slide-up { animation: slideUp 0.3s ease-out; }
-    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .loader { border: 4px solid #f3f3f3; border-top: 4px solid #0D9488; border-radius: 50%; width: 44px; height: 44px; animation: spin 1s linear infinite; }
-    .dark .loader { border: 4px solid #334155; border-top: 4px solid #2DD4BF; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .pending-pulse { animation: pendingPulse 1.8s ease-in-out infinite; }
-    @keyframes pendingPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-  </style>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../src/fonts/fonts.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Checador Gerencial - T0151</title>
+<link rel="icon" type="image/svg+xml" href="./src/icons/checador.svg">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://mifbcyxtafeacwkzqzsq.supabase.co; connect-src 'self' https://mifbcyxtafeacwkzqzsq.supabase.co wss://mifbcyxtafeacwkzqzsq.supabase.co https://cdn.jsdelivr.net https://unpkg.com https://tessdata.projectnaptha.com; worker-src 'self' blob: https://cdn.jsdelivr.net; base-uri 'self'; form-action 'self'; object-src 'none';">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#F8F9FA">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@1.72.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<!-- html2canvas para descargar la tarjeta de horarios del empleado -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- heic2any para decodificar imágenes HEIC/HEIF en navegadores sin soporte nativo -->
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+<!-- browser-image-compression para compresión de alta calidad con bajo peso -->
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+tailwind.config = {
+darkMode: 'class',
+theme: {
+extend: {
+fontFamily: { sans: ['Geist', 'sans-serif'] },
+colors: {
+app: { bg: '#F8F9FA', card: '#FFFFFF', border: '#E5E7EB', title: '#111827', sub: '#6B7280', brand: '#0D9488', accent: '#E6F6F4' },
+darkapp: { bg: '#0F172A', card: '#1E293B', border: '#334155', title: '#F8FAFC', sub: '#94A3B8' }
+}
+}
+}
+}
+</script>
+<style>
+::-webkit-scrollbar { display: none; }
+html {
+min-height: 100dvh;
+overflow-x: clip;
+}
+body {
+min-height: 100dvh;
+overflow-x: clip;
+-webkit-tap-highlight-color: transparent;
+user-select: none;
+padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+input { user-select: text; }
+.ios-header {
+padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+}
+.blur-overlay { backdrop-filter: blur(4px); background-color: rgba(15, 23, 42, 0.5); }
+.fade-in { animation: fadeIn 0.2s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.slide-up { animation: slideUp 0.3s ease-out; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.loader { border: 4px solid #f3f3f3; border-top: 4px solid #0D9488; border-radius: 50%; width: 44px; height: 44px; animation: spin 1s linear infinite; }
+.dark .loader { border: 4px solid #334155; border-top: 4px solid #2DD4BF; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.pending-pulse { animation: pendingPulse 1.8s ease-in-out infinite; }
+@keyframes pendingPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+</style>
 </head>
-<body class="h-full bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title font-sans overflow-hidden antialiased relative transition-colors duration-200">
-
-  <div id="overlay" onclick="closeAll()" class="fixed inset-0 z-40 blur-overlay transition-opacity duration-200 hidden"></div>
-
-  <!-- POPUP FLOTANTE: Hora Exacta -->
-  <div id="recordExactPopup" class="fixed z-[80] hidden pointer-events-none transition-opacity duration-150">
-    <div class="bg-slate-900 dark:bg-slate-800 text-white px-3 py-1.5 rounded-xl shadow-xl border border-white/15 flex flex-col items-center text-center">
-      <span id="popupRecordLabel" class="text-[9px] font-semibold text-teal-400 uppercase tracking-wider leading-none mb-1">--</span>
-      <span id="popupRecordTime" class="text-xs font-extrabold tracking-wide leading-none">--:--:--</span>
-    </div>
-    <div class="w-2.5 h-2.5 bg-slate-900 dark:bg-slate-800 border-r border-b border-white/15 transform rotate-45 mx-auto -mt-1.5"></div>
-  </div>
-
-  <!-- LOADER -->
-  <div id="ocrLoader" class="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="bg-white/90 dark:bg-slate-900/90 w-full max-w-xs rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center fade-in border border-white/20 dark:border-slate-700/30">
-      <div class="loader mb-4"></div>
-      <h3 class="font-bold text-base text-app-title dark:text-darkapp-title mb-1">Procesando checada</h3>
-      <p class="text-xs text-app-sub dark:text-darkapp-sub font-medium" id="loaderText">Preparando cámara...</p>
-    </div>
-  </div>
-
-  <!-- MODAL: Selección inicial de usuario -->
-  <div id="modalInitialUser" class="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm hidden">
-    <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl w-full max-w-sm rounded-3xl p-6 shadow-2xl slide-up border border-white/20 dark:border-slate-700/30 flex flex-col max-h-[85vh]">
-      <div class="text-center mb-5">
-        <h3 class="text-lg font-bold text-app-title dark:text-darkapp-title">Bienvenido al Checador</h3>
-        <p class="text-xs text-app-sub dark:text-darkapp-sub mt-1">Selecciona tu usuario para comenzar a registrar turnos</p>
-      </div>
-      <div id="initialUserList" class="overflow-y-auto flex flex-col gap-2.5 flex-1 pr-1"></div>
-    </div>
-  </div>
-
-  <div class="main-content h-full flex flex-col overflow-y-auto pb-10">
-    
-    <header class="px-5 py-4 flex items-center justify-between sticky top-0 bg-app-bg/95 dark:bg-darkapp-bg/95 backdrop-blur-md z-30 transition-colors">
-      <div class="flex items-center space-x-3">
+<body class="bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title font-sans antialiased relative transition-colors duration-200">
+<div id="overlay" onclick="closeAll()" class="fixed inset-0 z-40 blur-overlay transition-opacity duration-200 hidden"></div>
+<!-- POPUP FLOTANTE: Hora Exacta -->
+<div id="recordExactPopup" class="fixed z-[80] hidden pointer-events-none transition-opacity duration-150">
+<div class="bg-slate-900 dark:bg-slate-800 text-white px-3 py-1.5 rounded-xl shadow-xl border border-white/15 flex flex-col items-center text-center">
+<span id="popupRecordLabel" class="text-[9px] font-semibold text-teal-400 uppercase tracking-wider leading-none mb-1">--</span>
+<span id="popupRecordTime" class="text-xs font-extrabold tracking-wide leading-none">--:--:--</span>
+</div>
+<div class="w-2.5 h-2.5 bg-slate-900 dark:bg-slate-800 border-r border-b border-white/15 transform rotate-45 mx-auto -mt-1.5"></div>
+</div>
+<!-- LOADER -->
+<div id="ocrLoader" class="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+<div class="bg-white/90 dark:bg-slate-900/90 w-full max-w-xs rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center fade-in border border-white/20 dark:border-slate-700/30">
+<div class="loader mb-4"></div>
+<h3 class="font-bold text-base text-app-title dark:text-darkapp-title mb-1">Procesando checada</h3>
+<p class="text-xs text-app-sub dark:text-darkapp-sub font-medium" id="loaderText">Preparando cámara...</p>
+</div>
+</div>
+<!-- MODAL: Selección inicial de usuario -->
+<div id="modalInitialUser" class="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm hidden">
+<div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl w-full max-w-sm rounded-3xl p-6 shadow-2xl slide-up border border-white/20 dark:border-slate-700/30 flex flex-col max-h-[85dvh]">
+<div class="text-center mb-5">
+<h3 class="text-lg font-bold text-app-title dark:text-darkapp-title">Bienvenido al Checador</h3>
+<p class="text-xs text-app-sub dark:text-darkapp-sub mt-1">Selecciona tu usuario para comenzar a registrar turnos</p>
+</div>
+<div id="initialUserList" class="overflow-y-auto flex flex-col gap-2.5 flex-1 pr-1"></div>
+</div>
+</div>
+<div class="main-content flex flex-col pb-10">
+<header class="ios-header px-5 pb-4 flex items-center justify-between sticky top-0 bg-app-bg/95 dark:bg-darkapp-bg/95 backdrop-blur-md z-30 transition-colors">
+<div class="flex items-center space-x-3">
         <a href="../index.html" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg transition-all cursor-pointer" title="Ir al Inicio">  
           <i data-lucide="house" class="w-5 h-5"></i>  
         </a>    
-        <div>
-          <h1 class="font-bold text-[17px] leading-tight text-app-title dark:text-darkapp-title">Checador Gcial</h1>
-          <p class="text-[12px] text-app-sub dark:text-darkapp-sub flex items-center gap-1.5 font-medium mt-0.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-app-brand inline-block"></span> 
-            <span>Gran Plaza Mérida</span>
-          </p>
-        </div>
-      </div>
-      
-      <div class="flex items-center space-x-2">
-        <button type="button" id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors duration-200" title="Cambiar modo">
-            <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">
-                <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>
-                <i data-lucide="moon" class="w-3.5 h-3.5 text-slate-400 dark:text-indigo-400 opacity-100 dark:opacity-40"></i>
-            </div>
-            <div class="w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center transform transition-transform duration-200 translate-x-0 dark:translate-x-6 z-10">
-                <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 dark:hidden"></i>
-                <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400 hidden dark:block"></i>
-            </div>
-        </button>
+<div>
+<h1 class="font-bold text-[17px] leading-tight text-app-title dark:text-darkapp-title">Checador</h1>
+<p class="text-[12px] text-app-sub dark:text-darkapp-sub flex items-center gap-1.5 font-medium mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-app-brand inline-block"></span>
+<span>Gran Plaza Mérida</span>
+</p>
+</div>
+</div>
+<div class="flex items-center space-x-2 shrink-0">
+<button type="button" id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors duration-200 touch-manipulation" title="Cambiar modo">
+<div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">
+<i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 opacity-40 dark:opacity-100"></i>
+<i data-lucide="moon" class="w-3.5 h-3.5 text-slate-400 dark:text-indigo-400 opacity-100 dark:opacity-40"></i>
+</div>
+<div class="w-6 h-6 rounded-full bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center transform transition-transform duration-200 translate-x-0 dark:translate-x-6 z-10">
+<i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 dark:hidden"></i>
+<i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400 hidden dark:block"></i>
+</div>
+</button>
         <a href="admin.html" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg transition-colors" title="Panel Administrador">
           <i data-lucide="user-star" class="w-5 h-5"></i>
         </a>
-        <button type="button" onclick="toggleSettings(event)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg transition-colors cursor-pointer relative z-50" title="Ajustes">
-          <i data-lucide="settings" class="w-5 h-5"></i>
-        </button>
-      </div>
-    </header>
+<button type="button" onclick="toggleSettings(event)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg transition-colors cursor-pointer relative z-50 touch-manipulation" title="Ajustes">
+<i data-lucide="settings" class="w-5 h-5"></i>
+</button>
+</div>
+</header>
+<!-- BARRA DE ESTADO DE SINCRONIZACIÓN -->
+<div id="syncBar" class="hidden mx-5 mb-2 rounded-xl border text-[11px] font-semibold overflow-hidden">
+<div class="flex items-center justify-between p-2.5 gap-2">
+<span id="syncIndicator" class="inline-flex items-center gap-1.5"></span>
+<button type="button" id="btnSyncNow" onclick="processPendingQueue()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer hidden">
+Sincronizar ahora
+</button>
+</div>
+</div>
+<!-- MENÚ DE AJUSTES -->
+<div id="settingsMenu" class="hidden fixed right-4 top-20 mt-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl min-w-[220px] shadow-xl border border-white/20 dark:border-slate-700/30 rounded-xl z-[45] py-2 flex flex-col fade-in">
+<button type="button" onclick="openSwitchUserModal()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg/50 dark:hover:bg-slate-800/50 flex items-center gap-3 transition-colors">
+<i data-lucide="user-plus" class="w-4 h-4 text-blue-500"></i> Registrar a otro usuario
+</button>
+<button type="button" onclick="logoutSession()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/20 flex items-center gap-3 transition-colors">
+<i data-lucide="log-out" class="w-4 h-4"></i> Cambiar usuario
+</button>
+<div class="border-t border-app-border/50 dark:border-darkapp-border/50 my-1 mx-2"></div>
+<button type="button" onclick="clearCacheMemory()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-900/20 flex items-center gap-3 transition-colors">
+<i data-lucide="trash" class="w-4 h-4"></i> Borrar cache
+</button>
+</div>
+<!-- Banner "Registrando a otro usuario" -->
+<div id="otherUserBanner" class="hidden bg-blue-500/10 border border-blue-500/20 mx-5 mb-2 p-3 rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-sm font-semibold">
+<i data-lucide="info" class="w-4 h-4"></i>
+Registrando turno para: <span id="otherUserName" class="font-bold"></span>
+</div>
+<button type="button" onclick="returnToSessionUser()" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-bold text-xs bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg transition-colors">
+Volver a mi perfil
+</button>
+</div>
+<main class="px-5 flex-1 flex flex-col gap-5">
+<div class="pt-1 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div id="activeEmployeeAvatar"></div>
+<div>
+<h2 id="activeEmployeeName" class="font-bold text-base text-app-title dark:text-darkapp-title leading-tight">Cargando...</h2>
+<div id="statusBadge" class="flex items-center gap-1.5 text-slate-500 font-semibold text-xs mt-1">
+<i data-lucide="ban" class="w-3.5 h-3.5"></i> <span id="statusText">FUERA DE TURNO</span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<h2 class="text-2xl font-extrabold tracking-tight" id="currentTime">--:-- --</h2>
+<p class="text-[11px] text-app-sub dark:text-darkapp-sub font-medium" id="currentDate">--</p>
+</div>
+</div>
+<div class="bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl flex items-center justify-between">
+<span class="text-xs font-bold text-emerald-700 dark:text-emerald-400" id="assignedShiftText">Turno asignado: --</span>
+<i data-lucide="clock" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+</div>
+<div class="w-full h-px bg-app-border/50 dark:bg-darkapp-border/50"></div>
+<div class="grid grid-cols-2 gap-y-4 pt-1">
+<div>
+<label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Checadas</label>
+<p class="text-2xl font-black" id="statChecks">0/4</p>
+</div>
+<div>
+<label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Entrada</label>
+<p class="text-2xl font-black" id="statEntry">--:-- --</p>
+</div>
+<div>
+<label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Comida</label>
+<p class="text-2xl font-black" id="statLunch">—</p>
+</div>
+<div>
+<label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Jornada</label>
+<p class="text-2xl font-black" id="statShift">0 min</p>
+</div>
+</div>
+<div class="mt-2">
+<div class="flex items-center gap-2 mb-3">
+<i data-lucide="calendar-check" class="w-5 h-5 text-app-brand dark:text-teal-400"></i>
+<h3 class="font-bold text-[13px] uppercase tracking-wide">Registros de hoy</h3>
+</div>
+<div class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mb-5 overflow-hidden">
+<div id="progressBar" class="h-full bg-app-brand dark:bg-teal-500 w-0 transition-all duration-500 ease-out"></div>
+</div>
+<div class="flex flex-col gap-1" id="checksList"></div>
+<p class="text-[11px] text-app-sub dark:text-darkapp-sub mt-5 text-center">Las fotos se almacenan de forma segura en la Nube.</p>
+<div class="w-full h-px bg-app-border/50 dark:bg-darkapp-border/50 my-6"></div>
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<i data-lucide="calendar-days" class="w-5 h-5 text-app-brand dark:text-teal-400"></i>
+<h3 class="font-bold text-[13px] uppercase tracking-wide">Registros de la Semana</h3>
+</div>
+<button type="button" onclick="downloadEmployeeScheduleImage()" class="p-2 text-app-brand dark:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 rounded-xl transition-colors cursor-pointer" title="Descargar horarios de la semana">
+<i data-lucide="calendar-arrow-down" class="w-5 h-5"></i>
+</button>
+</div>
+<div class="flex items-center justify-between bg-app-card dark:bg-darkapp-card rounded-xl p-2 shadow-sm">
+<button type="button" id="btnPrevWeek" onclick="changeWeek(-1)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
+<i data-lucide="chevron-left" class="w-5 h-5"></i>
+</button>
+<div class="flex flex-col items-center">
+<span id="weekLabel" class="font-bold text-sm text-app-title dark:text-darkapp-title">Semana Actual</span>
+<span id="weekRange" class="text-[11px] text-app-sub dark:text-darkapp-sub font-medium">--/-- al --/--</span>
+</div>
+<button type="button" id="btnNextWeek" onclick="changeWeek(1)" class="p-2 text-slate-300 dark:text-slate-600 rounded-lg cursor-not-allowed" disabled>
+<i data-lucide="chevron-right" class="w-5 h-5"></i>
+</button>
+</div>
+<div class="flex items-center justify-center gap-4 text-[11px] font-semibold text-app-sub dark:text-darkapp-sub bg-app-card dark:bg-darkapp-card py-2 rounded-xl shadow-sm">
+<div class="flex items-center gap-1.5"><i data-lucide="clock-check" class="w-4 h-4 text-emerald-500"></i> A tiempo</div>
+<div class="flex items-center gap-1.5"><i data-lucide="clock-fading" class="w-4 h-4 text-orange-400"></i> Retardo</div>
+<div class="flex items-center gap-1.5"><i data-lucide="clock-exclamation-point" class="w-4 h-4 text-rose-500"></i> Sin Registro</div>
+</div>
+<div id="weeklyScheduleContainer" class="bg-app-card dark:bg-darkapp-card rounded-xl shadow-sm px-4 py-2"></div>
+</div>
+</div>
+</main>
+</div>
+<!-- Contenedor Oculto para Generar y Descargar la Imagen de Horarios del Empleado -->
+<div id="exportScheduleContainer" class="fixed top-0 left-0 w-[400px] bg-white text-slate-900 p-8 rounded-3xl shadow-2xl font-sans opacity-0 pointer-events-none -z-50 overflow-hidden" style="box-sizing: border-box;">
+<div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
+<div>
+<h2 id="exportModalTitle" class="text-2xl font-extrabold text-slate-900 tracking-tight">Horarios</h2>
+<p id="exportModalRange" class="text-sm font-semibold text-teal-700 mt-1">--/-- al --/--</p>
+</div>
+<div class="text-right">
+<p id="exportModalEmployeeName" class="text-s font-bold text-slate-800">Nombre del Miniser</p>
+<p class="text-xs text-slate-500 font-medium">Gran Plaza Mérida</p>
+</div>
+</div>
+<div id="exportModalScheduleList" class="flex flex-col gap-3">
+<!-- Inyectado dinámicamente -->
+</div>
+</div>
+<input type="file" id="cameraInput" accept="image/*,.heic,.heif" capture="environment" class="sr-only">
+<input type="file" id="galleryInput" accept="image/*,.heic,.heif" class="sr-only">
+<!-- MODAL: Registrar a otro usuario (Glassmorphism) -->
+<div id="modalSwitchUser" onclick="if(event.target === this) closeAll()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/55 backdrop-blur-md fade-in hidden">
+<div class="bg-white/75 dark:bg-slate-900/75 backdrop-blur-2xl w-full max-w-sm rounded-3xl p-6 shadow-2xl slide-up border border-white/30 dark:border-slate-700/40">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-bold text-app-title dark:text-darkapp-title">Seleccionar Miniser</h3>
+<button type="button" onclick="closeAll()" class="text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title"><i data-lucide="x" class="w-5 h-5"></i></button>
+</div>
+<p class="text-xs text-app-sub dark:text-darkapp-sub mb-4">Selecciona al Miniser para registrar su checada.</p>
+<div id="switchUserList" class="max-h-60 overflow-y-auto flex flex-col gap-2"></div>
+</div>
+</div>
+<!-- MODAL: Resultado OCR / Registro -->
+<div id="modalOCRResult" class="fixed inset-0 z-[70] flex flex-col items-center justify-center p-4 hidden bg-slate-950/80 backdrop-blur-md">
+<div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl w-full max-w-sm rounded-3xl p-5 shadow-2xl slide-up relative border border-white/20 dark:border-slate-700/30">
+<button type="button" onclick="closeAll()" class="absolute top-4 right-4 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title"><i data-lucide="x" class="w-6 h-6"></i></button>
+<h3 class="text-lg font-bold text-app-title dark:text-darkapp-title mb-1 text-center">Registro Exitoso</h3>
+<p id="resStatus" class="text-[12px] text-app-sub dark:text-darkapp-sub text-center mb-4">Datos procesados</p>
+<img id="ocrPreviewImage" src="" alt="Vista previa de checada" class="w-full h-48 object-contain bg-slate-100 dark:bg-slate-800 rounded-xl mb-4 border border-transparent">
+<div class="bg-slate-50/50 dark:bg-slate-800/50 rounded-xl p-4 mb-4 space-y-3">
+<div class="flex items-start gap-3">
+<i data-lucide="user" class="w-4 h-4 text-app-brand dark:text-teal-400 mt-0.5"></i>
+<div>
+<p class="text-[10px] font-bold text-app-sub dark:text-darkapp-sub uppercase">Nombre</p>
+<p id="resName" class="text-sm font-semibold text-app-title dark:text-darkapp-title">--</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<i data-lucide="calendar" class="w-4 h-4 text-app-brand dark:text-teal-400 mt-0.5"></i>
+<div>
+<p class="text-[10px] font-bold text-app-sub dark:text-darkapp-sub uppercase">Fecha y Hora de Registro</p>
+<p id="resDate" class="text-sm font-semibold text-app-title dark:text-darkapp-title">--</p>
+</div>
+</div>
+</div>
+<button type="button" onclick="closeAll()" class="w-full bg-transparent text-app-brand dark:text-teal-400 font-bold py-3.5 rounded-xl text-sm hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors">
+Entendido
+</button>
+</div>
+</div>
+<!-- MODAL: Visor de Foto -->
+<div id="modalPhoto" class="fixed inset-0 z-[60] flex flex-col items-center justify-center p-4 hidden bg-slate-950/90 backdrop-blur-md">
+<div class="relative w-full max-w-md max-h-[90dvh] flex flex-col">
+<div class="sticky top-0 z-20 flex justify-end pb-2">
+<button type="button" onclick="closeAll()" class="bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-full backdrop-blur-md shadow-lg transition-colors border border-white/20">
+<i data-lucide="x" class="w-6 h-6"></i>
+</button>
+</div>
+<div class="overflow-y-auto flex-1 flex flex-col items-center pr-1">
+<img id="photoViewer" src="" onerror="this.alt='Imagen no disponible sin conexión'; this.classList.add('opacity-40');" class="w-full rounded-2xl shadow-2xl mb-4 object-contain bg-slate-900">
+<div id="ocrResultData" class="text-white text-center bg-slate-800/80 p-4 rounded-xl hidden w-full mb-4 backdrop-blur-md">
+<p class="text-sm font-bold text-emerald-400 mb-2">Datos Detectados en la Foto</p>
+<p id="ocrNameText" class="text-sm">Nombre: --</p>
+<p id="ocrDateText" class="text-sm">Fecha: --</p>
+</div>
+<div id="pendingNotice" class="hidden text-white text-center bg-amber-500/20 p-3 rounded-xl w-full mb-4 backdrop-blur-md border border-amber-500/40">
+<p class="text-xs font-semibold text-amber-200">Registro pendiente de subir</p>
+<p class="text-[11px] text-amber-100/80 mt-1">Se sincronizará automáticamente al recuperar la conexión</p>
+</div>
+<button type="button" id="deleteRecordBtn" onclick="deleteCurrentRecord()" class="w-full bg-transparent text-rose-500 hover:bg-rose-500/10 font-bold py-3 rounded-xl text-sm transition-colors mb-4">
+Borrar Registro
+</button>
+</div>
+</div>
+</div>
+<!-- MODAL: Confirmación Unificada (Glassmorphism) -->
+<div id="customConfirmModal" class="fixed inset-0 z-[10005] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm hidden">
+<div class="bg-white/80 dark:bg-slate-900/85 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5 slide-up">
+<div id="customConfirmIconContainer" class="text-rose-500 flex justify-center mx-auto">
+<i data-lucide="alert-triangle" id="customConfirmIcon" class="w-8 h-8"></i>
+</div>
+<div class="space-y-1.5">
+<h3 id="customConfirmTitle" class="text-base font-bold text-app-title dark:text-darkapp-title">Confirmar acción</h3>
+<p id="customConfirmText" class="text-xs font-medium text-app-sub dark:text-darkapp-sub leading-relaxed whitespace-pre-line">
+¿Deseas continuar?
+</p>
+</div>
+<div class="flex justify-center items-center gap-2 w-full pt-1">
+<button type="button" id="customConfirmCancelBtn" onclick="closeCustomConfirm(false)" class="py-2.5 px-4 bg-transparent text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer flex-1">
+Cancelar
+</button>
+<button type="button" id="customConfirmAcceptBtn" onclick="closeCustomConfirm(true)" class="py-2.5 px-4 bg-transparent text-rose-500 dark:text-rose-400 hover:bg-rose-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer flex-1">
+Confirmar
+</button>
+</div>
+</div>
+</div>
+<!-- MODAL: Alerta / Aviso (Glassmorphism) -->
+<div id="customAlertModal" class="fixed inset-0 z-[10010] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm hidden">
+<div class="bg-white/80 dark:bg-slate-900/85 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5 slide-up">
+<div id="customAlertIconContainer" class="text-rose-500 flex justify-center mx-auto">
+<i data-lucide="alert-circle" id="customAlertIcon" class="w-8 h-8"></i>
+</div>
+<p id="customAlertText" class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed whitespace-pre-line">
+Mensaje
+</p>
+<div class="flex justify-center pt-1">
+<button type="button" onclick="closeCustomAlert()" class="w-full py-2.5 px-4 bg-transparent text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer">
+Aceptar
+</button>
+</div>
+</div>
+</div>
+<script>
+// ============================================================================
+// SEGURIDAD Y SERVICE WORKER
+// ============================================================================
+function escapeHtml(str) {
+if (str == null) return '';
+return String(str).replace(/[&<>"']/g, c => ({
+'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+}[c]));
+}
+function initServiceWorker() {
+if ('serviceWorker' in navigator) {
+navigator.serviceWorker.register('../sw.js')
+.then((registration) => console.log('[PWA] SW OK en Checador:', registration.scope))
+.catch((error) => console.error('[PWA] SW error:', error));
+}
+}
+// ============================================================================
+// SUPABASE (ACCESO DIRECTO SIN LOGIN / SIN SESIÓN AUTH)
+// ============================================================================
+const SUPABASE_URL = "https://mifbcyxtafeacwkzqzsq.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_O6EAbkSba1NQPq08k_7bHg_PZ_x4ZU5";
+const supabaseClient = (window.supabase && typeof window.supabase.createClient === 'function')
+? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+auth: {
+persistSession: false,
+autoRefreshToken: false,
+detectSessionInUrl: false
+}
+})
+: null;
+// ============================================================================
+// INDEXEDDB — COLA OFFLINE Y CACHÉ DE LECTURA (CON RESPALDO LOCALSTORAGE)
+// ============================================================================
+const DB_NAME = 'ChecadorOfflineDB';
+const DB_VERSION = 2;
+const STORE_PENDING = 'registros_pendientes';
+const STORE_CACHE = 'cache_lectura';
+const CACHE_PREFIX = 'checador_cache_v1_';
+const RECORD_SOURCE_META_KEY = 'checador_record_sources_v1';
+function openOfflineDB() {
+return new Promise((resolve, reject) => {
+const req = indexedDB.open(DB_NAME, DB_VERSION);
+req.onerror = () => reject(req.error);
+req.onsuccess = () => resolve(req.result);
+req.onupgradeneeded = (e) => {
+const db = e.target.result;
+if (!db.objectStoreNames.contains(STORE_PENDING)) {
+db.createObjectStore(STORE_PENDING, { keyPath: 'localId' });
+}
+if (!db.objectStoreNames.contains(STORE_CACHE)) {
+db.createObjectStore(STORE_CACHE, { keyPath: 'key' });
+}
+};
+});
+}
+async function dbPut(storeName, item) {
+const db = await openOfflineDB();
+return new Promise((resolve, reject) => {
+const tx = db.transaction(storeName, 'readwrite');
+const req = tx.objectStore(storeName).put(item);
+req.onsuccess = () => resolve(req.result);
+req.onerror = () => reject(req.error);
+});
+}
+async function dbGetAll(storeName) {
+const db = await openOfflineDB();
+return new Promise((resolve, reject) => {
+const tx = db.transaction(storeName, 'readonly');
+const req = tx.objectStore(storeName).getAll();
+req.onsuccess = () => resolve(req.result || []);
+req.onerror = () => reject(req.error);
+});
+}
+async function dbDelete(storeName, key) {
+const db = await openOfflineDB();
+return new Promise((resolve, reject) => {
+const tx = db.transaction(storeName, 'readwrite');
+const req = tx.objectStore(storeName).delete(key);
+req.onsuccess = () => resolve();
+req.onerror = () => reject(req.error);
+});
+}
+async function dbClear(storeName) {
+const db = await openOfflineDB();
+return new Promise((resolve, reject) => {
+const tx = db.transaction(storeName, 'readwrite');
+const req = tx.objectStore(storeName).clear();
+req.onsuccess = () => resolve();
+req.onerror = () => reject(req.error);
+});
+}
+async function setReadCache(key, value) {
+try {
+await dbPut(STORE_CACHE, { key, value, updatedAt: Date.now() });
+} catch (e) {
+console.warn('[Cache Checador] Error guardando en IndexedDB:', key, e);
+}
+try {
+localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(value));
+} catch (e) {
+console.warn('[Cache Checador] Error guardando en localStorage:', key, e);
+}
+}
+async function getReadCache(key) {
+try {
+const db = await openOfflineDB();
+const idbVal = await new Promise((resolve, reject) => {
+const tx = db.transaction(STORE_CACHE, 'readonly');
+const req = tx.objectStore(STORE_CACHE).get(key);
+req.onsuccess = () => resolve(req.result ? req.result.value : null);
+req.onerror = () => reject(req.error);
+});
+if (idbVal != null) return idbVal;
+} catch (e) {
+console.warn('[Cache Checador] Error leyendo IndexedDB:', key, e);
+}
+try {
+const raw = localStorage.getItem(CACHE_PREFIX + key);
+if (raw) return JSON.parse(raw);
+} catch (e) {
+console.warn('[Cache Checador] Error leyendo localStorage:', key, e);
+}
+return null;
+}
+// ============================================================================
+// METADATOS DE ORIGEN DE FOTO POR REGISTRO (CÁMARA VS GALERÍA)
+// ============================================================================
+function getRecordSourceMap() {
+try {
+const raw = localStorage.getItem(RECORD_SOURCE_META_KEY);
+return raw ? JSON.parse(raw) : {};
+} catch (e) {
+return {};
+}
+}
+function setRecordSource(employeeId, dateStr, type, source) {
+const map = getRecordSourceMap();
+const slotKey = `${employeeId}_${dateStr}_${type}`;
+map[slotKey] = source;
+try {
+localStorage.setItem(RECORD_SOURCE_META_KEY, JSON.stringify(map));
+} catch (e) {
+console.warn('[SourceMeta] No se pudo guardar origen:', e);
+}
+}
+function getRecordSource(employeeId, dateStr, type) {
+const map = getRecordSourceMap();
+const slotKey = `${employeeId}_${dateStr}_${type}`;
+return map[slotKey] || null;
+}
+function clearRecordSource(employeeId, dateStr, type) {
+const map = getRecordSourceMap();
+const slotKey = `${employeeId}_${dateStr}_${type}`;
+if (slotKey in map) {
+delete map[slotKey];
+try {
+localStorage.setItem(RECORD_SOURCE_META_KEY, JSON.stringify(map));
+} catch (e) {}
+}
+}
+// ============================================================================
+// TEMA
+// ============================================================================
+const btnThemeToggle = document.getElementById('btn-theme-toggle');
+const htmlElement = document.documentElement;
+function setTheme(isDark) {
+const themeMeta = document.querySelector('meta[name="theme-color"]');
+if (isDark) {
+htmlElement.classList.add('dark');
+localStorage.setItem('theme', 'dark');
+if (themeMeta) themeMeta.setAttribute('content', '#0F172A');
+} else {
+htmlElement.classList.remove('dark');
+localStorage.setItem('theme', 'light');
+if (themeMeta) themeMeta.setAttribute('content', '#F8F9FA');
+}
+}
+setTheme(localStorage.getItem('theme') !== 'light');
+btnThemeToggle.addEventListener('click', () => {
+setTheme(!htmlElement.classList.contains('dark'));
+});
+// ============================================================================
+// ESTADO GLOBAL
+// ============================================================================
+let employees = [];
+let sessionUserId = null;
+let viewingUserId = null;
+let todayRecords = [];
+let weekRecords = [];
+let pendingRecords = [];
+let currentWeekOffset = 0;
+let currentCheckIndexToCapture = -1;
+let currentCaptureSource = 'camera'; // 'camera' | 'gallery'
+let replacingRecordContext = null; // { recordId, isPending, type, date, employeeId }
+let currentViewingRecordId = null;
+let currentViewingIsPending = false;
+let activePopupTrigger = null;
+let isSyncing = false;
+let pendingBlobUrls = {};
+let ocrPreviewBlobUrl = null;
+let realtimeInitialized = false;
+const CHECK_TYPES = [
+{ id: 'entry', label: 'Ingreso', icon: 'check', color: 'text-emerald-500' },
+{ id: 'lunch_out', label: 'Salida a comer', icon: 'utensils', color: 'text-emerald-500' },
+{ id: 'lunch_in', label: 'Regreso de comer', icon: 'coffee', color: 'text-emerald-500' },
+{ id: 'exit', label: 'Fin de turno', icon: 'log-out', color: 'text-emerald-500' }
+];
+const DAYS_OF_WEEK = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const NON_WORK_SHIFTS = ['LIBRE', 'VACACIONES', 'CAPAC'];
+// ============================================================================
+// HELPERS DE BLOB URLs Y AVATAR
+// ============================================================================
+function getBlobUrlForPending(p) {
+if (pendingBlobUrls[p.localId]) return pendingBlobUrls[p.localId];
+const url = URL.createObjectURL(p.photoBlob);
+pendingBlobUrls[p.localId] = url;
+return url;
+}
+function cleanupOrphanBlobUrls() {
+const currentIds = new Set(pendingRecords.map(p => p.localId));
+for (const id in pendingBlobUrls) {
+if (!currentIds.has(id)) {
+URL.revokeObjectURL(pendingBlobUrls[id]);
+delete pendingBlobUrls[id];
+}
+}
+}
+function buildAvatarHTML(user, sizeClass = 'w-11 h-11', textClass = 'text-sm') {
+const initial = escapeHtml((user?.name || '?').charAt(0));
+const fallback = `<div class="${sizeClass} rounded-full bg-app-brand text-white flex items-center justify-center font-bold ${textClass} uppercase shrink-0 shadow-sm">${initial}</div>`;
+if (!user || !user.photoUrl) return fallback;
+return `<img src="${escapeHtml(user.photoUrl)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), {className:'${sizeClass} rounded-full bg-app-brand text-white flex items-center justify-center font-bold ${textClass} uppercase shrink-0 shadow-sm', textContent:'${initial}'}));" class="${sizeClass} rounded-full object-cover shrink-0 shadow-sm">`;
+}
+// ============================================================================
+// INICIALIZACIÓN
+// ============================================================================
+document.addEventListener('DOMContentLoaded', async () => {
+initServiceWorker();
+if (window.lucide) lucide.createIcons();
+updateClock();
+setInterval(updateClock, 1000);
+setInterval(updateShiftTime, 60000);
+document.addEventListener('click', (e) => {
+if (!e.target.closest('.record-chip-clickable')) {
+hideRecordPopup();
+}
+});
+window.addEventListener('scroll', hideRecordPopup, { passive: true });
+window.addEventListener('online', handleOnlineEvent);
+window.addEventListener('offline', handleOfflineEvent);
+try {
+pendingRecords = await dbGetAll(STORE_PENDING);
+cleanupOrphanBlobUrls();
+updateSyncStatusUI();
+await loadSession();
+iniciarRealtime();
+if (navigator.onLine && pendingRecords.length > 0) {
+setTimeout(() => processPendingQueue(), 500);
+}
+document.addEventListener('visibilitychange', () => {
+if (document.visibilityState === 'visible' && navigator.onLine && pendingRecords.length > 0) {
+processPendingQueue();
+}
+});
+} catch (error) {
+console.error("Error al iniciar la app:", error);
+document.getElementById('activeEmployeeName').textContent = "Error local";
+}
+});
+// ============================================================================
+// HANDLERS ONLINE / OFFLINE
+// ============================================================================
+async function handleOnlineEvent() {
+updateSyncStatusUI();
+iniciarRealtime();
+await loadSession();
+setTimeout(() => processPendingQueue(), 600);
+}
+function handleOfflineEvent() {
+updateSyncStatusUI();
+if (viewingUserId) {
+loadTodayRecords();
+loadWeeklySchedule();
+}
+}
+// ============================================================================
+// SINCRONIZACIÓN DE COLA
+// ============================================================================
+async function processPendingQueue() {
+if (isSyncing) return;
+if (!navigator.onLine || !supabaseClient) {
+updateSyncStatusUI();
+return;
+}
+const pending = await dbGetAll(STORE_PENDING);
+if (pending.length === 0) {
+updateSyncStatusUI();
+return;
+}
+isSyncing = true;
+updateSyncStatusUI();
+let successCount = 0;
+for (const item of pending) {
+try {
+if (employees.length > 0 && !employees.find(e => e.id === item.employeeId)) {
+await dbDelete(STORE_PENDING, item.localId);
+continue;
+}
+const fileName = `${item.employeeId}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.jpg`;
+const { error: uploadError } = await supabaseClient.storage
+.from('registros-empleados')
+.upload(fileName, item.photoBlob, { contentType: 'image/jpeg', upsert: false });
+if (uploadError) throw new Error(`Storage: ${uploadError.message}`);
+const { data: publicUrlData } = supabaseClient.storage
+.from('registros-empleados')
+.getPublicUrl(fileName);
+const { error: insertError } = await supabaseClient
+.from('registros')
+.insert([{
+employee_id: item.employeeId,
+tipo: item.type,
+timestamp: item.timestamp,
+fecha: item.date,
+foto_url: publicUrlData.publicUrl,
+ocr_nombre: item.ocrName || null,
+ocr_fecha: item.ocrDate || null
+}]);
+if (insertError) throw new Error(`DB insert: ${insertError.message}`);
+await dbDelete(STORE_PENDING, item.localId);
+successCount++;
+} catch (err) {
+console.error('[Sync] Error sincronizando pendiente:', item.localId, err);
+item.lastError = err?.message || String(err);
+await dbPut(STORE_PENDING, item);
+}
+}
+isSyncing = false;
+await refreshPendingRecords();
+if (successCount > 0) {
+await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
+}
+}
+async function refreshPendingRecords() {
+pendingRecords = await dbGetAll(STORE_PENDING);
+cleanupOrphanBlobUrls();
+updateSyncStatusUI();
+}
+// ============================================================================
+// INDICADOR DE SINCRONIZACIÓN
+// ============================================================================
+function updateSyncStatusUI() {
+const syncBar = document.getElementById('syncBar');
+const indicator = document.getElementById('syncIndicator');
+const btnSync = document.getElementById('btnSyncNow');
+if (!syncBar || !indicator) return;
+const pendingCount = pendingRecords.length;
+const online = navigator.onLine;
+if (!online) {
+syncBar.classList.remove('hidden');
+syncBar.className = 'mx-5 mb-2 rounded-xl border text-[11px] font-semibold overflow-hidden bg-amber-500/10 border-amber-500/20';
+indicator.className = 'inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400';
+indicator.innerHTML = pendingCount > 0
+? `<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Sin conexión · ${pendingCount} pendiente${pendingCount > 1 ? 's' : ''}`
+: '<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Sin conexión · Modo local';
+btnSync.classList.add('hidden');
+} else if (isSyncing) {
+syncBar.classList.remove('hidden');
+syncBar.className = 'mx-5 mb-2 rounded-xl border text-[11px] font-semibold overflow-hidden bg-blue-500/10 border-blue-500/20';
+indicator.className = 'inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400';
+indicator.innerHTML = '<i data-lucide="refresh-cw" class="w-3.5 h-3.5 animate-spin"></i> Sincronizando registros...';
+btnSync.classList.add('hidden');
+} else if (pendingCount > 0) {
+syncBar.classList.remove('hidden');
+syncBar.className = 'mx-5 mb-2 rounded-xl border text-[11px] font-semibold overflow-hidden bg-amber-500/10 border-amber-500/20';
+indicator.className = 'inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400';
+indicator.innerHTML = `<i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i> ${pendingCount} registro${pendingCount > 1 ? 's' : ''} por subir`;
+btnSync.classList.remove('hidden');
+} else {
+syncBar.classList.add('hidden');
+btnSync.classList.add('hidden');
+}
+if (window.lucide) lucide.createIcons({ root: syncBar });
+}
+// ============================================================================
+// POPUP HORA EXACTA
+// ============================================================================
+function showRecordPopup(event, label, exactTime) {
+event.stopPropagation();
+const target = event.currentTarget;
+const popup = document.getElementById('recordExactPopup');
+if (activePopupTrigger === target && !popup.classList.contains('hidden')) {
+hideRecordPopup();
+return;
+}
+activePopupTrigger = target;
+document.getElementById('popupRecordLabel').textContent = label;
+document.getElementById('popupRecordTime').textContent = exactTime;
+popup.classList.remove('hidden');
+const rect = target.getBoundingClientRect();
+const popupRect = popup.getBoundingClientRect();
+let top = rect.top - popupRect.height - 8;
+let left = rect.left + (rect.width / 2) - (popupRect.width / 2);
+const padding = 10;
+if (left < padding) left = padding;
+if (left + popupRect.width > window.innerWidth - padding) {
+left = window.innerWidth - popupRect.width - padding;
+}
+if (top < padding) {
+top = rect.bottom + 8;
+}
+popup.style.top = `${top}px`;
+popup.style.left = `${left}px`;
+}
+function hideRecordPopup() {
+const popup = document.getElementById('recordExactPopup');
+if (popup) popup.classList.add('hidden');
+activePopupTrigger = null;
+}
+function updateClock() {
+const now = new Date();
+document.getElementById('currentTime').textContent = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
+const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+document.getElementById('currentDate').textContent = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}`;
+}
+// ============================================================================
+// EMPLEADOS (CON CACHÉ OFFLINE + RESPALDO LOCALSTORAGE)
+// ============================================================================
+async function fetchEmployeesFromSupabase() {
+if (navigator.onLine && supabaseClient) {
+try {
+const { data, error } = await supabaseClient
+.from('empleados')
+.select('id, nombre, numero_empleado, foto_url, turnos')
+.order('nombre', { ascending: true });
+if (!error && Array.isArray(data)) {
+const mapped = data.map(emp => ({
+id: emp.id,
+name: emp.nombre,
+number: String(emp.numero_empleado).trim(),
+photoUrl: emp.foto_url || '',
+turnos: emp.turnos || {}
+}));
+await setReadCache('empleados', mapped);
+return mapped;
+}
+console.warn("No se pudo conectar a la Nube:", error?.message);
+} catch (err) {
+console.warn("Error de red al consultar Minisers:", err);
+}
+}
+const cached = await getReadCache('empleados');
+return Array.isArray(cached) ? cached : [];
+}
+async function precacheUserSchedules() {
+if (!viewingUserId) return;
+await loadTodayRecords();
+await loadWeeklySchedule();
+if (navigator.onLine && currentWeekOffset === 0) {
+currentWeekOffset = -1;
+await loadWeeklySchedule();
+currentWeekOffset = 0;
+await loadWeeklySchedule();
+}
+}
+async function loadSession() {
+employees = await fetchEmployeesFromSupabase();
+if (employees.length === 0) {
+document.getElementById('activeEmployeeName').textContent = navigator.onLine ? "Sin Minisers" : "Sin conexión";
+document.getElementById('assignedShiftText').textContent = navigator.onLine ? "Turno asignado: --" : "Turno asignado: Sin caché de Minisers";
+renderRecordsUI();
+renderWeeklySchedule();
+return;
+}
+const savedSession = localStorage.getItem('sessionUserId');
+if (savedSession && employees.some(e => e.id == savedSession)) {
+sessionUserId = Number(savedSession);
+viewingUserId = sessionUserId;
+updateUIForUser();
+await precacheUserSchedules();
+} else {
+openInitialUserModal();
+}
+}
+function openInitialUserModal() {
+const list = document.getElementById('initialUserList');
+list.innerHTML = '';
+if (employees.length === 0) {
+list.innerHTML = '<p class="text-center text-xs text-app-sub dark:text-darkapp-sub py-6">No hay Minisers disponibles.</p>';
+} else {
+employees.forEach(emp => {
+list.innerHTML += `<div class="p-3 bg-app-bg/50 dark:bg-slate-800/50 rounded-2xl cursor-pointer hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-all flex items-center justify-between" onclick="selectInitialUser(${emp.id})"><div class="flex items-center gap-3.5">${buildAvatarHTML(emp, 'w-12 h-12', 'text-sm')}<div class="flex flex-col"><span class="font-bold text-sm text-app-title dark:text-darkapp-title">${escapeHtml(emp.name)}</span><span class="text-[11px] text-app-sub dark:text-darkapp-sub">#: ${escapeHtml(emp.number || 'N/A')}</span></div></div><i data-lucide="chevron-right" class="w-4 h-4 text-app-sub dark:text-darkapp-sub"></i></div>`;
+});
+}
+if (window.lucide) lucide.createIcons();
+document.getElementById('modalInitialUser').classList.remove('hidden');
+}
+async function selectInitialUser(id) {
+sessionUserId = id;
+viewingUserId = id;
+localStorage.setItem('sessionUserId', sessionUserId);
+if (Array.isArray(employees) && employees.length > 0) {
+await setReadCache('empleados', employees);
+}
+document.getElementById('modalInitialUser').classList.add('hidden');
+updateUIForUser();
+await precacheUserSchedules();
+}
+async function logoutSession() {
+closeAll();
+localStorage.removeItem('sessionUserId');
+sessionUserId = null;
+viewingUserId = null;
+openInitialUserModal();
+}
+function updateUIForUser() {
+const user = employees.find(e => e.id === viewingUserId);
+const nameEl = document.getElementById('activeEmployeeName');
+const avatarEl = document.getElementById('activeEmployeeAvatar');
+if (user) {
+avatarEl.innerHTML = buildAvatarHTML(user, 'w-11 h-11', 'text-sm');
+nameEl.textContent = user.name;
+} else {
+avatarEl.innerHTML = '';
+nameEl.textContent = 'Desconocido';
+}
+const banner = document.getElementById('otherUserBanner');
+if (viewingUserId !== sessionUserId && user) {
+banner.classList.remove('hidden');
+document.getElementById('otherUserName').textContent = user.name;
+} else {
+banner.classList.add('hidden');
+}
+updateAssignedShiftDisplay(user);
+}
+function updateAssignedShiftDisplay(user) {
+const shiftEl = document.getElementById('assignedShiftText');
+if (!user || !user.turnos) {
+shiftEl.textContent = 'Turno asignado: No disponible';
+return;
+}
+const now = new Date();
+const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+const sched = user.turnos[dateStr];
+if (sched && sched.startTime) {
+const st = String(sched.startTime).toUpperCase();
+if (st === 'LIBRE') {
+shiftEl.textContent = 'Turno asignado: Descanso';
+} else if (st === 'VACACIONES') {
+shiftEl.textContent = 'Turno asignado: Vacaciones';
+} else if (st.startsWith('CAPAC')) {
+shiftEl.textContent = 'Turno asignado: Capacitación';
+} else {
+const timeText = sched.endTime ? `${sched.startTime} - ${sched.endTime}` : sched.startTime;
+shiftEl.textContent = `Turno asignado: ${timeText}`;
+}
+} else {
+shiftEl.textContent = 'Turno asignado: Sin horario programado';
+}
+}
+async function returnToSessionUser() {
+viewingUserId = sessionUserId;
+updateUIForUser();
+await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
+}
+// ============================================================================
+// REGISTROS DEL DÍA (CON CACHÉ OFFLINE)
+// ============================================================================
+async function loadTodayRecords() {
+if (!viewingUserId) {
+todayRecords = [];
+renderRecordsUI();
+return;
+}
+const now = new Date();
+const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+const cacheKey = `today_${viewingUserId}_${todayStr}`;
+pendingRecords = await dbGetAll(STORE_PENDING);
+cleanupOrphanBlobUrls();
+let serverRecords = [];
+if (navigator.onLine && supabaseClient) {
+try {
+const { data, error } = await supabaseClient
+.from('registros')
+.select('*')
+.eq('employee_id', viewingUserId)
+.eq('fecha', todayStr)
+.order('timestamp', { ascending: true });
+if (!error && Array.isArray(data)) {
+serverRecords = data.map(r => ({
+id: r.id,
+employeeId: r.employee_id,
+type: r.tipo,
+timestamp: r.timestamp,
+date: r.fecha,
+photo: r.foto_url,
+ocrName: r.ocr_nombre,
+ocrDate: r.ocr_fecha,
+isPending: false
+}));
+await setReadCache(cacheKey, serverRecords);
+} else {
+serverRecords = (await getReadCache(cacheKey)) || [];
+}
+} catch (err) {
+console.error("Excepción al consultar registros del día:", err);
+serverRecords = (await getReadCache(cacheKey)) || [];
+}
+} else {
+serverRecords = (await getReadCache(cacheKey)) || [];
+}
+const pendingToday = pendingRecords
+.filter(p => p.date === todayStr && p.employeeId === viewingUserId)
+.map(p => ({
+id: p.localId,
+employeeId: p.employeeId,
+type: p.type,
+timestamp: p.timestamp,
+date: p.date,
+photo: getBlobUrlForPending(p),
+ocrName: p.ocrName,
+ocrDate: p.ocrDate,
+isPending: true
+}));
+todayRecords = [...serverRecords, ...pendingToday]
+.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+renderRecordsUI();
+}
+let customConfirmResolver = null;
+function showCustomConfirm({
+title = 'Confirmar acción',
+message = '¿Deseas continuar?',
+confirmText = 'Confirmar',
+cancelText = 'Cancelar',
+confirmColor = 'red',
+cancelColor = 'green',
+icon = 'alert-triangle'
+} = {}) {
+return new Promise((resolve) => {
+customConfirmResolver = resolve;
+const modal = document.getElementById('customConfirmModal');
+const titleEl = document.getElementById('customConfirmTitle');
+const textEl = document.getElementById('customConfirmText');
+const iconContainer = document.getElementById('customConfirmIconContainer');
+const iconEl = document.getElementById('customConfirmIcon');
+const cancelBtn = document.getElementById('customConfirmCancelBtn');
+const acceptBtn = document.getElementById('customConfirmAcceptBtn');
+titleEl.textContent = title;
+textEl.textContent = message;
+cancelBtn.textContent = cancelText;
+acceptBtn.textContent = confirmText;
+const colorClasses = {
+red: 'py-2.5 px-4 bg-transparent text-rose-500 dark:text-rose-400 hover:bg-rose-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer flex-1',
+green: 'py-2.5 px-4 bg-transparent text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer flex-1'
+};
+acceptBtn.className = colorClasses[confirmColor] || colorClasses.red;
+cancelBtn.className = colorClasses[cancelColor] || colorClasses.green;
+iconContainer.className = (confirmColor === 'green' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500') + ' flex justify-center mx-auto';
+iconEl.setAttribute('data-lucide', icon);
+modal.classList.remove('hidden');
+if (window.lucide) lucide.createIcons({ root: modal });
+});
+}
+function closeCustomConfirm(result) {
+const modal = document.getElementById('customConfirmModal');
+modal.classList.add('hidden');
+if (customConfirmResolver) {
+const resolve = customConfirmResolver;
+customConfirmResolver = null;
+resolve(result);
+}
+}
+function showCustomAlert(message, type = 'error') {
+const modal = document.getElementById('customAlertModal');
+const textEl = document.getElementById('customAlertText');
+const iconContainer = document.getElementById('customAlertIconContainer');
+const iconEl = document.getElementById('customAlertIcon');
+textEl.textContent = message;
+if (type === 'success') {
+iconContainer.className = 'text-emerald-600 dark:text-emerald-400 flex justify-center mx-auto';
+iconEl.setAttribute('data-lucide', 'check-circle-2');
+} else {
+iconContainer.className = 'text-rose-500 flex justify-center mx-auto';
+iconEl.setAttribute('data-lucide', 'alert-circle');
+}
+modal.classList.remove('hidden');
+if (window.lucide) lucide.createIcons({ root: modal });
+}
+function closeCustomAlert() {
+document.getElementById('customAlertModal').classList.add('hidden');
+}
+async function deleteCurrentRecord() {
+if (!currentViewingRecordId) return;
+const recToDelete = todayRecords.find(r => String(r.id) === String(currentViewingRecordId));
+if (currentViewingIsPending) {
+const confirmed = await showCustomConfirm({
+title: 'Descartar registro pendiente',
+message: '¿Deseas descartar este registro pendiente? No se subirá a la nube.',
+confirmText: 'Descartar',
+cancelText: 'Cancelar',
+confirmColor: 'red',
+cancelColor: 'green',
+icon: 'trash-2'
+});
+if (confirmed) {
+await dbDelete(STORE_PENDING, currentViewingRecordId);
+if (recToDelete) {
+clearRecordSource(recToDelete.employeeId, recToDelete.date, recToDelete.type);
+}
+currentViewingIsPending = false;
+currentViewingRecordId = null;
+closeAll();
+await refreshPendingRecords();
+await loadTodayRecords();
+await loadWeeklySchedule();
+}
+} else {
+if (!navigator.onLine || !supabaseClient) {
+showCustomAlert('Sin conexión. No se puede eliminar el registro hasta recuperar la conexión.');
+return;
+}
+const confirmed = await showCustomConfirm({
+title: 'Eliminar registro',
+message: '¿Deseas eliminar este registro de la nube?',
+confirmText: 'Eliminar',
+cancelText: 'Cancelar',
+confirmColor: 'red',
+cancelColor: 'green',
+icon: 'trash-2'
+});
+if (confirmed) {
+const { error } = await supabaseClient
+.from('registros')
+.delete()
+.eq('id', currentViewingRecordId);
+if (error) {
+showCustomAlert('No se pudo eliminar el registro: ' + error.message);
+} else {
+if (recToDelete) {
+clearRecordSource(recToDelete.employeeId, recToDelete.date, recToDelete.type);
+}
+currentViewingRecordId = null;
+closeAll();
+await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
+}
+}
+}
+}
+function renderRecordsUI() {
+const list = document.getElementById('checksList');
+list.innerHTML = '';
+document.getElementById('statChecks').textContent = `${todayRecords.length}/4`;
+document.getElementById('progressBar').style.width = `${(todayRecords.length / 4) * 100}%`;
+const entry = todayRecords.find(r => r.type === 'entry');
+document.getElementById('statEntry').textContent = entry ? formatTime(entry.timestamp) : '--:-- --';
+const lOut = todayRecords.find(r => r.type === 'lunch_out');
+const lIn = todayRecords.find(r => r.type === 'lunch_in');
+if (lOut && lIn) {
+const diffMins = Math.round((new Date(lIn.timestamp) - new Date(lOut.timestamp)) / 60000);
+if (diffMins < 60) {
+document.getElementById('statLunch').textContent = `${diffMins} min`;
+} else {
+const hours = Math.floor(diffMins / 60);
+const mins = diffMins % 60;
+document.getElementById('statLunch').textContent = `${hours}h ${mins}min`;
+}
+} else if (lOut) {
+document.getElementById('statLunch').textContent = 'En curso';
+} else {
+document.getElementById('statLunch').textContent = '—';
+}
+updateShiftTime();
+updateStatusBadge();
+CHECK_TYPES.forEach((type, index) => {
+const record = todayRecords.find(r => r.type === type.id);
+const canRegister = !record && Boolean(viewingUserId);
+const isPending = record && record.isPending;
+let leftIcon;
+if (record && isPending) {
+leftIcon = `<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-amber-500 bg-transparent"><i data-lucide="cloud-upload" class="w-6 h-6"></i></div>`;
+} else if (record) {
+leftIcon = `<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-emerald-500 bg-transparent"><i data-lucide="check-circle" class="w-6 h-6"></i></div>`;
+} else {
+leftIcon = `<div class="w-10 h-10 rounded-full ${canRegister ? 'bg-app-brand/10 text-app-brand dark:bg-teal-500/20 dark:text-teal-400' : 'text-app-sub dark:text-darkapp-sub bg-app-bg/50 dark:bg-slate-800/50'} flex items-center justify-center shrink-0 font-bold text-sm">${index + 1}</div>`;
+}
+const imgSrc = record && record.photo ? escapeHtml(record.photo) : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
+let rightAction;
+if (record) {
+const recSource = getRecordSource(record.employeeId, record.date, record.type);
+const galleryReplaceBtn = (viewingUserId && recSource !== 'gallery')
+? `<button type="button" onclick="this.blur(); handleGalleryButtonClick(${index})" onpointerup="this.blur()" ontouchend="this.blur()" class="text-app-brand dark:text-teal-400 active:bg-transparent focus:bg-transparent md:hover:bg-app-brand/10 dark:md:hover:bg-teal-500/10 p-2 rounded-xl transition-colors cursor-pointer" title="Elegir imagen de galería"><i data-lucide="image-plus" class="w-4 h-4"></i></button>`
+: '';
+rightAction = `<div class="relative flex items-center gap-1.5">${galleryReplaceBtn}<img src="${imgSrc}" onerror="this.classList.add('opacity-40');" onclick="viewPhoto('${escapeHtml(String(record.id))}', '${escapeHtml(record.photo)}', ${isPending})" class="w-12 h-12 rounded-xl object-cover cursor-pointer border ${isPending ? 'border-amber-400 dark:border-amber-500' : 'border-transparent'} shadow-sm bg-slate-100 dark:bg-slate-800">${isPending ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center shadow-md pending-pulse"><i data-lucide="arrow-up" class="w-2.5 h-2.5 text-white"></i></span>` : ''}</div>`;
+} else if (canRegister) {
+rightAction = `<div class="flex items-center gap-1"><button type="button" onclick="this.blur(); handleGalleryButtonClick(${index})" onpointerup="this.blur()" ontouchend="this.blur()" class="text-app-brand dark:text-teal-400 active:bg-transparent focus:bg-transparent md:hover:bg-app-brand/10 dark:md:hover:bg-teal-500/10 p-2 rounded-xl transition-colors cursor-pointer" title="Elegir imagen de galería"><i data-lucide="image-plus" class="w-4 h-4"></i></button><button type="button" onclick="this.blur(); triggerFileInput(${index})" onpointerup="this.blur()" ontouchend="this.blur()" class="text-app-brand dark:text-teal-400 active:bg-transparent focus:bg-transparent md:hover:bg-app-brand/10 dark:md:hover:bg-teal-500/10 px-3 py-2 rounded-xl font-bold text-[12px] flex items-center gap-1.5 transition-colors"><i data-lucide="camera" class="w-6 h-6"></i> </button></div>`;
+} else {
+rightAction = '';
+}
+const subtitle = record
+? (isPending
+? `${formatTime(record.timestamp)} · <span class="text-amber-600 dark:text-amber-400 font-semibold">Pendiente de subir</span>`
+: formatTime(record.timestamp))
+: (canRegister ? ' ' : 'Pendiente');
+list.innerHTML += `<div class="flex items-center gap-4 py-3 border-b border-app-border/30 dark:border-darkapp-border/30 last:border-0">${leftIcon}<div class="flex-1"><h4 class="font-bold text-[15px] ${canRegister ? 'text-app-brand dark:text-teal-400' : 'text-app-title dark:text-darkapp-title'}">${type.label}</h4><p class="text-[12px] text-app-sub dark:text-darkapp-sub mt-0.5">${subtitle}</p></div>${rightAction}</div>`;
+});
+if (window.lucide) lucide.createIcons();
+}
+function updateStatusBadge() {
+const badge = document.getElementById('statusBadge');
+const hasEntry = todayRecords.some(r => r.type === 'entry');
+const hasLunchOut = todayRecords.some(r => r.type === 'lunch_out');
+const hasLunchIn = todayRecords.some(r => r.type === 'lunch_in');
+const hasExit = todayRecords.some(r => r.type === 'exit');
+let text = 'FUERA DE TURNO';
+let icon = 'ban';
+let colorClass = 'text-slate-500 dark:text-slate-400';
+if (hasExit) {
+text = 'FUERA DE TURNO';
+icon = 'ban';
+colorClass = 'text-slate-500 dark:text-slate-400';
+} else if (hasLunchOut && !hasLunchIn) {
+text = 'EN COMIDA';
+icon = 'utensils';
+colorClass = 'text-teal-600 dark:text-teal-400';
+} else if (hasEntry || (hasLunchOut && hasLunchIn)) {
+text = 'EN TURNO';
+icon = 'check-circle';
+colorClass = 'text-app-brand dark:text-teal-400';
+}
+badge.className = `flex items-center gap-1.5 font-semibold text-xs mt-1 ${colorClass}`;
+badge.innerHTML = `<i data-lucide="${icon}" class="w-3.5 h-3.5"></i> <span>${text}</span>`;
+if (window.lucide) lucide.createIcons();
+}
+function updateShiftTime() {
+const entry = todayRecords.find(r => r.type === 'entry');
+const exit = todayRecords.find(r => r.type === 'exit');
+if (entry) {
+const diffMins = Math.round(((exit ? new Date(exit.timestamp) : new Date()) - new Date(entry.timestamp)) / 60000);
+document.getElementById('statShift').textContent = diffMins < 60 ? `${diffMins} min` : `${Math.floor(diffMins/60)}h ${diffMins%60}m`;
+} else {
+document.getElementById('statShift').textContent = '0 min';
+}
+}
+// ============================================================================
+// SEMANA Y DESCARGA DE HORARIO EN IMAGEN
+// ============================================================================
+function getWeekData(offset) {
+const now = new Date();
+const day = now.getDay() || 7;
+const monday = new Date(now);
+monday.setDate(now.getDate() - day + 1 + (offset * 7));
+monday.setHours(0, 0, 0, 0);
+const sunday = new Date(monday);
+sunday.setDate(monday.getDate() + 6);
+sunday.setHours(23, 59, 59, 999);
+return { monday, sunday };
+}
+function timeToSeconds(timeStr) {
+if (!timeStr || NON_WORK_SHIFTS.includes(String(timeStr).toUpperCase())) return null;
+const parts = String(timeStr).split(':').map(Number);
+if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
+return parts[0] * 3600 + parts[1] * 60 + (parts[2] || 0);
+}
+function formatTime24To12Short(time24) {
+if (!time24) return '';
+const parts = String(time24).trim().split(':');
+if (parts.length < 2) return String(time24).trim();
+const h = parseInt(parts[0], 10);
+const m = parseInt(parts[1], 10);
+if (isNaN(h) || isNaN(m)) return String(time24).trim();
+const suffix = h >= 12 ? 'PM' : 'AM';
+const hour12 = h % 12 === 0 ? 12 : h % 12;
+const minPart = m === 0 ? '' : `:${String(m).padStart(2, '0')}`;
+return `${hour12}${minPart} ${suffix}`;
+}
+function formatShiftForDownloadCell(sched) {
+if (!sched || !sched.startTime) {
+return { text: 'Sin horario', badgeClass: 'text-slate-400 italic' };
+}
+const upper = String(sched.startTime).trim().toUpperCase();
+if (upper === 'LIBRE') {
+return { text: 'Descanso', badgeClass: 'text-slate-600 font-semibold' };
+}
+if (upper === 'VACACIONES' || upper === 'VAC') {
+return { text: 'Vacaciones', badgeClass: 'text-purple-600 font-bold' };
+}
+if (upper.startsWith('CAPAC')) {
+return { text: 'Capacitación', badgeClass: 'text-amber-600 font-bold' };
+}
+const start12 = formatTime24To12Short(sched.startTime);
+const end12 = sched.endTime ? formatTime24To12Short(sched.endTime) : '';
+const formatted = end12 ? `${start12} - ${end12}` : start12;
+return { text: formatted, badgeClass: 'bg-teal-500/10 text-teal-700 font-bold px-3 py-1.5 rounded-md text-sm' };
+}
+async function downloadEmployeeScheduleImage() {
+const targetUserId = viewingUserId || sessionUserId;
+const emp = employees.find(e => e.id === targetUserId);
+if (!emp || typeof html2canvas === 'undefined') return;
+const { monday, sunday } = getWeekData(currentWeekOffset);
+const rangeOptions = { day: 'numeric', month: 'short' };
+const monDayNum = monday.getDate();
+const monMonthShort = monday.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
+const sunDayNum = sunday.getDate();
+const sunMonthShort = sunday.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
+const filenameStr = `Horarios ${monDayNum}${monMonthShort}-${sunDayNum}${sunMonthShort}`;
+document.getElementById('exportModalTitle').textContent = 'Horarios';
+document.getElementById('exportModalRange').textContent = `${monday.toLocaleDateString('es-MX', rangeOptions)} al ${sunday.toLocaleDateString('es-MX', rangeOptions)}`;
+document.getElementById('exportModalEmployeeName').textContent = emp.name;
+const empTurnos = emp.turnos || {};
+let exportDaysHTML = '';
+DAYS_OF_WEEK.forEach((dayName, index) => {
+const targetDate = new Date(monday);
+targetDate.setDate(monday.getDate() + index);
+const dateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth()+1).padStart(2,'0')}-${String(targetDate.getDate()).padStart(2,'0')}`;
+const sched = empTurnos[dateStr];
+const shiftInfo = formatShiftForDownloadCell(sched);
+const monthShort = targetDate.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
+exportDaysHTML += `<div class="grid grid-cols-12 items-center py-4 px-5 bg-slate-50/80 rounded-2xl border border-slate-200 mb-3"><div class="col-span-4 flex items-center"><span class="text-base font-bold text-slate-900">${dayName}</span></div><div class="col-span-3 flex items-center"><span class="text-sm font-medium text-slate-500">${targetDate.getDate()} ${monthShort}.</span></div><div class="col-span-5 flex items-center justify-end"><span class="${shiftInfo.badgeClass} inline-block">${escapeHtml(shiftInfo.text)}</span></div></div>`;
+});
+const exportContainer = document.getElementById('exportScheduleContainer');
+document.getElementById('exportModalScheduleList').innerHTML = exportDaysHTML;
+try {
+const canvas = await html2canvas(exportContainer, {
+scale: 3,
+useCORS: true,
+backgroundColor: '#ffffff'
+});
+const imageURL = canvas.toDataURL('image/png');
+const link = document.createElement('a');
+link.href = imageURL;
+link.download = `${filenameStr}.png`;
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+} catch (err) {
+console.error('Error al generar la imagen de horarios:', err);
+alert('No se pudo generar la imagen de los horarios.');
+}
+}
+async function changeWeek(dir) {
+hideRecordPopup();
+const newOffset = currentWeekOffset + dir;
+if (newOffset >= -1 && newOffset <= 0) {
+currentWeekOffset = newOffset;
+await loadWeeklySchedule();
+}
+}
+async function loadWeeklySchedule() {
+const targetUserId = viewingUserId || sessionUserId;
+if (!targetUserId) {
+weekRecords = [];
+renderWeeklySchedule();
+return;
+}
+const { monday, sunday } = getWeekData(currentWeekOffset);
+const startStr = `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
+const endStr = `${sunday.getFullYear()}-${String(sunday.getMonth()+1).padStart(2,'0')}-${String(sunday.getDate()).padStart(2,'0')}`;
+const cacheKey = `week_${targetUserId}_${startStr}_${endStr}`;
+pendingRecords = await dbGetAll(STORE_PENDING);
+cleanupOrphanBlobUrls();
+let serverRecords = [];
+if (navigator.onLine && supabaseClient) {
+try {
+const { data, error } = await supabaseClient
+.from('registros')
+.select('*')
+.eq('employee_id', targetUserId)
+.gte('fecha', startStr)
+.lte('fecha', endStr)
+.order('timestamp', { ascending: true });
+if (!error && Array.isArray(data)) {
+serverRecords = data.map(r => ({
+id: r.id,
+employeeId: r.employee_id,
+type: r.tipo,
+timestamp: r.timestamp,
+date: r.fecha,
+isPending: false
+}));
+await setReadCache(cacheKey, serverRecords);
+} else {
+serverRecords = (await getReadCache(cacheKey)) || [];
+}
+} catch (err) {
+console.error("Excepción al consultar registros semanales:", err);
+serverRecords = (await getReadCache(cacheKey)) || [];
+}
+} else {
+serverRecords = (await getReadCache(cacheKey)) || [];
+}
+const pendingInRange = pendingRecords
+.filter(p => p.employeeId === targetUserId && p.date >= startStr && p.date <= endStr)
+.map(p => ({
+id: p.localId,
+employeeId: p.employeeId,
+type: p.type,
+timestamp: p.timestamp,
+date: p.date,
+isPending: true
+}));
+weekRecords = [...serverRecords, ...pendingInRange]
+.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+renderWeeklySchedule();
+}
+function renderWeeklySchedule() {
+const targetUserId = viewingUserId || sessionUserId;
+const emp = employees.find(e => e.id === targetUserId);
+const container = document.getElementById('weeklyScheduleContainer');
+if (!container) return;
+const { monday, sunday } = getWeekData(currentWeekOffset);
+const options = { day: 'numeric', month: 'short' };
+document.getElementById('weekRange').textContent = `${monday.toLocaleDateString('es-MX', options)} al ${sunday.toLocaleDateString('es-MX', options)}`;
+const btnPrev = document.getElementById('btnPrevWeek');
+const btnNext = document.getElementById('btnNextWeek');
+if (currentWeekOffset === 0) {
+document.getElementById('weekLabel').textContent = 'Semana Actual';
+btnPrev.className = 'p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer';
+btnPrev.disabled = false;
+btnNext.className = 'p-2 text-slate-300 dark:text-slate-600 rounded-lg cursor-not-allowed';
+btnNext.disabled = true;
+} else if (currentWeekOffset === -1) {
+document.getElementById('weekLabel').textContent = 'Semana Anterior';
+btnPrev.className = 'p-2 text-slate-300 dark:text-slate-600 rounded-lg cursor-not-allowed';
+btnPrev.disabled = true;
+btnNext.className = 'p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer';
+btnNext.disabled = false;
+}
+if (!emp) {
+container.innerHTML = '<p class="text-center text-xs text-app-sub dark:text-darkapp-sub py-4">Sin horarios disponibles sin conexión.</p>';
+return;
+}
+const empTurnos = emp.turnos || {};
+let daysHTML = '';
+const now = new Date();
+const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+DAYS_OF_WEEK.forEach((dayName, index) => {
+const targetDate = new Date(monday);
+targetDate.setDate(monday.getDate() + index);
+const targetMidnight = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+const dateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth()+1).padStart(2,'0')}-${String(targetDate.getDate()).padStart(2,'0')}`;
+const isFutureDay = targetMidnight > todayMidnight;
+const isPastDay = targetMidnight < todayMidnight;
+const sched = empTurnos[dateStr];
+const dayRecords = weekRecords.filter(r => r.date === dateStr).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+const upperShift = sched && sched.startTime ? String(sched.startTime).toUpperCase() : '';
+const isLibreDay = upperShift === 'LIBRE';
+const isNonWorkDay = upperShift !== '' && NON_WORK_SHIFTS.includes(upperShift);
+const lunchOutRec = dayRecords.find(r => r.type === 'lunch_out');
+const greenClass = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+const orangeClass = 'bg-orange-500/10 text-orange-600 dark:text-orange-400';
+const redClass = 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+const neutralClass = 'bg-app-bg/50 dark:bg-slate-800/50 text-app-sub dark:text-darkapp-sub';
+let cellsHTML = '';
+if (!isFutureDay && !(isLibreDay && dayRecords.length === 0)) {
+cellsHTML = CHECK_TYPES.map((type) => {
+const rec = dayRecords.find(r => r.type === type.id);
+let bgClass = neutralClass;
+let displayTime = '--:--';
+let title = `Sin registro: ${type.label}`;
+if (rec) {
+const actualDate = new Date(rec.timestamp);
+displayTime = actualDate.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
+const exactTimeStr = actualDate.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+const actualSecs = actualDate.getHours() * 3600 + actualDate.getMinutes() * 60 + actualDate.getSeconds();
+if (type.id === 'entry') {
+if (sched && sched.startTime) {
+const startSecs = timeToSeconds(sched.startTime);
+if (startSecs !== null) {
+if (actualSecs > startSecs + 600) {
+bgClass = orangeClass;
+title = `Retardo (Turno: ${sched.startTime})`;
+} else {
+bgClass = greenClass;
+title = `A tiempo (Turno: ${sched.startTime})`;
+}
+} else {
+bgClass = greenClass;
+title = type.label;
+}
+} else {
+bgClass = greenClass;
+title = type.label;
+}
+} else if (type.id === 'lunch_out') {
+bgClass = greenClass;
+title = type.label;
+} else if (type.id === 'lunch_in') {
+if (lunchOutRec) {
+const lunchOutTimeMs = new Date(lunchOutRec.timestamp).getTime();
+const lunchInTimeMs = actualDate.getTime();
+const diffSecs = Math.floor((lunchInTimeMs - lunchOutTimeMs) / 1000);
+if (diffSecs >= 3601) {
+bgClass = orangeClass;
+title = 'Regreso de comida con retardo (+1h)';
+} else {
+bgClass = greenClass;
+title = 'Regreso de comida a tiempo';
+}
+} else {
+bgClass = greenClass;
+title = type.label;
+}
+} else if (type.id === 'exit') {
+if (sched && sched.endTime) {
+const endSecs = timeToSeconds(sched.endTime);
+const startSecs = timeToSeconds(sched.startTime);
+if (endSecs !== null) {
+let effectiveEndSecs = endSecs;
+if (startSecs !== null && endSecs < startSecs) {
+effectiveEndSecs += 86400;
+}
+let effectiveActualSecs = actualSecs;
+if (startSecs !== null && endSecs < startSecs && actualSecs < startSecs) {
+effectiveActualSecs += 86400;
+}
+if (effectiveActualSecs < effectiveEndSecs - 600) {
+bgClass = orangeClass;
+title = `Salida anticipada (Salida programada: ${sched.endTime})`;
+} else {
+bgClass = greenClass;
+title = `Salida a tiempo (Salida programada: ${sched.endTime})`;
+}
+} else {
+bgClass = greenClass;
+title = type.label;
+}
+} else {
+bgClass = greenClass;
+title = type.label;
+}
+}
+const pendingMark = rec.isPending
+? '<i data-lucide="cloud-upload" class="w-2.5 h-2.5 inline text-amber-500"></i>'
+: '';
+return `<button type="button" onclick="showRecordPopup(event, '${escapeHtml(type.label)}', '${escapeHtml(exactTimeStr)}')" class="record-chip-clickable ${bgClass} ${rec.isPending ? 'ring-1 ring-amber-400 dark:ring-amber-500' : ''} px-1.5 py-1 rounded-md text-[10px] font-bold text-center transition-all active:scale-95 cursor-pointer" title="${title}">${displayTime}${pendingMark}</button>`;
+} else {
+if (isPastDay && !isNonWorkDay) {
+bgClass = redClass;
+}
+return `<div class="${bgClass} px-1.5 py-1 rounded-md text-[10px] font-bold text-center transition-colors" title="${title}">${displayTime}</div>`;
+}
+}).join('');
+}
+let shiftLabel = '';
+if (sched && sched.startTime) {
+const st = String(sched.startTime).toUpperCase();
+if (st === 'LIBRE') {
+shiftLabel = '<span class="text-[10px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">Descanso</span>';
+} else if (st === 'VACACIONES') {
+shiftLabel = '<span class="text-[10px] font-semibold text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">Vacaciones</span>';
+} else if (st.startsWith('CAPAC')) {
+shiftLabel = '<span class="text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">Capacitación</span>';
+} else {
+const t = sched.endTime ? `${sched.startTime} - ${sched.endTime}` : sched.startTime;
+shiftLabel = `<span class="text-[10px] font-bold text-app-brand dark:text-teal-400 bg-app-brand/10 dark:bg-teal-500/10 px-2 py-0.5 rounded">${escapeHtml(t)}</span>`;
+}
+} else {
+shiftLabel = '<span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 italic">Sin horario</span>';
+}
+const bottomRowHTML = isLibreDay && dayRecords.length === 0
+? ''
+: `<div class="grid grid-cols-4 gap-1.5 mt-1">${cellsHTML || '<div class="col-span-4 text-[10px] text-slate-400 dark:text-slate-500 italic text-center py-1">-- Sin registros --</div>'}</div>`;
+daysHTML += `<div class="flex flex-col py-3 border-b border-app-border/30 dark:border-darkapp-border/30 last:border-0"><div class="flex items-center justify-between ${bottomRowHTML ? 'mb-1.5' : ''}"><div class="flex items-center gap-2"><p class="text-[11px] font-bold text-app-title dark:text-darkapp-title w-16">${dayName}</p><p class="text-[10px] text-app-sub dark:text-darkapp-sub font-medium w-12">${targetDate.getDate()} ${targetDate.toLocaleDateString('es-MX', { month: 'short' })}</p>${shiftLabel}</div></div>${bottomRowHTML}</div>`;
+});
+container.innerHTML = daysHTML;
+if (window.lucide) lucide.createIcons();
+}
+// ============================================================================
+// CAPTURA DE FOTO (CÁMARA Y GALERÍA) + HEIC + COMPRESIÓN + OCR + GUARDADO
+// ============================================================================
+function isHeicOrHeifFile(file) {
+if (!file) return false;
+const type = (file.type || '').toLowerCase().split(';')[0].trim();
+const name = (file.name || '').toLowerCase();
+return (
+type === 'image/heic' ||
+type === 'image/heif' ||
+type === 'image/heic-sequence' ||
+type === 'image/heif-sequence' ||
+type === 'application/heic' ||
+type === 'application/heif' ||
+/\.(heic|heif)$/i.test(name)
+);
+}
+async function convertHeicIfNeeded(file, onProgressText) {
+if (!isHeicOrHeifFile(file)) return file;
 
-    <!-- BARRA DE ESTADO DE SINCRONIZACIÓN -->
-    <div id="syncBar" class="hidden mx-5 mb-2 rounded-xl border text-[11px] font-semibold overflow-hidden">
-        <div class="flex items-center justify-between p-2.5 gap-2">
-            <span id="syncIndicator" class="inline-flex items-center gap-1.5"></span>
-            <button type="button" id="btnSyncNow" onclick="processPendingQueue()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors cursor-pointer hidden">
-                Sincronizar ahora
-            </button>
-        </div>
-    </div>
+if (typeof window.heic2any !== 'function') {
+throw new Error('No se cargó el conversor HEIC. Comprueba tu conexión e inténtalo nuevamente.');
+}
+if (typeof onProgressText === 'function') {
+onProgressText('Convirtiendo imagen HEIC a JPEG...');
+}
 
-    <!-- MENÚ DE AJUSTES -->
-    <div id="settingsMenu" class="hidden fixed right-4 top-[72px] mt-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl min-w-[220px] shadow-xl border border-white/20 dark:border-slate-700/30 rounded-xl z-[45] py-2 flex flex-col fade-in">
-      <button type="button" onclick="openSwitchUserModal()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-app-title dark:text-darkapp-title hover:bg-app-bg/50 dark:hover:bg-slate-800/50 flex items-center gap-3 transition-colors">
-        <i data-lucide="user-plus" class="w-4 h-4 text-blue-500"></i> Registrar a otro usuario
-      </button>
-      <button type="button" onclick="logoutSession()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/20 flex items-center gap-3 transition-colors">
-        <i data-lucide="log-out" class="w-4 h-4"></i> Cerrar sesión
-      </button>
-      <div class="border-t border-app-border/50 dark:border-darkapp-border/50 my-1 mx-2"></div>
-      <button type="button" onclick="clearLocalStorage()" class="w-full px-4 py-3 text-left text-[13px] font-semibold text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-900/20 flex items-center gap-3 transition-colors">
-        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refrescar sesión local
-      </button>
-    </div>
+// Evita que un worker/conversor bloqueado deje el modal abierto indefinidamente.
+const conversionPromise = window.heic2any({
+blob: file,
+toType: 'image/jpeg',
+quality: 0.88
+});
+let timeoutId;
+const timeoutPromise = new Promise((resolve, reject) => {
+timeoutId = setTimeout(() => reject(new Error(
+'La conversión HEIC tardó demasiado. Intenta guardar la foto como JPG desde la galería del teléfono.'
+)), 60000);
+});
 
-    <!-- Banner "Registrando a otro usuario" -->
-    <div id="otherUserBanner" class="hidden bg-blue-500/10 border border-blue-500/20 mx-5 mb-2 p-3 rounded-xl flex items-center justify-between">
-      <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-sm font-semibold">
-        <i data-lucide="info" class="w-4 h-4"></i>
-        Registrando turno para: <span id="otherUserName" class="font-bold"></span>
-      </div>
-      <button type="button" onclick="returnToSessionUser()" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-bold text-xs bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg transition-colors">
-        Volver a mi perfil
-      </button>
-    </div>
+let converted;
+try {
+converted = await Promise.race([conversionPromise, timeoutPromise]);
+} finally {
+clearTimeout(timeoutId);
+}
 
-    <main class="px-5 flex-1 flex flex-col gap-5">
-      
-      <div class="pt-1 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div id="activeEmployeeAvatar"></div>
-          <div>
-            <h2 id="activeEmployeeName" class="font-bold text-base text-app-title dark:text-darkapp-title leading-tight">Cargando...</h2>
-            <div id="statusBadge" class="flex items-center gap-1.5 text-slate-500 font-semibold text-xs mt-1">
-              <i data-lucide="ban" class="w-3.5 h-3.5"></i> <span id="statusText">FUERA DE TURNO</span>
-            </div>
-          </div>
-        </div>
-        <div class="text-right">
-          <h2 class="text-2xl font-extrabold tracking-tight" id="currentTime">--:-- --</h2>
-          <p class="text-[11px] text-app-sub dark:text-darkapp-sub font-medium" id="currentDate">--</p>
-        </div>
-      </div>
+const resultBlob = Array.isArray(converted) ? converted[0] : converted;
+if (!(resultBlob instanceof Blob) || resultBlob.size === 0) {
+throw new Error('El conversor no devolvió una imagen válida. Intenta con otra fotografía.');
+}
 
-      <div class="bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl flex items-center justify-between">
-        <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400" id="assignedShiftText">Turno asignado: --</span>
-        <i data-lucide="clock" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
-      </div>
-
-      <div class="w-full h-px bg-app-border/50 dark:bg-darkapp-border/50"></div>
-
-      <div class="grid grid-cols-2 gap-y-4 pt-1">
-        <div>
-          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Checadas</label>
-          <p class="text-2xl font-black" id="statChecks">0/4</p>
-        </div>
-        <div>
-          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Entrada</label>
-          <p class="text-2xl font-black" id="statEntry">--:-- --</p>
-        </div>
-        <div>
-          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Comida</label>
-          <p class="text-2xl font-black" id="statLunch">—</p>
-        </div>
-        <div>
-          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Jornada</label>
-          <p class="text-2xl font-black" id="statShift">0 min</p>
-        </div>
-      </div>
-
-      <div class="mt-2">
-        <div class="flex items-center gap-2 mb-3">
-          <i data-lucide="calendar-check" class="w-5 h-5 text-app-brand dark:text-teal-400"></i>
-          <h3 class="font-bold text-[13px] uppercase tracking-wide">Registros de hoy</h3>
-        </div>
+const baseName = (file.name || 'imagen').replace(/\.(heic|heif)$/i, '') || 'imagen';
+return new File([resultBlob], `${baseName}.jpg`, {
+type: 'image/jpeg',
+lastModified: Date.now()
+});
+}
+function openInputForIndex(index, source) {
+const input = document.getElementById(source === 'gallery' ? 'galleryInput' : 'cameraInput');
+if (!input) {
+throw new Error('No se encontró el campo de selección de foto.');
+}
+currentCheckIndexToCapture = index;
+currentCaptureSource = source;
+input.value = '';
+input.click();
+}
+function triggerFileInput(index) {
+try {
+if (document.activeElement && typeof document.activeElement.blur === 'function') {
+document.activeElement.blur();
+}
+if (!viewingUserId) {
+alert('Selecciona un usuario antes de registrar una checada.');
+return;
+}
+const checkType = CHECK_TYPES[index];
+const existingRec = checkType ? todayRecords.find(r => r.type === checkType.id) : null;
+const currentSource = existingRec
+? getRecordSource(existingRec.employeeId, existingRec.date, existingRec.type)
+: null;
+if (existingRec && currentSource === 'gallery') {
+replacingRecordContext = {
+recordId: existingRec.id,
+isPending: !!existingRec.isPending,
+type: existingRec.type,
+date: existingRec.date,
+employeeId: existingRec.employeeId
+};
+showCustomConfirm({
+title: 'Reemplazar imagen',
+message: 'Se reemplazará la imagen ya registrada. Desea continuar?',
+confirmText: 'Registrar',
+cancelText: 'Cancelar',
+confirmColor: 'red',
+cancelColor: 'green',
+icon: 'camera'
+}).then((confirmed) => {
+if (confirmed) {
+openInputForIndex(index, 'camera');
+} else {
+replacingRecordContext = null;
+}
+});
+return;
+}
+replacingRecordContext = null;
+openInputForIndex(index, 'camera');
+} catch (err) {
+console.error('Error al abrir la cámara/selector:', err);
+alert('No se pudo abrir la cámara o selector de foto: ' + (err?.message || err));
+}
+}
+function handleGalleryButtonClick(index) {
+try {
+if (document.activeElement && typeof document.activeElement.blur === 'function') {
+document.activeElement.blur();
+}
+if (!viewingUserId) {
+alert('Selecciona un usuario antes de registrar una checada.');
+return;
+}
+const checkType = CHECK_TYPES[index];
+const existingRec = checkType ? todayRecords.find(r => r.type === checkType.id) : null;
+if (existingRec) {
+replacingRecordContext = {
+recordId: existingRec.id,
+isPending: !!existingRec.isPending,
+type: existingRec.type,
+date: existingRec.date,
+employeeId: existingRec.employeeId
+};
+showCustomConfirm({
+title: 'Reemplazar imagen',
+message: 'Se reemplazará la imagen ya registrada. Desea continuar?',
+confirmText: 'Elegir imagen',
+cancelText: 'Cancelar',
+confirmColor: 'red',
+cancelColor: 'green',
+icon: 'image-plus'
+}).then((confirmed) => {
+if (confirmed) {
+openInputForIndex(index, 'gallery');
+} else {
+replacingRecordContext = null;
+}
+});
+return;
+}
+replacingRecordContext = null;
+openInputForIndex(index, 'gallery');
+} catch (err) {
+console.error('Error al abrir la galería:', err);
+alert('No se pudo abrir la galería: ' + (err?.message || err));
+}
+}
+async function resizeImage(file, maxWidth = 1280, source = 'camera') {
+const compressLib = window.imageCompression || window.browserImageCompression;
+const targetMaxSizeMB = source === 'gallery' ? 0.35 : 0.45;
+const targetMaxDim = source === 'gallery' ? 1280 : maxWidth;
+const quality = source === 'gallery' ? 0.8 : 0.82;
+if (typeof compressLib === 'function') {
+try {
+const compressedFile = await compressLib(file, {
+maxSizeMB: targetMaxSizeMB,
+maxWidthOrHeight: targetMaxDim,
+useWebWorker: false,
+fileType: 'image/jpeg',
+initialQuality: quality
+});
+if (compressedFile) {
+return compressedFile;
+}
+} catch (libErr) {
+console.warn('[Compress] Fallback a canvas por error en librería de compresión:', libErr);
+}
+}
+try {
+const bitmap = await createImageBitmap(file);
+const canvas = document.createElement('canvas');
+let width = bitmap.width;
+let height = bitmap.height;
+if (width > height && width > targetMaxDim) {
+height *= targetMaxDim / width;
+width = targetMaxDim;
+} else if (height > targetMaxDim) {
+width *= targetMaxDim / height;
+height = targetMaxDim;
+}
+canvas.width = Math.round(width);
+canvas.height = Math.round(height);
+const ctx = canvas.getContext('2d');
+ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+return await new Promise((resolve, reject) => {
+canvas.toBlob((blob) => {
+if (blob) resolve(blob);
+else reject(new Error('No se pudo convertir la imagen a Blob'));
+}, 'image/jpeg', quality);
+});
+} catch (err) {
+return new Promise((resolve, reject) => {
+const reader = new FileReader();
+reader.onload = (e) => {
+const img = new Image();
+img.onload = () => {
+const canvas = document.createElement('canvas');
+let width = img.width;
+let height = img.height;
+if (width > height && width > targetMaxDim) {
+height *= targetMaxDim / width;
+width = targetMaxDim;
+} else if (height > targetMaxDim) {
+width *= targetMaxDim / height;
+height = targetMaxDim;
+}
+canvas.width = Math.round(width);
+canvas.height = Math.round(height);
+const ctx = canvas.getContext('2d');
+ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+canvas.toBlob((blob) => {
+if (blob) resolve(blob);
+else reject(new Error('No se pudo convertir la imagen al respaldo'));
+}, 'image/jpeg', quality);
+};
+img.onerror = () => reject(new Error('El navegador no pudo interpretar el formato de la imagen.'));
+img.src = e.target.result;
+};
+reader.onerror = () => reject(new Error('Error al leer el archivo de imagen'));
+reader.readAsDataURL(file);
+});
+}
+}
+document.getElementById('cameraInput').addEventListener('change', function(e) {
+handleSelectedFile(e.target.files[0], 'camera');
+this.value = '';
+});
+document.getElementById('galleryInput').addEventListener('change', function(e) {
+handleSelectedFile(e.target.files[0], 'gallery');
+this.value = '';
+});
+function blobToDataUrl(blob) {
+return new Promise((resolve, reject) => {
+const reader = new FileReader();
+reader.onload = (e) => resolve(e.target.result);
+reader.onerror = () => reject(new Error('No se pudo convertir el Blob a DataURL'));
+reader.readAsDataURL(blob);
+});
+}
+async function handleSelectedFile(file, source = 'camera') {
+if (!file) {
+replacingRecordContext = null;
+return;
+}
+const loader = document.getElementById('ocrLoader');
+const loaderText = document.getElementById('loaderText');
+loaderText.textContent = 'Preparando imagen...';
+loader.classList.remove('hidden');
+let detectedName = null;
+let detectedDate = null;
+let worker = null;
+let imageBlob = null;
+try {
+const preparedFile = await convertHeicIfNeeded(file, (msg) => {
+loaderText.textContent = msg;
+});
+loaderText.textContent = source === 'gallery'
+? "Comprimiendo imagen con alta calidad..."
+: "Comprimiendo imagen...";
+imageBlob = await resizeImage(preparedFile, 1280, source);
+if (navigator.onLine && typeof Tesseract !== 'undefined') {
+    loaderText.textContent = "Analizando con OCR...";
+    try {
+        const base64Data = await blobToDataUrl(imageBlob);
         
-        <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mb-5 overflow-hidden">
-          <div id="progressBar" class="h-full bg-app-brand dark:bg-teal-500 w-0 transition-all duration-500 ease-out"></div>
-        </div>
-
-        <div class="flex flex-col gap-1" id="checksList"></div>
-        
-        <p class="text-[11px] text-app-sub dark:text-darkapp-sub mt-5 text-center">Las fotos se almacenan de forma segura en la Nube.</p>
-
-        <div class="w-full h-px bg-app-border/50 dark:bg-darkapp-border/50 my-6"></div>
-
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <i data-lucide="calendar-days" class="w-5 h-5 text-app-brand dark:text-teal-400"></i>
-              <h3 class="font-bold text-[13px] uppercase tracking-wide">Registros de la Semana</h3>
-            </div>
-            <button type="button" onclick="downloadEmployeeScheduleImage()" class="p-2 text-app-brand dark:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 rounded-xl transition-colors cursor-pointer" title="Descargar horarios de la semana">
-              <i data-lucide="calendar-arrow-down" class="w-5 h-5"></i>  
-            </button>
-          </div>
- 
-          <div class="flex items-center justify-between bg-app-card dark:bg-darkapp-card rounded-xl p-2 shadow-sm">
-            <button type="button" id="btnPrevWeek" onclick="changeWeek(-1)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors">
-              <i data-lucide="chevron-left" class="w-5 h-5"></i>
-            </button>
-            <div class="flex flex-col items-center">
-              <span id="weekLabel" class="font-bold text-sm text-app-title dark:text-darkapp-title">Semana Actual</span>
-              <span id="weekRange" class="text-[11px] text-app-sub dark:text-darkapp-sub font-medium">--/-- al --/--</span>
-            </div>
-            <button type="button" id="btnNextWeek" onclick="changeWeek(1)" class="p-2 text-slate-300 dark:text-slate-600 rounded-lg cursor-not-allowed" disabled>
-              <i data-lucide="chevron-right" class="w-5 h-5"></i>
-            </button>
-          </div>
-
-          <div class="flex items-center justify-center gap-4 text-[11px] font-semibold text-app-sub dark:text-darkapp-sub bg-app-card dark:bg-darkapp-card py-2 rounded-xl shadow-sm">
-            <div class="flex items-center gap-1.5"><i data-lucide="clock-check" class="w-4 h-4 text-emerald-500"></i> A tiempo</div>
-            <div class="flex items-center gap-1.5"><i data-lucide="clock-fading" class="w-4 h-4 text-orange-400"></i> Retardo</div>
-            <div class="flex items-center gap-1.5"><i data-lucide="clock-exclamation-point" class="w-4 h-4 text-rose-500"></i> Sin Registro</div>
-          </div>
-
-          <div id="weeklyScheduleContainer" class="bg-app-card dark:bg-darkapp-card rounded-xl shadow-sm px-4 py-2"></div>
-        </div>
-      </div>
-
-    </main>
-  </div>
-
-  <!-- Contenedor Oculto para Generar y Descargar la Imagen de Horarios del Empleado -->
-  <div id="exportScheduleContainer" class="fixed -top-[9999px] left-0 w-[400px] bg-white text-slate-900 p-8 rounded-3xl shadow-2xl font-sans z-[-999]" style="box-sizing: border-box;">
-    <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
-      <div>
-        <h2 id="exportModalTitle" class="text-2xl font-extrabold text-slate-900 tracking-tight">Horarios</h2>
-        <p id="exportModalRange" class="text-sm font-semibold text-teal-700 mt-1">--/-- al --/--</p>
-      </div>
-      <div class="text-right">
-        <p id="exportModalEmployeeName" class="text-s font-bold text-slate-800">Nombre del Miniser</p>
-        <p class="text-xs text-slate-500 font-medium">Gran Plaza Mérida</p>
-      </div>
-    </div>
-    <div id="exportModalScheduleList" class="flex flex-col gap-3">
-      <!-- Inyectado dinámicamente -->
-    </div>
-  </div>
-
-  <input type="file" id="cameraInput" accept="image/*" capture="environment" class="opacity-0 pointer-events-none fixed -top-96 w-px h-px">
-
-  <!-- MODAL: Registrar a otro usuario (Glassmorphism) -->
-  <div id="modalSwitchUser" onclick="if(event.target === this) closeAll()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/55 backdrop-blur-md fade-in hidden">
-    <div class="bg-white/75 dark:bg-slate-900/75 backdrop-blur-2xl w-full max-w-sm rounded-3xl p-6 shadow-2xl slide-up border border-white/30 dark:border-slate-700/40">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-lg font-bold text-app-title dark:text-darkapp-title">Seleccionar Miniser</h3>
-        <button type="button" onclick="closeAll()" class="text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <p class="text-xs text-app-sub dark:text-darkapp-sub mb-4">Selecciona al Miniser para registrar su checada.</p>
-      <div id="switchUserList" class="max-h-60 overflow-y-auto flex flex-col gap-2"></div>
-    </div>
-  </div>
-
-  <!-- MODAL: Resultado OCR / Registro -->
-  <div id="modalOCRResult" class="fixed inset-0 z-[70] flex flex-col items-center justify-center p-4 hidden bg-slate-950/80 backdrop-blur-md">
-    <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl w-full max-w-sm rounded-3xl p-5 shadow-2xl slide-up relative border border-white/20 dark:border-slate-700/30">
-      <button type="button" onclick="closeAll()" class="absolute top-4 right-4 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title"><i data-lucide="x" class="w-6 h-6"></i></button>
-      
-      <h3 class="text-lg font-bold text-app-title dark:text-darkapp-title mb-1 text-center">Registro Exitoso</h3>
-      <p id="resStatus" class="text-[12px] text-app-sub dark:text-darkapp-sub text-center mb-4">Datos procesados</p>
-      
-      <img id="ocrPreviewImage" src="" alt="Vista previa de checada" class="w-full h-48 object-contain bg-slate-100 dark:bg-slate-800 rounded-xl mb-4 border border-transparent">
-      
-      <div class="bg-slate-50/50 dark:bg-slate-800/50 rounded-xl p-4 mb-4 space-y-3">
-        <div class="flex items-start gap-3">
-          <i data-lucide="user" class="w-4 h-4 text-app-brand dark:text-teal-400 mt-0.5"></i>
-          <div>
-            <p class="text-[10px] font-bold text-app-sub dark:text-darkapp-sub uppercase">Nombre</p>
-            <p id="resName" class="text-sm font-semibold text-app-title dark:text-darkapp-title">--</p>
-          </div>
-        </div>
-        <div class="flex items-start gap-3">
-          <i data-lucide="calendar" class="w-4 h-4 text-app-brand dark:text-teal-400 mt-0.5"></i>
-          <div>
-            <p class="text-[10px] font-bold text-app-sub dark:text-darkapp-sub uppercase">Fecha y Hora de Registro</p>
-            <p id="resDate" class="text-sm font-semibold text-app-title dark:text-darkapp-title">--</p>
-          </div>
-        </div>
-      </div>
-      
-      <button type="button" onclick="closeAll()" class="w-full bg-transparent text-app-brand dark:text-teal-400 font-bold py-3.5 rounded-xl text-sm hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors">
-        Entendido
-      </button>
-    </div>
-  </div>
-
-  <!-- MODAL: Visor de Foto -->
-  <div id="modalPhoto" class="fixed inset-0 z-[60] flex flex-col items-center justify-center p-4 hidden bg-slate-950/90 backdrop-blur-md">
-    <div class="relative w-full max-w-md max-h-[90vh] flex flex-col">
-      <div class="sticky top-0 z-20 flex justify-end pb-2">
-        <button type="button" onclick="closeAll()" class="bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-full backdrop-blur-md shadow-lg transition-colors border border-white/20">
-          <i data-lucide="x" class="w-6 h-6"></i>
-        </button>
-      </div>
-      <div class="overflow-y-auto flex-1 flex flex-col items-center pr-1">
-        <img id="photoViewer" src="" onerror="this.alt='Imagen no disponible sin conexión'; this.classList.add('opacity-40');" class="w-full rounded-2xl shadow-2xl mb-4 object-contain bg-slate-900">
-        <div id="ocrResultData" class="text-white text-center bg-slate-800/80 p-4 rounded-xl hidden w-full mb-4 backdrop-blur-md">
-          <p class="text-sm font-bold text-emerald-400 mb-2">Datos Detectados en la Foto</p>
-          <p id="ocrNameText" class="text-sm">Nombre: --</p>
-          <p id="ocrDateText" class="text-sm">Fecha: --</p>
-        </div>
-        <div id="pendingNotice" class="hidden text-white text-center bg-amber-500/20 p-3 rounded-xl w-full mb-4 backdrop-blur-md border border-amber-500/40">
-          <p class="text-xs font-semibold text-amber-200">Registro pendiente de subir</p>
-          <p class="text-[11px] text-amber-100/80 mt-1">Se sincronizará automáticamente al recuperar la conexión</p>
-        </div>
-        <button type="button" id="deleteRecordBtn" onclick="deleteCurrentRecord()" class="w-full bg-transparent text-rose-500 hover:bg-rose-500/10 font-bold py-3 rounded-xl text-sm transition-colors mb-4">
-          Borrar Registro
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: Confirmación Unificada (Glassmorphism) -->
-  <div id="customConfirmModal" class="fixed inset-0 z-[10005] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm hidden">
-    <div class="bg-white/80 dark:bg-slate-900/85 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5 slide-up">
-      <div id="customConfirmIconContainer" class="text-rose-500 flex justify-center mx-auto">
-        <i data-lucide="alert-triangle" id="customConfirmIcon" class="w-8 h-8"></i>
-      </div>
-      <div class="space-y-1.5">
-        <h3 id="customConfirmTitle" class="text-base font-bold text-app-title dark:text-darkapp-title">Confirmar acción</h3>
-        <p id="customConfirmText" class="text-xs font-medium text-app-sub dark:text-darkapp-sub leading-relaxed whitespace-pre-line">
-          ¿Deseas continuar?
-        </p>
-      </div>
-      <div class="flex justify-center items-center gap-2 w-full pt-1">
-        <button type="button" id="customConfirmCancelBtn" onclick="closeCustomConfirm(false)" class="py-2.5 px-4 bg-transparent text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer flex-1">
-          Cancelar
-        </button>
-        <button type="button" id="customConfirmAcceptBtn" onclick="closeCustomConfirm(true)" class="py-2.5 px-4 bg-transparent text-rose-500 dark:text-rose-400 hover:bg-rose-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer flex-1">
-          Confirmar
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: Alerta / Aviso (Glassmorphism) -->
-  <div id="customAlertModal" class="fixed inset-0 z-[10010] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm hidden">
-    <div class="bg-white/80 dark:bg-slate-900/85 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center space-y-5 slide-up">
-      <div id="customAlertIconContainer" class="text-rose-500 flex justify-center mx-auto">
-        <i data-lucide="alert-circle" id="customAlertIcon" class="w-8 h-8"></i>
-      </div>
-      <p id="customAlertText" class="text-xs font-semibold text-app-title dark:text-darkapp-title leading-relaxed whitespace-pre-line">
-        Mensaje
-      </p>
-      <div class="flex justify-center pt-1">
-        <button type="button" onclick="closeCustomAlert()" class="w-full py-2.5 px-4 bg-transparent text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer">
-          Aceptar
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // ============================================================================
-    // SEGURIDAD Y SERVICE WORKER
-    // ============================================================================
-    function escapeHtml(str) {
-        if (str == null) return '';
-        return String(str).replace(/[&<>"']/g, c => ({
-            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-        }[c]));
-    }
-
-    function initServiceWorker() {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('../sw.js')
-                .then((registration) => console.log('[PWA] SW OK en Checador:', registration.scope))
-                .catch((error) => console.error('[PWA] SW error:', error));
-        }
-    }
-
-    // ============================================================================
-    // SUPABASE (NO BLOQUEANTE EN MODO OFFLINE)
-    // ============================================================================
-    const SUPABASE_URL = "https://mifbcyxtafeacwkzqzsq.supabase.co";  
-    const SUPABASE_ANON_KEY = "sb_publishable_O6EAbkSba1NQPq08k_7bHg_PZ_x4ZU5";  
-
-    const supabaseClient = (window.supabase && typeof window.supabase.createClient === 'function')
-        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-        : null;
-
-    if (supabaseClient?.auth) {
-        supabaseClient.auth.onAuthStateChange((event) => {
-            if (event === 'SIGNED_OUT' && navigator.onLine) {
-                window.location.replace('../index.html');
-            }
-        });
-    }
-
-    // ============================================================================
-    // INDEXEDDB — COLA OFFLINE Y CACHÉ DE LECTURA (CON RESPALDO LOCALSTORAGE)
-    // ============================================================================
-    const DB_NAME = 'ChecadorOfflineDB';
-    const DB_VERSION = 2;
-    const STORE_PENDING = 'registros_pendientes';
-    const STORE_CACHE = 'cache_lectura';
-    const CACHE_PREFIX = 'checador_cache_v1_';
-
-    function openOfflineDB() {
-        return new Promise((resolve, reject) => {
-            const req = indexedDB.open(DB_NAME, DB_VERSION);
-            req.onerror = () => reject(req.error);
-            req.onsuccess = () => resolve(req.result);
-            req.onupgradeneeded = (e) => {
-                const db = e.target.result;
-                if (!db.objectStoreNames.contains(STORE_PENDING)) {
-                    db.createObjectStore(STORE_PENDING, { keyPath: 'localId' });
-                }
-                if (!db.objectStoreNames.contains(STORE_CACHE)) {
-                    db.createObjectStore(STORE_CACHE, { keyPath: 'key' });
-                }
-            };
-        });
-    }
-
-    async function dbPut(storeName, item) {
-        const db = await openOfflineDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction(storeName, 'readwrite');
-            const req = tx.objectStore(storeName).put(item);
-            req.onsuccess = () => resolve(req.result);
-            req.onerror = () => reject(req.error);
-        });
-    }
-
-    async function dbGetAll(storeName) {
-        const db = await openOfflineDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction(storeName, 'readonly');
-            const req = tx.objectStore(storeName).getAll();
-            req.onsuccess = () => resolve(req.result || []);
-            req.onerror = () => reject(req.error);
-        });
-    }
-
-    async function dbDelete(storeName, key) {
-        const db = await openOfflineDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction(storeName, 'readwrite');
-            const req = tx.objectStore(storeName).delete(key);
-            req.onsuccess = () => resolve();
-            req.onerror = () => reject(req.error);
-        });
-    }
-
-    async function setReadCache(key, value) {
-        try {
-            await dbPut(STORE_CACHE, { key, value, updatedAt: Date.now() });
-        } catch (e) {
-            console.warn('[Cache Checador] Error guardando en IndexedDB:', key, e);
-        }
-
-        try {
-            localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(value));
-        } catch (e) {
-            console.warn('[Cache Checador] Error guardando en localStorage:', key, e);
-        }
-    }
-
-    async function getReadCache(key) {
-        try {
-            const db = await openOfflineDB();
-            const idbVal = await new Promise((resolve, reject) => {
-                const tx = db.transaction(STORE_CACHE, 'readonly');
-                const req = tx.objectStore(STORE_CACHE).get(key);
-                req.onsuccess = () => resolve(req.result ? req.result.value : null);
-                req.onerror = () => reject(req.error);
-            });
-            if (idbVal != null) return idbVal;
-        } catch (e) {
-            console.warn('[Cache Checador] Error leyendo IndexedDB:', key, e);
-        }
-
-        try {
-            const raw = localStorage.getItem(CACHE_PREFIX + key);
-            if (raw) return JSON.parse(raw);
-        } catch (e) {
-            console.warn('[Cache Checador] Error leyendo localStorage:', key, e);
-        }
-
-        return null;
-    }
-
-    // ============================================================================
-    // TEMA
-    // ============================================================================
-    const btnThemeToggle = document.getElementById('btn-theme-toggle');
-    const htmlElement = document.documentElement;
-    
-    function setTheme(isDark) {
-        const themeMeta = document.querySelector('meta[name="theme-color"]');
-        if (isDark) {
-            htmlElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-            if (themeMeta) themeMeta.setAttribute('content', '#0F172A');
-        } else {
-            htmlElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-            if (themeMeta) themeMeta.setAttribute('content', '#F8F9FA');
-        }
-    }
-
-    setTheme(localStorage.getItem('theme') !== 'light');
-    btnThemeToggle.addEventListener('click', () => {
-        setTheme(!htmlElement.classList.contains('dark'));
-    });
-
-    // ============================================================================
-    // ESTADO GLOBAL
-    // ============================================================================
-    let employees = [];
-    let sessionUserId = null; 
-    let viewingUserId = null; 
-    let todayRecords = [];
-    let weekRecords = [];
-    let pendingRecords = [];
-    let currentWeekOffset = 0; 
-    let currentCheckIndexToCapture = -1;
-    let currentViewingRecordId = null; 
-    let currentViewingIsPending = false;
-    let activePopupTrigger = null;
-    let isSyncing = false;
-    let pendingBlobUrls = {};
-    let ocrPreviewBlobUrl = null;
-    let realtimeInitialized = false;
-
-    const CHECK_TYPES = [
-      { id: 'entry', label: 'Ingreso', icon: 'check', color: 'text-emerald-500' },
-      { id: 'lunch_out', label: 'Salida a comer', icon: 'utensils', color: 'text-emerald-500' },
-      { id: 'lunch_in', label: 'Regreso de comer', icon: 'coffee', color: 'text-emerald-500' },
-      { id: 'exit', label: 'Fin de turno', icon: 'log-out', color: 'text-emerald-500' }
-    ];
-    const DAYS_OF_WEEK = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-    const NON_WORK_SHIFTS = ['LIBRE', 'VACACIONES', 'CAPAC'];
-
-    // ============================================================================
-    // HELPERS DE BLOB URLs Y AVATAR
-    // ============================================================================
-    function getBlobUrlForPending(p) {
-        if (pendingBlobUrls[p.localId]) return pendingBlobUrls[p.localId];
-        const url = URL.createObjectURL(p.photoBlob);
-        pendingBlobUrls[p.localId] = url;
-        return url;
-    }
-
-    function cleanupOrphanBlobUrls() {
-        const currentIds = new Set(pendingRecords.map(p => p.localId));
-        for (const id in pendingBlobUrls) {
-            if (!currentIds.has(id)) {
-                URL.revokeObjectURL(pendingBlobUrls[id]);
-                delete pendingBlobUrls[id];
-            }
-        }
-    }
-
-    function buildAvatarHTML(user, sizeClass = 'w-11 h-11', textClass = 'text-sm') {
-        const initial = escapeHtml((user?.name || '?').charAt(0));
-        const fallback = `<div class="${sizeClass} rounded-full bg-app-brand text-white flex items-center justify-center font-bold ${textClass} uppercase shrink-0 shadow-sm">${initial}</div>`;
-        if (!user || !user.photoUrl) return fallback;
-        return `<img src="${escapeHtml(user.photoUrl)}" onerror="this.replaceWith(Object.assign(document.createElement('div'), {className:'${sizeClass} rounded-full bg-app-brand text-white flex items-center justify-center font-bold ${textClass} uppercase shrink-0 shadow-sm', textContent:'${initial}'}));" class="${sizeClass} rounded-full object-cover shrink-0 shadow-sm">`;
-    }
-
-    // ============================================================================
-    // INICIALIZACIÓN
-    // ============================================================================
-    document.addEventListener('DOMContentLoaded', async () => {
-      document.documentElement.style.visibility = 'visible';
-      initServiceWorker();
-      if (window.lucide) lucide.createIcons();
-      updateClock();
-      setInterval(updateClock, 1000);
-      setInterval(updateShiftTime, 60000);
-
-      document.addEventListener('click', (e) => {
-        if (!e.target.closest('.record-chip-clickable')) {
-          hideRecordPopup();
-        }
-      });
-      const mainScrollContainer = document.querySelector('.main-content');
-      if (mainScrollContainer) {
-        mainScrollContainer.addEventListener('scroll', hideRecordPopup, { passive: true });
-      }
-
-      window.addEventListener('online', handleOnlineEvent);
-      window.addEventListener('offline', handleOfflineEvent);
-
-      if (navigator.onLine && supabaseClient?.auth) {
-        try {
-          const { data: { session } } = await supabaseClient.auth.getSession();
-          if (!session) {
-            window.location.replace('../index.html');
-            return;
-          }
-        } catch (e) {
-          console.warn('[Auth] Error verificando sesión:', e);
-        }
-      }
-
-      try {
-        pendingRecords = await dbGetAll(STORE_PENDING);
-        cleanupOrphanBlobUrls();
-        updateSyncStatusUI();
-
-        await loadSession();
-        iniciarRealtime();
-
-        if (navigator.onLine && pendingRecords.length > 0) {
-          setTimeout(() => processPendingQueue(), 500);
-        }
-
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible' && navigator.onLine && pendingRecords.length > 0) {
-            processPendingQueue();
-          }
-        });
-      } catch (error) {
-        console.error("Error al iniciar la app:", error);
-        document.getElementById('activeEmployeeName').textContent = "Error local";
-      }
-    });
-
-    // ============================================================================
-    // HANDLERS ONLINE / OFFLINE
-    // ============================================================================
-    async function handleOnlineEvent() {
-        updateSyncStatusUI();
-        iniciarRealtime();
-        await loadSession();
-        setTimeout(() => processPendingQueue(), 600);
-    }
-
-    function handleOfflineEvent() {
-        updateSyncStatusUI();
-        if (viewingUserId) {
-            loadTodayRecords();
-            loadWeeklySchedule();
-        }
-    }
-
-    // ============================================================================
-    // SINCRONIZACIÓN DE COLA
-    // ============================================================================
-    async function processPendingQueue() {
-        if (isSyncing) return;
-        if (!navigator.onLine || !supabaseClient) {
-            updateSyncStatusUI();
-            return;
-        }
-
-        const pending = await dbGetAll(STORE_PENDING);
-        if (pending.length === 0) {
-            updateSyncStatusUI();
-            return;
-        }
-
-        isSyncing = true;
-        updateSyncStatusUI();
-
-        let successCount = 0;
-
-        for (const item of pending) {
-            try {
-                if (employees.length > 0 && !employees.find(e => e.id === item.employeeId)) {
-                    await dbDelete(STORE_PENDING, item.localId);
-                    continue;
-                }
-
-                const fileName = `${item.employeeId}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.jpg`;
-                const { error: uploadError } = await supabaseClient.storage
-                    .from('registros-empleados')
-                    .upload(fileName, item.photoBlob, { contentType: 'image/jpeg', upsert: false });
-
-                if (uploadError) throw new Error(`Storage: ${uploadError.message}`);
-
-                const { data: publicUrlData } = supabaseClient.storage
-                    .from('registros-empleados')
-                    .getPublicUrl(fileName);
-
-                const { error: insertError } = await supabaseClient
-                    .from('registros')
-                    .insert([{
-                        employee_id: item.employeeId,
-                        tipo: item.type,
-                        timestamp: item.timestamp,
-                        fecha: item.date,
-                        foto_url: publicUrlData.publicUrl,
-                        ocr_nombre: item.ocrName || null,
-                        ocr_fecha: item.ocrDate || null
-                    }]);
-
-                if (insertError) throw new Error(`DB insert: ${insertError.message}`);
-
-                await dbDelete(STORE_PENDING, item.localId);
-                successCount++;
-
-            } catch (err) {
-                console.error('[Sync] Error sincronizando pendiente:', item.localId, err);
-                item.lastError = err?.message || String(err);
-                await dbPut(STORE_PENDING, item);
-            }
-        }
-
-        isSyncing = false;
-        await refreshPendingRecords();
-
-        if (successCount > 0) {
-            await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
-        }
-    }
-
-    async function refreshPendingRecords() {
-        pendingRecords = await dbGetAll(STORE_PENDING);
-        cleanupOrphanBlobUrls();
-        updateSyncStatusUI();
-    }
-
-    // ============================================================================
-    // INDICADOR DE SINCRONIZACIÓN
-    // ============================================================================
-    function updateSyncStatusUI() {
-        const syncBar = document.getElementById('syncBar');
-        const indicator = document.getElementById('syncIndicator');
-        const btnSync = document.getElementById('btnSyncNow');
-
-        if (!syncBar || !indicator) return;
-
-        const pendingCount = pendingRecords.length;
-        const online = navigator.onLine;
-
-        if (!online) {
-            syncBar.classList.remove('hidden');
-            syncBar.className = 'mx-5 mb-2 rounded-xl border text-[11px] font-semibold overflow-hidden bg-amber-500/10 border-amber-500/20';
-            indicator.className = 'inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400';
-            indicator.innerHTML = pendingCount > 0
-                ? `<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Sin conexión · ${pendingCount} pendiente${pendingCount > 1 ? 's' : ''}`
-                : `<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Sin conexión · Modo local`;
-            btnSync.classList.add('hidden');
-        } else if (isSyncing) {
-            syncBar.classList.remove('hidden');
-            syncBar.className = 'mx-5 mb-2 rounded-xl border text-[11px] font-semibold overflow-hidden bg-blue-500/10 border-blue-500/20';
-            indicator.className = 'inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400';
-            indicator.innerHTML = `<i data-lucide="refresh-cw" class="w-3.5 h-3.5 animate-spin"></i> Sincronizando registros...`;
-            btnSync.classList.add('hidden');
-        } else if (pendingCount > 0) {
-            syncBar.classList.remove('hidden');
-            syncBar.className = 'mx-5 mb-2 rounded-xl border text-[11px] font-semibold overflow-hidden bg-amber-500/10 border-amber-500/20';
-            indicator.className = 'inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400';
-            indicator.innerHTML = `<i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i> ${pendingCount} registro${pendingCount > 1 ? 's' : ''} por subir`;
-            btnSync.classList.remove('hidden');
-        } else {
-            syncBar.classList.add('hidden');
-            btnSync.classList.add('hidden');
-        }
-
-        if (window.lucide) lucide.createIcons({ root: syncBar });
-    }
-
-    // ============================================================================
-    // POPUP HORA EXACTA
-    // ============================================================================
-    function showRecordPopup(event, label, exactTime) {
-      event.stopPropagation();
-      const target = event.currentTarget;
-      const popup = document.getElementById('recordExactPopup');
-
-      if (activePopupTrigger === target && !popup.classList.contains('hidden')) {
-        hideRecordPopup();
-        return;
-      }
-
-      activePopupTrigger = target;
-      document.getElementById('popupRecordLabel').textContent = label;
-      document.getElementById('popupRecordTime').textContent = exactTime;
-
-      popup.classList.remove('hidden');
-
-      const rect = target.getBoundingClientRect();
-      const popupRect = popup.getBoundingClientRect();
-
-      let top = rect.top - popupRect.height - 8;
-      let left = rect.left + (rect.width / 2) - (popupRect.width / 2);
-
-      const padding = 10;
-      if (left < padding) left = padding;
-      if (left + popupRect.width > window.innerWidth - padding) {
-        left = window.innerWidth - popupRect.width - padding;
-      }
-      if (top < padding) {
-        top = rect.bottom + 8;
-      }
-
-      popup.style.top = `${top}px`;
-      popup.style.left = `${left}px`;
-    }
-
-    function hideRecordPopup() {
-      const popup = document.getElementById('recordExactPopup');
-      if (popup) popup.classList.add('hidden');
-      activePopupTrigger = null;
-    }
-
-    function updateClock() {
-      const now = new Date();
-      document.getElementById('currentTime').textContent = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
-      const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-      const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-      document.getElementById('currentDate').textContent = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}`;
-    }
-
-    // ============================================================================
-    // EMPLEADOS (CON CACHÉ OFFLINE + RESPALDO LOCALSTORAGE)
-    // ============================================================================
-    async function fetchEmployeesFromSupabase() {
-      if (navigator.onLine && supabaseClient) {
-        try {
-          const { data, error } = await supabaseClient
-            .from('empleados')
-            .select('id, nombre, numero_empleado, foto_url, turnos')
-            .order('nombre', { ascending: true });
-          
-          if (!error && Array.isArray(data)) {
-            const mapped = data.map(emp => ({
-              id: emp.id,
-              name: emp.nombre,
-              number: String(emp.numero_empleado).trim(),
-              photoUrl: emp.foto_url || '',
-              turnos: emp.turnos || {}
-            }));
-            await setReadCache('empleados', mapped);
-            return mapped;
-          }
-          console.warn("No se pudo conectar a la Nube:", error?.message);
-        } catch (err) {
-          console.warn("Error de red al consultar Minisers:", err);
-        }
-      }
-
-      const cached = await getReadCache('empleados');
-      return Array.isArray(cached) ? cached : [];
-    }
-
-    async function precacheUserSchedules() {
-      if (!viewingUserId) return;
-      await loadTodayRecords();
-      await loadWeeklySchedule();
-      if (navigator.onLine && currentWeekOffset === 0) {
-        currentWeekOffset = -1;
-        await loadWeeklySchedule();
-        currentWeekOffset = 0;
-        await loadWeeklySchedule();
-      }
-    }
-
-    async function loadSession() {
-      employees = await fetchEmployeesFromSupabase();
-
-      if (employees.length === 0) {
-        document.getElementById('activeEmployeeName').textContent = navigator.onLine ? "Sin Minisers" : "Sin conexión";
-        document.getElementById('assignedShiftText').textContent = navigator.onLine ? "Turno asignado: --" : "Turno asignado: Sin caché de Minisers";
-        renderRecordsUI();
-        renderWeeklySchedule();
-        return;
-      }
-
-      const savedSession = localStorage.getItem('sessionUserId');
-      
-      if (savedSession && employees.some(e => e.id == savedSession)) {
-        sessionUserId = Number(savedSession);
-        viewingUserId = sessionUserId;
-        updateUIForUser();
-        await precacheUserSchedules();
-      } else {
-        openInitialUserModal();
-      }
-    }
-
-    function openInitialUserModal() {
-      const list = document.getElementById('initialUserList');
-      list.innerHTML = '';
-
-      if (employees.length === 0) {
-        list.innerHTML = '<p class="text-center text-xs text-app-sub dark:text-darkapp-sub py-6">No hay Minisers disponibles.</p>';
-      } else {
-        employees.forEach(emp => {
-          list.innerHTML += `
-            <div class="p-3 bg-app-bg/50 dark:bg-slate-800/50 rounded-2xl cursor-pointer hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-all flex items-center justify-between" onclick="selectInitialUser(${emp.id})">
-              <div class="flex items-center gap-3.5">
-                ${buildAvatarHTML(emp, 'w-12 h-12', 'text-sm')}
-                <div class="flex flex-col">
-                  <span class="font-bold text-sm text-app-title dark:text-darkapp-title">${escapeHtml(emp.name)}</span>
-                  <span class="text-[11px] text-app-sub dark:text-darkapp-sub">#: ${escapeHtml(emp.number || 'N/A')}</span>
-                </div>
-              </div>
-              <i data-lucide="chevron-right" class="w-4 h-4 text-app-sub dark:text-darkapp-sub"></i>
-            </div>
-          `;
-        });
-      }
-      if (window.lucide) lucide.createIcons();
-      document.getElementById('modalInitialUser').classList.remove('hidden');
-    }
-
-    async function selectInitialUser(id) {
-      sessionUserId = id;
-      viewingUserId = id;
-      localStorage.setItem('sessionUserId', sessionUserId);
-      if (Array.isArray(employees) && employees.length > 0) {
-        await setReadCache('empleados', employees);
-      }
-      document.getElementById('modalInitialUser').classList.add('hidden');
-      updateUIForUser();
-      await precacheUserSchedules();
-    }
-
-    async function logoutSession() {
-      closeAll();
-      localStorage.removeItem('sessionUserId');
-      sessionUserId = null;
-      viewingUserId = null;
-      openInitialUserModal();
-    }
-
-    function updateUIForUser() {
-      const user = employees.find(e => e.id === viewingUserId);
-      const nameEl = document.getElementById('activeEmployeeName');
-      const avatarEl = document.getElementById('activeEmployeeAvatar');
-      
-      if (user) {
-        avatarEl.innerHTML = buildAvatarHTML(user, 'w-11 h-11', 'text-sm');
-        nameEl.textContent = user.name;
-      } else {
-        avatarEl.innerHTML = '';
-        nameEl.textContent = 'Desconocido';
-      }
-      
-      const banner = document.getElementById('otherUserBanner');
-      if (viewingUserId !== sessionUserId && user) {
-        banner.classList.remove('hidden');
-        document.getElementById('otherUserName').textContent = user.name;
-      } else {
-        banner.classList.add('hidden');
-      }
-
-      updateAssignedShiftDisplay(user);
-    }
-
-    function updateAssignedShiftDisplay(user) {
-      const shiftEl = document.getElementById('assignedShiftText');
-      if (!user || !user.turnos) {
-        shiftEl.textContent = 'Turno asignado: No disponible';
-        return;
-      }
-
-      const now = new Date();
-      const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-      const sched = user.turnos[dateStr];
-
-      if (sched && sched.startTime) {
-        const st = String(sched.startTime).toUpperCase();
-        if (st === 'LIBRE') {
-          shiftEl.textContent = 'Turno asignado: Descanso';
-        } else if (st === 'VACACIONES') {
-          shiftEl.textContent = 'Turno asignado: Vacaciones';
-        } else if (st.startsWith('CAPAC')) {
-          shiftEl.textContent = 'Turno asignado: Capacitación';
-        } else {
-          const timeText = sched.endTime ? `${sched.startTime} - ${sched.endTime}` : sched.startTime;
-          shiftEl.textContent = `Turno asignado: ${timeText}`;
-        }
-      } else {
-        shiftEl.textContent = 'Turno asignado: Sin horario programado';
-      }
-    }
-
-    async function returnToSessionUser() {
-      viewingUserId = sessionUserId;
-      updateUIForUser();
-      await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
-    }
-
-    // ============================================================================
-    // REGISTROS DEL DÍA (CON CACHÉ OFFLINE)
-    // ============================================================================
-    async function loadTodayRecords() {
-      if (!viewingUserId) {
-        todayRecords = [];
-        renderRecordsUI();
-        return;
-      }
-
-      const now = new Date();
-      const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-      const cacheKey = `today_${viewingUserId}_${todayStr}`;
-
-      pendingRecords = await dbGetAll(STORE_PENDING);
-      cleanupOrphanBlobUrls();
-
-      let serverRecords = [];
-      if (navigator.onLine && supabaseClient) {
-        try {
-          const { data, error } = await supabaseClient
-            .from('registros')
-            .select('*')
-            .eq('employee_id', viewingUserId)
-            .eq('fecha', todayStr)
-            .order('timestamp', { ascending: true });
-
-          if (!error && Array.isArray(data)) {
-            serverRecords = data.map(r => ({
-              id: r.id,
-              employeeId: r.employee_id,
-              type: r.tipo,
-              timestamp: r.timestamp,
-              date: r.fecha,
-              photo: r.foto_url,
-              ocrName: r.ocr_nombre,
-              ocrDate: r.ocr_fecha,
-              isPending: false
-            }));
-            await setReadCache(cacheKey, serverRecords);
-          } else {
-            serverRecords = (await getReadCache(cacheKey)) || [];
-          }
-        } catch (err) {
-          console.error("Excepción al consultar registros del día:", err);
-          serverRecords = (await getReadCache(cacheKey)) || [];
-        }
-      } else {
-        serverRecords = (await getReadCache(cacheKey)) || [];
-      }
-
-      const pendingToday = pendingRecords
-        .filter(p => p.date === todayStr && p.employeeId === viewingUserId)
-        .map(p => ({
-          id: p.localId,
-          employeeId: p.employeeId,
-          type: p.type,
-          timestamp: p.timestamp,
-          date: p.date,
-          photo: getBlobUrlForPending(p),
-          ocrName: p.ocrName,
-          ocrDate: p.ocrDate,
-          isPending: true
-        }));
-
-      todayRecords = [...serverRecords, ...pendingToday]
-        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
-      renderRecordsUI();
-    }
-
-    let customConfirmResolver = null;
-
-    function showCustomConfirm({
-      title = 'Confirmar acción',
-      message = '¿Deseas continuar?',
-      confirmText = 'Confirmar',
-      cancelText = 'Cancelar',
-      confirmColor = 'red',
-      cancelColor = 'green',
-      icon = 'alert-triangle'
-    } = {}) {
-      return new Promise((resolve) => {
-        customConfirmResolver = resolve;
-
-        const modal = document.getElementById('customConfirmModal');
-        const titleEl = document.getElementById('customConfirmTitle');
-        const textEl = document.getElementById('customConfirmText');
-        const iconContainer = document.getElementById('customConfirmIconContainer');
-        const iconEl = document.getElementById('customConfirmIcon');
-        const cancelBtn = document.getElementById('customConfirmCancelBtn');
-        const acceptBtn = document.getElementById('customConfirmAcceptBtn');
-
-        titleEl.textContent = title;
-        textEl.textContent = message;
-        cancelBtn.textContent = cancelText;
-        acceptBtn.textContent = confirmText;
-
-        const colorClasses = {
-          red: 'py-2.5 px-4 bg-transparent text-rose-500 dark:text-rose-400 hover:bg-rose-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer flex-1',
-          green: 'py-2.5 px-4 bg-transparent text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-xl font-bold text-xs transition-all cursor-pointer flex-1'
-        };
-
-        acceptBtn.className = colorClasses[confirmColor] || colorClasses.red;
-        cancelBtn.className = colorClasses[cancelColor] || colorClasses.green;
-
-        iconContainer.className = (confirmColor === 'green' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500') + ' flex justify-center mx-auto';
-        iconEl.setAttribute('data-lucide', icon);
-
-        modal.classList.remove('hidden');
-        if (window.lucide) lucide.createIcons({ root: modal });
-      });
-    }
-
-    function closeCustomConfirm(result) {
-      const modal = document.getElementById('customConfirmModal');
-      modal.classList.add('hidden');
-      if (customConfirmResolver) {
-        const resolve = customConfirmResolver;
-        customConfirmResolver = null;
-        resolve(result);
-      }
-    }
-
-    function showCustomAlert(message, type = 'error') {
-      const modal = document.getElementById('customAlertModal');
-      const textEl = document.getElementById('customAlertText');
-      const iconContainer = document.getElementById('customAlertIconContainer');
-      const iconEl = document.getElementById('customAlertIcon');
-
-      textEl.textContent = message;
-      if (type === 'success') {
-        iconContainer.className = 'text-emerald-600 dark:text-emerald-400 flex justify-center mx-auto';
-        iconEl.setAttribute('data-lucide', 'check-circle-2');
-      } else {
-        iconContainer.className = 'text-rose-500 flex justify-center mx-auto';
-        iconEl.setAttribute('data-lucide', 'alert-circle');
-      }
-
-      modal.classList.remove('hidden');
-      if (window.lucide) lucide.createIcons({ root: modal });
-    }
-
-    function closeCustomAlert() {
-      document.getElementById('customAlertModal').classList.add('hidden');
-    }
-
-    async function deleteCurrentRecord() {
-      if (!currentViewingRecordId) return;
-
-      if (currentViewingIsPending) {
-        const confirmed = await showCustomConfirm({
-          title: 'Descartar registro pendiente',
-          message: '¿Deseas descartar este registro pendiente? No se subirá a la nube.',
-          confirmText: 'Descartar',
-          cancelText: 'Cancelar',
-          confirmColor: 'red',
-          cancelColor: 'green',
-          icon: 'trash-2'
-        });
-        if (confirmed) {
-          await dbDelete(STORE_PENDING, currentViewingRecordId);
-          currentViewingIsPending = false;
-          currentViewingRecordId = null;
-          closeAll();
-          await refreshPendingRecords();
-          await loadTodayRecords();
-          await loadWeeklySchedule();
-        }
-      } else {
-        if (!navigator.onLine || !supabaseClient) {
-          showCustomAlert('Sin conexión. No se puede eliminar el registro hasta recuperar la conexión.');
-          return;
-        }
-        const confirmed = await showCustomConfirm({
-          title: 'Eliminar registro',
-          message: '¿Deseas eliminar este registro de la nube?',
-          confirmText: 'Eliminar',
-          cancelText: 'Cancelar',
-          confirmColor: 'red',
-          cancelColor: 'green',
-          icon: 'trash-2'
-        });
-        if (confirmed) {
-          const { error } = await supabaseClient
-            .from('registros')
-            .delete()
-            .eq('id', currentViewingRecordId);
-
-          if (error) {
-            showCustomAlert('No se pudo eliminar el registro: ' + error.message);
-          } else {
-            currentViewingRecordId = null;
-            closeAll();
-            await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
-          }
-        }
-      }
-    }
-
-    function renderRecordsUI() {
-      const list = document.getElementById('checksList');
-      list.innerHTML = '';
-      
-      document.getElementById('statChecks').textContent = `${todayRecords.length}/4`;
-      document.getElementById('progressBar').style.width = `${(todayRecords.length / 4) * 100}%`;
-
-      const entry = todayRecords.find(r => r.type === 'entry');
-      document.getElementById('statEntry').textContent = entry ? formatTime(entry.timestamp) : '--:-- --';
-
-      const lOut = todayRecords.find(r => r.type === 'lunch_out');
-      const lIn = todayRecords.find(r => r.type === 'lunch_in');
-      
-      if (lOut && lIn) {
-        const diffMins = Math.round((new Date(lIn.timestamp) - new Date(lOut.timestamp)) / 60000);
-        if (diffMins < 60) {
-          document.getElementById('statLunch').textContent = `${diffMins} min`;
-        } else {
-          const hours = Math.floor(diffMins / 60);
-          const mins = diffMins % 60;
-          document.getElementById('statLunch').textContent = `${hours}h ${mins}min`;
-        }
-      } else if (lOut) {
-        document.getElementById('statLunch').textContent = 'En curso';
-      } else {
-        document.getElementById('statLunch').textContent = '—';
-      }
-
-      updateShiftTime();
-      updateStatusBadge();
-
-      CHECK_TYPES.forEach((type, index) => {
-        const record = todayRecords.find(r => r.type === type.id);
-        const canRegister = !record && Boolean(viewingUserId);
-        const isPending = record && record.isPending;
-
-        let leftIcon;
-        if (record && isPending) {
-          leftIcon = `<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-amber-500 bg-transparent"><i data-lucide="cloud-upload" class="w-6 h-6"></i></div>`;
-        } else if (record) {
-          leftIcon = `<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-emerald-500 bg-transparent"><i data-lucide="check-circle" class="w-6 h-6"></i></div>`;
-        } else {
-          leftIcon = `<div class="w-10 h-10 rounded-full ${canRegister ? 'bg-app-brand/10 text-app-brand dark:bg-teal-500/20 dark:text-teal-400' : 'text-app-sub dark:text-darkapp-sub bg-app-bg/50 dark:bg-slate-800/50'} flex items-center justify-center shrink-0 font-bold text-sm">${index + 1}</div>`;
-        }
-
-        let imgSrc = record && record.photo ? escapeHtml(record.photo) : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
-
-        let rightAction;
-        if (record) {
-          rightAction = `<div class="relative flex items-center gap-2">
-               <img src="${imgSrc}" onerror="this.classList.add('opacity-40');" onclick="viewPhoto('${escapeHtml(String(record.id))}', '${escapeHtml(record.photo)}', ${isPending})" class="w-12 h-12 rounded-xl object-cover cursor-pointer border ${isPending ? 'border-amber-400 dark:border-amber-500' : 'border-transparent'} shadow-sm bg-slate-100 dark:bg-slate-800">
-               ${isPending ? `<span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center shadow-md pending-pulse"><i data-lucide="arrow-up" class="w-2.5 h-2.5 text-white"></i></span>` : ''}
-             </div>`;
-        } else if (canRegister) {
-          rightAction = `<button type="button" onclick="this.blur(); triggerFileInput(${index})" onpointerup="this.blur()" ontouchend="this.blur()" class="text-app-brand dark:text-teal-400 active:bg-transparent focus:bg-transparent md:hover:bg-app-brand/10 dark:md:hover:bg-teal-500/10 px-3 py-2 rounded-xl font-bold text-[12px] flex items-center gap-1.5 transition-colors"><i data-lucide="camera" class="w-4 h-4"></i> Registrar</button>`;
-        } else {
-          rightAction = '';
-        }
-
-        const subtitle = record 
-          ? (isPending 
-              ? `${formatTime(record.timestamp)} · <span class="text-amber-600 dark:text-amber-400 font-semibold">Pendiente de subir</span>`
-              : formatTime(record.timestamp))
-          : (canRegister ? ' ' : 'Pendiente');
-
-        list.innerHTML += `
-          <div class="flex items-center gap-4 py-3 border-b border-app-border/30 dark:border-darkapp-border/30 last:border-0">
-            ${leftIcon}
-            <div class="flex-1">
-              <h4 class="font-bold text-[15px] ${canRegister ? 'text-app-brand dark:text-teal-400' : 'text-app-title dark:text-darkapp-title'}">${type.label}</h4>
-              <p class="text-[12px] text-app-sub dark:text-darkapp-sub mt-0.5">${subtitle}</p>
-            </div>
-            ${rightAction}
-          </div>
-        `;
-      });
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function updateStatusBadge() {
-      const badge = document.getElementById('statusBadge');
-      const hasEntry = todayRecords.some(r => r.type === 'entry');
-      const hasLunchOut = todayRecords.some(r => r.type === 'lunch_out');
-      const hasLunchIn = todayRecords.some(r => r.type === 'lunch_in');
-      const hasExit = todayRecords.some(r => r.type === 'exit');
-
-      let text = 'FUERA DE TURNO';
-      let icon = 'ban';
-      let colorClass = 'text-slate-500 dark:text-slate-400';
-
-      if (hasExit) {
-        text = 'FUERA DE TURNO';
-        icon = 'ban';
-        colorClass = 'text-slate-500 dark:text-slate-400';
-      } else if (hasLunchOut && !hasLunchIn) {
-        text = 'EN COMIDA';
-        icon = 'utensils';
-        colorClass = 'text-teal-600 dark:text-teal-400';
-      } else if (hasEntry || (hasLunchOut && hasLunchIn)) {
-        text = 'EN TURNO';
-        icon = 'check-circle';
-        colorClass = 'text-app-brand dark:text-teal-400';
-      }
-
-      badge.className = `flex items-center gap-1.5 font-semibold text-xs mt-1 ${colorClass}`;
-      badge.innerHTML = `<i data-lucide="${icon}" class="w-3.5 h-3.5"></i> <span>${text}</span>`;
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function updateShiftTime() {
-      const entry = todayRecords.find(r => r.type === 'entry');
-      const exit = todayRecords.find(r => r.type === 'exit');
-      if (entry) {
-        const diffMins = Math.round(((exit ? new Date(exit.timestamp) : new Date()) - new Date(entry.timestamp)) / 60000);
-        document.getElementById('statShift').textContent = diffMins < 60 ? `${diffMins} min` : `${Math.floor(diffMins/60)}h ${diffMins%60}m`;
-      } else {
-        document.getElementById('statShift').textContent = '0 min';
-      }
-    }
-
-    // ============================================================================
-    // SEMANA Y DESCARGA DE HORARIO EN IMAGEN
-    // ============================================================================
-    function getWeekData(offset) {
-      const now = new Date();
-      const day = now.getDay() || 7; 
-      const monday = new Date(now);
-      monday.setDate(now.getDate() - day + 1 + (offset * 7));
-      monday.setHours(0, 0, 0, 0);
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
-      sunday.setHours(23, 59, 59, 999);
-      return { monday, sunday };
-    }
-
-    function timeToSeconds(timeStr) {
-      if (!timeStr || NON_WORK_SHIFTS.includes(String(timeStr).toUpperCase())) return null;
-      const parts = String(timeStr).split(':').map(Number);
-      if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
-      return parts[0] * 3600 + parts[1] * 60 + (parts[2] || 0);
-    }
-
-    function formatTime24To12Short(time24) {
-      if (!time24) return '';
-      const parts = String(time24).trim().split(':');
-      if (parts.length < 2) return String(time24).trim();
-      const h = parseInt(parts[0], 10);
-      const m = parseInt(parts[1], 10);
-      if (isNaN(h) || isNaN(m)) return String(time24).trim();
-
-      const suffix = h >= 12 ? 'PM' : 'AM';
-      const hour12 = h % 12 === 0 ? 12 : h % 12;
-      const minPart = m === 0 ? '' : `:${String(m).padStart(2, '0')}`;
-      return `${hour12}${minPart} ${suffix}`;
-    }
-
-    function formatShiftForDownloadCell(sched) {
-      if (!sched || !sched.startTime) {
-        return { text: 'Sin horario', badgeClass: 'text-slate-400 italic' };
-      }
-      const upper = String(sched.startTime).trim().toUpperCase();
-      if (upper === 'LIBRE') {
-        return { text: 'Descanso', badgeClass: 'text-slate-600 font-semibold' };
-      }
-      if (upper === 'VACACIONES' || upper === 'VAC') {
-        return { text: 'Vacaciones', badgeClass: 'text-purple-600 font-bold' };
-      }
-      if (upper.startsWith('CAPAC')) {
-        return { text: 'Capacitación', badgeClass: 'text-amber-600 font-bold' };
-      }
-
-      const start12 = formatTime24To12Short(sched.startTime);
-      const end12 = sched.endTime ? formatTime24To12Short(sched.endTime) : '';
-      const formatted = end12 ? `${start12} - ${end12}` : start12;
-      return { text: formatted, badgeClass: 'bg-teal-500/10 text-teal-700 font-bold px-3 py-1.5 rounded-md text-sm' };
-    }
-
-    async function downloadEmployeeScheduleImage() {
-      const targetUserId = viewingUserId || sessionUserId;
-      const emp = employees.find(e => e.id === targetUserId);
-      if (!emp || typeof html2canvas === 'undefined') return;
-
-      const { monday, sunday } = getWeekData(currentWeekOffset);
-      const rangeOptions = { day: 'numeric', month: 'short' };
-      
-      const monDayNum = monday.getDate();
-      const monMonthShort = monday.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
-      const sunDayNum = sunday.getDate();
-      const sunMonthShort = sunday.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
-      const filenameStr = `Horarios ${monDayNum}${monMonthShort}-${sunDayNum}${sunMonthShort}`;
-
-      document.getElementById('exportModalTitle').textContent = 'Horarios';
-      document.getElementById('exportModalRange').textContent = `${monday.toLocaleDateString('es-MX', rangeOptions)} al ${sunday.toLocaleDateString('es-MX', rangeOptions)}`;
-      document.getElementById('exportModalEmployeeName').textContent = emp.name;
-
-      const empTurnos = emp.turnos || {};
-      let exportDaysHTML = '';
-
-      DAYS_OF_WEEK.forEach((dayName, index) => {
-        const targetDate = new Date(monday);
-        targetDate.setDate(monday.getDate() + index);
-        const dateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth()+1).padStart(2,'0')}-${String(targetDate.getDate()).padStart(2,'0')}`;
-        
-        const sched = empTurnos[dateStr];
-        const shiftInfo = formatShiftForDownloadCell(sched);
-        const monthShort = targetDate.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
-
-        exportDaysHTML += `
-          <div class="grid grid-cols-12 items-center py-4 px-5 bg-slate-50/80 rounded-2xl border border-slate-200 mb-3">
-            <div class="col-span-4 flex items-center">
-              <span class="text-base font-bold text-slate-900">${dayName}</span>              
-            </div>
-            <div class="col-span-3 flex items-center">
-              <span class="text-sm font-medium text-slate-500">${targetDate.getDate()} ${monthShort}.</span>
-            </div>            
-            <div class="col-span-5 flex items-center justify-end">
-              <span class="${shiftInfo.badgeClass} inline-block">${escapeHtml(shiftInfo.text)}</span>
-            </div>
-          </div>
-        `;
-      });
-
-      const exportContainer = document.getElementById('exportScheduleContainer');
-      document.getElementById('exportModalScheduleList').innerHTML = exportDaysHTML;
-
-      try {
-        const canvas = await html2canvas(exportContainer, {
-          scale: 3,
-          useCORS: true,
-          backgroundColor: '#ffffff'
-        });
-
-        const imageURL = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = imageURL;
-        link.download = `${filenameStr}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } catch (err) {
-        console.error('Error al generar la imagen de horarios:', err);
-        alert('No se pudo generar la imagen de los horarios.');
-      }
-    }
-
-    async function changeWeek(dir) {
-      hideRecordPopup();
-      const newOffset = currentWeekOffset + dir;
-      if (newOffset >= -1 && newOffset <= 0) {
-        currentWeekOffset = newOffset;
-        await loadWeeklySchedule();
-      }
-    }
-
-    async function loadWeeklySchedule() {
-      const targetUserId = viewingUserId || sessionUserId;
-      if (!targetUserId) {
-        weekRecords = [];
-        renderWeeklySchedule();
-        return;
-      }
-
-      const { monday, sunday } = getWeekData(currentWeekOffset);
-      const startStr = `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
-      const endStr = `${sunday.getFullYear()}-${String(sunday.getMonth()+1).padStart(2,'0')}-${String(sunday.getDate()).padStart(2,'0')}`;
-      const cacheKey = `week_${targetUserId}_${startStr}_${endStr}`;
-
-      pendingRecords = await dbGetAll(STORE_PENDING);
-      cleanupOrphanBlobUrls();
-
-      let serverRecords = [];
-      if (navigator.onLine && supabaseClient) {
-        try {
-          const { data, error } = await supabaseClient
-            .from('registros')
-            .select('*')
-            .eq('employee_id', targetUserId)
-            .gte('fecha', startStr)
-            .lte('fecha', endStr)
-            .order('timestamp', { ascending: true });
-
-          if (!error && Array.isArray(data)) {
-            serverRecords = data.map(r => ({
-              id: r.id,
-              employeeId: r.employee_id,
-              type: r.tipo,
-              timestamp: r.timestamp,
-              date: r.fecha,
-              isPending: false
-            }));
-            await setReadCache(cacheKey, serverRecords);
-          } else {
-            serverRecords = (await getReadCache(cacheKey)) || [];
-          }
-        } catch (err) {
-          console.error("Excepción al consultar registros semanales:", err);
-          serverRecords = (await getReadCache(cacheKey)) || [];
-        }
-      } else {
-        serverRecords = (await getReadCache(cacheKey)) || [];
-      }
-
-      const pendingInRange = pendingRecords
-        .filter(p => p.employeeId === targetUserId && p.date >= startStr && p.date <= endStr)
-        .map(p => ({
-          id: p.localId,
-          employeeId: p.employeeId,
-          type: p.type,
-          timestamp: p.timestamp,
-          date: p.date,
-          isPending: true
-        }));
-
-      weekRecords = [...serverRecords, ...pendingInRange]
-        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
-      renderWeeklySchedule();
-    }
-
-    function renderWeeklySchedule() {
-      const targetUserId = viewingUserId || sessionUserId;
-      const emp = employees.find(e => e.id === targetUserId);
-      const container = document.getElementById('weeklyScheduleContainer');
-      if (!container) return;
-
-      const { monday, sunday } = getWeekData(currentWeekOffset);
-      const options = { day: 'numeric', month: 'short' };
-      document.getElementById('weekRange').textContent = `${monday.toLocaleDateString('es-MX', options)} al ${sunday.toLocaleDateString('es-MX', options)}`;
-      
-      const btnPrev = document.getElementById('btnPrevWeek');
-      const btnNext = document.getElementById('btnNextWeek');
-
-      if (currentWeekOffset === 0) {
-        document.getElementById('weekLabel').textContent = 'Semana Actual';
-        btnPrev.className = 'p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer';
-        btnPrev.disabled = false;
-        btnNext.className = 'p-2 text-slate-300 dark:text-slate-600 rounded-lg cursor-not-allowed';
-        btnNext.disabled = true;
-      } else if (currentWeekOffset === -1) {
-        document.getElementById('weekLabel').textContent = 'Semana Anterior';
-        btnPrev.className = 'p-2 text-slate-300 dark:text-slate-600 rounded-lg cursor-not-allowed';
-        btnPrev.disabled = true;
-        btnNext.className = 'p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg hover:bg-app-bg/50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer';
-        btnNext.disabled = false;
-      }
-
-      if (!emp) {
-        container.innerHTML = '<p class="text-center text-xs text-app-sub dark:text-darkapp-sub py-4">Sin horarios disponibles sin conexión.</p>';
-        return;
-      }
-
-      const empTurnos = emp.turnos || {};
-      let daysHTML = '';
-
-      const now = new Date();
-      const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-      DAYS_OF_WEEK.forEach((dayName, index) => {
-        const targetDate = new Date(monday);
-        targetDate.setDate(monday.getDate() + index);
-        const targetMidnight = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
-        const dateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth()+1).padStart(2,'0')}-${String(targetDate.getDate()).padStart(2,'0')}`;
-        
-        const isFutureDay = targetMidnight > todayMidnight;
-        const isPastDay = targetMidnight < todayMidnight;
-
-        const sched = empTurnos[dateStr];
-        const dayRecords = weekRecords.filter(r => r.date === dateStr).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-        
-        const upperShift = sched && sched.startTime ? String(sched.startTime).toUpperCase() : '';
-        const isLibreDay = upperShift === 'LIBRE';
-        const isNonWorkDay = upperShift !== '' && NON_WORK_SHIFTS.includes(upperShift);
-        const lunchOutRec = dayRecords.find(r => r.type === 'lunch_out');
-
-        const greenClass = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
-        const orangeClass = 'bg-orange-500/10 text-orange-600 dark:text-orange-400';
-        const redClass = 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
-        const neutralClass = 'bg-app-bg/50 dark:bg-slate-800/50 text-app-sub dark:text-darkapp-sub';
-
-        let cellsHTML = '';
-
-        if (!isFutureDay && !(isLibreDay && dayRecords.length === 0)) {
-          cellsHTML = CHECK_TYPES.map((type) => {
-            const rec = dayRecords.find(r => r.type === type.id);
-            let bgClass = neutralClass;
-            let displayTime = '--:--';
-            let title = `Sin registro: ${type.label}`;
-
-            if (rec) {
-              const actualDate = new Date(rec.timestamp);
-              displayTime = actualDate.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
-              const exactTimeStr = actualDate.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-              const actualSecs = actualDate.getHours() * 3600 + actualDate.getMinutes() * 60 + actualDate.getSeconds();
-
-              if (type.id === 'entry') {
-                if (sched && sched.startTime) {
-                  const startSecs = timeToSeconds(sched.startTime);
-                  if (startSecs !== null) {
-                    if (actualSecs > startSecs + 600) {
-                      bgClass = orangeClass;
-                      title = `Retardo (Turno: ${sched.startTime})`;
-                    } else {
-                      bgClass = greenClass;
-                      title = `A tiempo (Turno: ${sched.startTime})`;
-                    }
-                  } else {
-                    bgClass = greenClass;
-                    title = type.label;
-                  }
-                } else {
-                  bgClass = greenClass;
-                  title = type.label;
-                }
-              } else if (type.id === 'lunch_out') {
-                bgClass = greenClass;
-                title = type.label;
-              } else if (type.id === 'lunch_in') {
-                if (lunchOutRec) {
-                  const lunchOutTimeMs = new Date(lunchOutRec.timestamp).getTime();
-                  const lunchInTimeMs = actualDate.getTime();
-                  const diffSecs = Math.floor((lunchInTimeMs - lunchOutTimeMs) / 1000);
-                  if (diffSecs >= 3601) {
-                    bgClass = orangeClass;
-                    title = 'Regreso de comida con retardo (+1h)';
-                  } else {
-                    bgClass = greenClass;
-                    title = 'Regreso de comida a tiempo';
-                  }
-                } else {
-                  bgClass = greenClass;
-                  title = type.label;
-                }
-              } else if (type.id === 'exit') {
-                if (sched && sched.endTime) {
-                  const endSecs = timeToSeconds(sched.endTime);
-                  const startSecs = timeToSeconds(sched.startTime);
-                  if (endSecs !== null) {
-                    let effectiveEndSecs = endSecs;
-                    if (startSecs !== null && endSecs < startSecs) {
-                      effectiveEndSecs += 86400;
-                    }
-                    let effectiveActualSecs = actualSecs;
-                    if (startSecs !== null && endSecs < startSecs && actualSecs < startSecs) {
-                      effectiveActualSecs += 86400;
-                    }
-
-                    if (effectiveActualSecs < effectiveEndSecs - 600) {
-                      bgClass = orangeClass;
-                      title = `Salida anticipada (Salida programada: ${sched.endTime})`;
-                    } else {
-                      bgClass = greenClass;
-                      title = `Salida a tiempo (Salida programada: ${sched.endTime})`;
-                    }
-                  } else {
-                    bgClass = greenClass;
-                    title = type.label;
-                  }
-                } else {
-                  bgClass = greenClass;
-                  title = type.label;
-                }
-              }
-
-              const pendingMark = rec.isPending 
-                ? ` <i data-lucide="cloud-upload" class="w-2.5 h-2.5 inline text-amber-500"></i>` 
-                : '';
-
-              return `<button type="button" onclick="showRecordPopup(event, '${escapeHtml(type.label)}', '${escapeHtml(exactTimeStr)}')" class="record-chip-clickable ${bgClass} ${rec.isPending ? 'ring-1 ring-amber-400 dark:ring-amber-500' : ''} px-1.5 py-1 rounded-md text-[10px] font-bold text-center transition-all active:scale-95 cursor-pointer" title="${title}">${displayTime}${pendingMark}</button>`;
-            } else {
-              if (isPastDay && !isNonWorkDay) {
-                bgClass = redClass;
-              } 
-
-              return `<div class="${bgClass} px-1.5 py-1 rounded-md text-[10px] font-bold text-center transition-colors" title="${title}">${displayTime}</div>`;
-            }
-          }).join('');
-        }
-
-        let shiftLabel = '';
-        if (sched && sched.startTime) {
-          const st = String(sched.startTime).toUpperCase();
-          if (st === 'LIBRE') {
-            shiftLabel = '<span class="text-[10px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">Descanso</span>';
-          } else if (st === 'VACACIONES') {
-            shiftLabel = '<span class="text-[10px] font-semibold text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">Vacaciones</span>';
-          } else if (st.startsWith('CAPAC')) {
-            shiftLabel = '<span class="text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">Capacitación</span>';
-          } else {
-            const t = sched.endTime ? `${sched.startTime} - ${sched.endTime}` : sched.startTime;
-            shiftLabel = `<span class="text-[10px] font-bold text-app-brand dark:text-teal-400 bg-app-brand/10 dark:bg-teal-500/10 px-2 py-0.5 rounded">${escapeHtml(t)}</span>`;
-          }
-        } else {
-          shiftLabel = '<span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 italic">Sin horario</span>';
-        }
-
-        const bottomRowHTML = isLibreDay && dayRecords.length === 0
-          ? ''
-          : `<div class="grid grid-cols-4 gap-1.5 mt-1">
-               ${cellsHTML || '<div class="col-span-4 text-[10px] text-slate-400 dark:text-slate-500 italic text-center py-1">-- Sin registros --</div>'}
-             </div>`;
-
-        daysHTML += `
-          <div class="flex flex-col py-3 border-b border-app-border/30 dark:border-darkapp-border/30 last:border-0">
-            <div class="flex items-center justify-between ${bottomRowHTML ? 'mb-1.5' : ''}">
-              <div class="flex items-center gap-2">
-                <p class="text-[11px] font-bold text-app-title dark:text-darkapp-title w-16">${dayName}</p>
-                <p class="text-[10px] text-app-sub dark:text-darkapp-sub font-medium w-12">${targetDate.getDate()} ${targetDate.toLocaleDateString('es-MX', { month: 'short' })}</p>
-                ${shiftLabel}
-              </div>
-            </div>
-            ${bottomRowHTML}
-          </div>
-        `;
-      });
-
-      container.innerHTML = daysHTML;
-      if (window.lucide) lucide.createIcons();
-    }
-
-    // ============================================================================
-    // CAPTURA DE FOTO + OCR + GUARDADO
-    // ============================================================================
-    function triggerFileInput(index) {
-      try {
-        if (document.activeElement && typeof document.activeElement.blur === 'function') {
-          document.activeElement.blur();
-        }
-        if (!viewingUserId) {
-          alert('Selecciona un usuario antes de registrar una checada.');
-          return;
-        }
-        const input = document.getElementById('cameraInput');
-        if (!input) {
-          throw new Error('No se encontró el campo de selección de foto.');
-        }
-        currentCheckIndexToCapture = index;
-        input.value = '';
-        input.click();
-      } catch (err) {
-        console.error('Error al abrir la cámara/selector:', err);
-        alert('No se pudo abrir la cámara o selector de foto: ' + (err?.message || err));
-      }
-    }
-
-    async function resizeImage(file, maxWidth = 1200) {
-      try {
-        const bitmap = await createImageBitmap(file);
-        const canvas = document.createElement('canvas');
-        let width = bitmap.width;
-        let height = bitmap.height;
-
-        if (width > height && width > maxWidth) {
-          height *= maxWidth / width;
-          width = maxWidth;
-        } else if (height > maxWidth) {
-          width *= maxWidth / height;
-          height = maxWidth;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(bitmap, 0, 0, width, height);
-
-        return await new Promise((resolve, reject) => {
-          canvas.toBlob((blob) => {
-            if (blob) resolve(blob);
-            else reject(new Error('No se pudo convertir la imagen a Blob'));
-          }, 'image/jpeg', 0.82);
-        });
-      } catch (err) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-              const canvas = document.createElement('canvas');
-              let width = img.width;
-              let height = img.height;
-
-              if (width > height && width > maxWidth) {
-                height *= maxWidth / width;
-                width = maxWidth;
-              } else if (height > maxWidth) {
-                width *= maxWidth / height;
-                height = maxWidth;
-              }
-
-              canvas.width = width;
-              canvas.height = height;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0, width, height);
-              
-              canvas.toBlob((blob) => {
-                if (blob) resolve(blob);
-                else reject(new Error('No se pudo convertir la imagen al respaldo'));
-              }, 'image/jpeg', 0.82);
-            };
-            img.onerror = () => reject(new Error('El navegador no pudo interpretar el formato de la imagen.'));
-            img.src = e.target.result;
-          };
-          reader.onerror = () => reject(new Error('Error al leer el archivo de imagen'));
-          reader.readAsDataURL(file);
-        });
-      }
-    }
-
-    document.getElementById('cameraInput').addEventListener('change', function(e) { 
-      handleSelectedFile(e.target.files[0]); 
-      this.value = ''; 
-    });
-
-    function blobToDataUrl(blob) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.onerror = () => reject(new Error('No se pudo convertir el Blob a DataURL'));
-        reader.readAsDataURL(blob);
-      });
-    }
-
-    async function handleSelectedFile(file) {
-      if (!file) return;
-
-      const loader = document.getElementById('ocrLoader');
-      const loaderText = document.getElementById('loaderText');
-      loader.classList.remove('hidden');
-      
-      let detectedName = null;
-      let detectedDate = null;
-      let worker = null;
-      let imageBlob = null;
-
-      try {
-        loaderText.textContent = "Comprimiendo imagen...";
-        imageBlob = await resizeImage(file);
-
-        if (navigator.onLine && typeof Tesseract !== 'undefined') {
-          loaderText.textContent = "Analizando con OCR...";
-          try {
-            const base64Data = await blobToDataUrl(imageBlob);
-
+        // Envolvemos la inicialización y lectura en una promesa con timeout
+        const ocrPromise = (async () => {
             worker = await Tesseract.createWorker('spa');
-            const ret = await worker.recognize(base64Data);
-            const extractedText = ret.data.text;
+            return await worker.recognize(base64Data);
+        })();
 
-            const nameMatch = extractedText.match(/(\d+)-([A-Za-z\sáéíóúÁÉÍÓÚñÑ]+)/i);
-            if (nameMatch) detectedName = nameMatch[2].trim(); 
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Tiempo de espera OCR agotado')), 15000)
+        );
 
-            const dateMatch = extractedText.match(/(\d{2}\/\d{2}\/\d{4})\s(\d{2}:\d{2}:\d{2})/);
-            if (dateMatch) detectedDate = dateMatch[0];
-          } catch (ocrError) {
-            console.warn("OCR no pudo interpretar el texto:", ocrError);
-          } finally {
-            if (worker) await worker.terminate();
-          }
+        const ret = await Promise.race([ocrPromise, timeoutPromise]);
+        
+        const extractedText = ret.data.text;
+        const nameMatch = extractedText.match(/(\d+)-([A-Za-z\sáéíóúÁÉÍÓÚñÑ]+)/i);
+        if (nameMatch) detectedName = nameMatch[2].trim();
+        const dateMatch = extractedText.match(/(\d{2}\/\d{2}\/\d{4})\s(\d{2}:\d{2}:\d{2})/);
+        if (dateMatch) detectedDate = dateMatch[0];
+    } catch (ocrError) {
+        console.warn("OCR no pudo interpretar el texto o tardó demasiado:", ocrError);
+        // Aquí no detenemos la app, simplemente continúa sin los datos del OCR
+    } finally {
+        if (worker) {
+            try { await worker.terminate(); } catch (e) {}
         }
-
-        loaderText.textContent = navigator.onLine ? "Guardando registro..." : "Guardando sin conexión...";
-        await saveRecord(imageBlob, detectedName, detectedDate);
-        
-        if (ocrPreviewBlobUrl) {
-          URL.revokeObjectURL(ocrPreviewBlobUrl);
-          ocrPreviewBlobUrl = null;
-        }
-        const previewImg = document.getElementById('ocrPreviewImage');
-        const previewDataUrl = await blobToDataUrl(imageBlob);
-        previewImg.onload = null;
-        previewImg.onerror = () => {
-          previewImg.onerror = null;
-          if (!ocrPreviewBlobUrl) {
-            ocrPreviewBlobUrl = URL.createObjectURL(imageBlob);
-          }
-          previewImg.src = ocrPreviewBlobUrl;
-        };
-        previewImg.src = previewDataUrl;
-
-        document.getElementById('resName').textContent = detectedName || (employees.find(e => e.id === viewingUserId)?.name || 'Usuario Actual');
-        
-        const now = new Date();
-        document.getElementById('resDate').textContent = now.toLocaleDateString('es-MX') + ' ' + now.toLocaleTimeString('es-MX', { hour12: false });
-
-        document.getElementById('resStatus').textContent = navigator.onLine 
-            ? 'Datos procesados y subidos a la nube' 
-            : 'Guardado localmente. Se subirá cuando recuperes la conexión.';
-        
-        loader.classList.add('hidden');
-        openModal('modalOCRResult');
-        
-      } catch (err) {
-        console.error("Error en proceso de registro:", err);
-        alert(err.message || "Hubo un problema al procesar el registro.");
-        loader.classList.add('hidden');
-      }
     }
-
-    async function saveRecord(photoBlob, ocrName, ocrDate) {
-      if (currentCheckIndexToCapture === -1 || !viewingUserId) return;
-      
-      const type = CHECK_TYPES[currentCheckIndexToCapture].id;
-      const exactNow = new Date();
-      const timestamp = exactNow.toISOString(); 
-      const localDateStr = `${exactNow.getFullYear()}-${String(exactNow.getMonth()+1).padStart(2,'0')}-${String(exactNow.getDate()).padStart(2,'0')}`;
-      const localId = `local_${viewingUserId}_${Date.now()}_${type}`;
-
-      if (!navigator.onLine || !supabaseClient) {
-        await guardarEnColaLocal(localId, viewingUserId, type, timestamp, localDateStr, photoBlob, ocrName, ocrDate);
-        return;
-      }
-
-      try {
-        const fileName = `${viewingUserId}_${Date.now()}.jpg`;
-        const { error: uploadError } = await supabaseClient.storage
-          .from('registros-empleados')
-          .upload(fileName, photoBlob, { contentType: 'image/jpeg', upsert: false });
-
-        if (uploadError) throw uploadError;
-
-        const { data: publicUrlData } = supabaseClient.storage
-          .from('registros-empleados')
-          .getPublicUrl(fileName);
-
-        const { error: insertError } = await supabaseClient
-          .from('registros')
-          .insert([{
-            employee_id: viewingUserId,
-            tipo: type,
-            timestamp: timestamp,
-            fecha: localDateStr,
-            foto_url: publicUrlData.publicUrl,
-            ocr_nombre: ocrName || null,
-            ocr_fecha: ocrDate || null
-          }]);
-
-        if (insertError) throw insertError;
-
-        currentCheckIndexToCapture = -1;
-        await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
-
-      } catch (err) {
-        console.warn("Fallo al subir online, guardando en cola:", err);
-        await guardarEnColaLocal(localId, viewingUserId, type, timestamp, localDateStr, photoBlob, ocrName, ocrDate);
-      }
-    }
-
-    async function guardarEnColaLocal(localId, employeeId, type, timestamp, dateStr, photoBlob, ocrName, ocrDate) {
-      const pendingItem = {
-        localId,
-        employeeId,
-        type,
-        timestamp,
-        date: dateStr,
-        photoBlob,
-        ocrName: ocrName || null,
-        ocrDate: ocrDate || null,
-        createdAt: new Date().toISOString()
-      };
-      await dbPut(STORE_PENDING, pendingItem);
-      currentCheckIndexToCapture = -1;
-      
-      await refreshPendingRecords();
-      await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
-    }
-
-    function formatTime(isoStr) {
-      return new Date(isoStr).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
-    }
-
-    async function viewPhoto(id, photoUrl, isPending) {
-      if (!photoUrl) return;
-      currentViewingRecordId = id;
-      currentViewingIsPending = !!isPending;
-      
-      const viewer = document.getElementById('photoViewer');
-      viewer.classList.remove('opacity-40');
-      viewer.src = photoUrl;
-      
-      const rec = todayRecords.find(r => r.id == id);
-      const resultDiv = document.getElementById('ocrResultData');
-      const pendingNotice = document.getElementById('pendingNotice');
-      
-      if (rec && (rec.ocrName || rec.ocrDate)) {
-        resultDiv.classList.remove('hidden');
-        document.getElementById('ocrNameText').textContent = `Nombre OCR: ${rec.ocrName || 'No leído'}`;
-        document.getElementById('ocrDateText').textContent = `Fecha OCR: ${rec.ocrDate || 'No leída'}`;
-      } else {
-        resultDiv.classList.add('hidden');
-      }
-
-      if (isPending) {
-        pendingNotice.classList.remove('hidden');
-      } else {
-        pendingNotice.classList.add('hidden');
-      }
-      
-      openModal('modalPhoto');
-    }
-
-    function toggleSettings(e) {
-      e.stopPropagation();
-      const menu = document.getElementById('settingsMenu');
-      const overlay = document.getElementById('overlay');
-      if (menu.classList.contains('hidden')) {
-        menu.classList.remove('hidden');
-        overlay.classList.remove('hidden');
-      } else {
-        closeAll();
-      }
-    }
-
-    function openModal(id) {
-      closeAll();
-      document.getElementById('overlay').classList.add('hidden');
-      document.getElementById(id).classList.remove('hidden');
-    }
-
-    function closeAll() {
-      document.getElementById('overlay').classList.add('hidden');
-      document.getElementById('settingsMenu').classList.add('hidden');
-      document.getElementById('modalSwitchUser').classList.add('hidden');
-      document.getElementById('modalPhoto').classList.add('hidden');
-      document.getElementById('modalOCRResult').classList.add('hidden');
-      document.getElementById('customConfirmModal').classList.add('hidden');
-      document.getElementById('customAlertModal').classList.add('hidden');
-      if (ocrPreviewBlobUrl) {
-        URL.revokeObjectURL(ocrPreviewBlobUrl);
-        ocrPreviewBlobUrl = null;
-      }
-    }
-
-    async function openSwitchUserModal() {
-      if (employees.length === 0) {
-        employees = await fetchEmployeesFromSupabase();
-      }
-      const list = document.getElementById('switchUserList');
-      list.innerHTML = '';
-      
-      const otherUsers = employees.filter(emp => emp.id !== sessionUserId);
-      
-      if (otherUsers.length === 0) {
-        list.innerHTML = '<p class="text-center text-sm text-app-sub dark:text-darkapp-sub py-4">No hay otros Minisers registrados en el sistema.</p>';
-      } else {
-        otherUsers.forEach(emp => {
-          list.innerHTML += `
-            <div class="p-3 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-slate-700/40 rounded-xl cursor-pointer hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors flex items-center justify-between" onclick="switchViewingUser(${emp.id})">
-              <div class="flex items-center gap-3">
-                ${buildAvatarHTML(emp, 'w-10 h-10', 'text-xs')}
-                <div class="flex flex-col">
-                  <span class="font-bold text-sm text-app-title dark:text-darkapp-title">${escapeHtml(emp.name)}</span>
-                  <span class="text-[11px] text-app-sub dark:text-darkapp-sub">#: ${escapeHtml(emp.number || 'N/A')}</span>
-                </div>
-              </div>
-              <i data-lucide="chevron-right" class="w-4 h-4 text-app-sub dark:text-darkapp-sub"></i>
-            </div>
-          `;
-        });
-      }
-      
-      if (window.lucide) lucide.createIcons();
-      openModal('modalSwitchUser');
-    }
-
-    async function switchViewingUser(id) {
-      viewingUserId = id;
-      updateUIForUser();
-      await precacheUserSchedules();
-      closeAll();
-    }
-
-    async function clearLocalStorage() {
-      document.getElementById('settingsMenu').classList.add('hidden');
-      document.getElementById('overlay').classList.add('hidden');
-      const confirmed = await showCustomConfirm({
-        title: '¿Refrescar sesión local?',
-        message: 'Los registros pendientes en la memoria NO se perderán.',
-        confirmText: 'Refrescar',
-        cancelText: 'Cancelar',
-        confirmColor: 'green',
-        cancelColor: 'red',
-        icon: 'refresh-cw'
-      });
-      if (confirmed) {
-        localStorage.removeItem('sessionUserId');
-        window.location.reload();
-      }
-    }
-
-    // ============================================================================
-    // REALTIME
-    // ============================================================================
-    function iniciarRealtime() {
-      if (realtimeInitialized || !navigator.onLine || !supabaseClient) return;
-      try {
-        supabaseClient
-          .channel('checador-realtime')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'registros' }, (payload) => {
-            const affectedEmployeeId = payload.new?.employee_id || payload.old?.employee_id;
-            if (affectedEmployeeId === viewingUserId) {
-              loadTodayRecords();
-              loadWeeklySchedule();
-            }
-          })
-          .subscribe();
-        realtimeInitialized = true;
-      } catch (err) {
-        console.warn('Realtime no disponible:', err);
-      }
-    }
-  </script>
+}
+loaderText.textContent = navigator.onLine ? "Guardando registro..." : "Guardando sin conexión...";
+await saveRecord(imageBlob, detectedName, detectedDate, source);
+if (ocrPreviewBlobUrl) {
+URL.revokeObjectURL(ocrPreviewBlobUrl);
+ocrPreviewBlobUrl = null;
+}
+const previewImg = document.getElementById('ocrPreviewImage');
+const previewDataUrl = await blobToDataUrl(imageBlob);
+previewImg.onload = null;
+previewImg.onerror = () => {
+previewImg.onerror = null;
+if (!ocrPreviewBlobUrl) {
+ocrPreviewBlobUrl = URL.createObjectURL(imageBlob);
+}
+previewImg.src = ocrPreviewBlobUrl;
+};
+previewImg.src = previewDataUrl;
+document.getElementById('resName').textContent = detectedName || (employees.find(e => e.id === viewingUserId)?.name || 'Usuario Actual');
+const now = new Date();
+document.getElementById('resDate').textContent = now.toLocaleDateString('es-MX') + ' ' + now.toLocaleTimeString('es-MX', { hour12: false });
+document.getElementById('resStatus').textContent = navigator.onLine
+? 'Datos procesados y subidos a la nube'
+: 'Guardado localmente. Se subirá cuando recuperes la conexión.';
+loader.classList.add('hidden');
+openModal('modalOCRResult');
+} catch (err) {
+console.error("Error en proceso de registro:", err);
+showCustomAlert(err?.message || "Hubo un problema al procesar el registro.");
+loader.classList.add('hidden');
+replacingRecordContext = null;
+}
+}
+async function saveRecord(photoBlob, ocrName, ocrDate, source = 'camera') {
+if (currentCheckIndexToCapture === -1 || !viewingUserId) return;
+const type = CHECK_TYPES[currentCheckIndexToCapture].id;
+const exactNow = new Date();
+const timestamp = exactNow.toISOString();
+const localDateStr = `${exactNow.getFullYear()}-${String(exactNow.getMonth()+1).padStart(2,'0')}-${String(exactNow.getDate()).padStart(2,'0')}`;
+const localId = `local_${viewingUserId}_${Date.now()}_${type}`;
+const replaceCtx = replacingRecordContext;
+replacingRecordContext = null;
+if (replaceCtx) {
+if (replaceCtx.isPending) {
+await dbDelete(STORE_PENDING, replaceCtx.recordId);
+await refreshPendingRecords();
+} else if (navigator.onLine && supabaseClient && replaceCtx.recordId) {
+try {
+await supabaseClient
+.from('registros')
+.delete()
+.eq('id', replaceCtx.recordId);
+} catch (delErr) {
+console.warn('No se pudo eliminar registro anterior al reemplazar:', delErr);
+}
+}
+}
+if (!navigator.onLine || !supabaseClient) {
+await guardarEnColaLocal(localId, viewingUserId, type, timestamp, localDateStr, photoBlob, ocrName, ocrDate);
+setRecordSource(viewingUserId, localDateStr, type, source);
+return;
+}
+try {
+const fileName = `${viewingUserId}_${Date.now()}.jpg`;
+const { error: uploadError } = await supabaseClient.storage
+.from('registros-empleados')
+.upload(fileName, photoBlob, { contentType: 'image/jpeg', upsert: false });
+if (uploadError) throw uploadError;
+const { data: publicUrlData } = supabaseClient.storage
+.from('registros-empleados')
+.getPublicUrl(fileName);
+const { error: insertError } = await supabaseClient
+.from('registros')
+.insert([{
+employee_id: viewingUserId,
+tipo: type,
+timestamp: timestamp,
+fecha: localDateStr,
+foto_url: publicUrlData.publicUrl,
+ocr_nombre: ocrName || null,
+ocr_fecha: ocrDate || null
+}]);
+if (insertError) throw insertError;
+setRecordSource(viewingUserId, localDateStr, type, source);
+currentCheckIndexToCapture = -1;
+await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
+} catch (err) {
+console.warn("Fallo al subir online, guardando en cola:", err);
+await guardarEnColaLocal(localId, viewingUserId, type, timestamp, localDateStr, photoBlob, ocrName, ocrDate);
+setRecordSource(viewingUserId, localDateStr, type, source);
+}
+}
+async function guardarEnColaLocal(localId, employeeId, type, timestamp, dateStr, photoBlob, ocrName, ocrDate) {
+const pendingItem = {
+localId,
+employeeId,
+type,
+timestamp,
+date: dateStr,
+photoBlob,
+ocrName: ocrName || null,
+ocrDate: ocrDate || null,
+createdAt: new Date().toISOString()
+};
+await dbPut(STORE_PENDING, pendingItem);
+currentCheckIndexToCapture = -1;
+await refreshPendingRecords();
+await Promise.all([loadTodayRecords(), loadWeeklySchedule()]);
+}
+function formatTime(isoStr) {
+return new Date(isoStr).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
+}
+async function viewPhoto(id, photoUrl, isPending) {
+if (!photoUrl) return;
+currentViewingRecordId = id;
+currentViewingIsPending = !!isPending;
+const viewer = document.getElementById('photoViewer');
+viewer.classList.remove('opacity-40');
+viewer.src = photoUrl;
+const rec = todayRecords.find(r => r.id == id);
+const resultDiv = document.getElementById('ocrResultData');
+const pendingNotice = document.getElementById('pendingNotice');
+if (rec && (rec.ocrName || rec.ocrDate)) {
+resultDiv.classList.remove('hidden');
+document.getElementById('ocrNameText').textContent = `Nombre OCR: ${rec.ocrName || 'No leído'}`;
+document.getElementById('ocrDateText').textContent = `Fecha OCR: ${rec.ocrDate || 'No leída'}`;
+} else {
+resultDiv.classList.add('hidden');
+}
+if (isPending) {
+pendingNotice.classList.remove('hidden');
+} else {
+pendingNotice.classList.add('hidden');
+}
+openModal('modalPhoto');
+}
+function toggleSettings(e) {
+e.stopPropagation();
+const menu = document.getElementById('settingsMenu');
+const overlay = document.getElementById('overlay');
+if (menu.classList.contains('hidden')) {
+menu.classList.remove('hidden');
+overlay.classList.remove('hidden');
+} else {
+closeAll();
+}
+}
+function openModal(id) {
+closeAll();
+document.getElementById('overlay').classList.add('hidden');
+document.getElementById(id).classList.remove('hidden');
+}
+function closeAll() {
+document.getElementById('overlay').classList.add('hidden');
+document.getElementById('settingsMenu').classList.add('hidden');
+document.getElementById('modalSwitchUser').classList.add('hidden');
+document.getElementById('modalPhoto').classList.add('hidden');
+document.getElementById('modalOCRResult').classList.add('hidden');
+document.getElementById('customConfirmModal').classList.add('hidden');
+document.getElementById('customAlertModal').classList.add('hidden');
+if (ocrPreviewBlobUrl) {
+URL.revokeObjectURL(ocrPreviewBlobUrl);
+ocrPreviewBlobUrl = null;
+}
+}
+async function openSwitchUserModal() {
+if (employees.length === 0) {
+employees = await fetchEmployeesFromSupabase();
+}
+const list = document.getElementById('switchUserList');
+list.innerHTML = '';
+const otherUsers = employees.filter(emp => emp.id !== sessionUserId);
+if (otherUsers.length === 0) {
+list.innerHTML = '<p class="text-center text-sm text-app-sub dark:text-darkapp-sub py-4">No hay otros Minisers registrados en el sistema.</p>';
+} else {
+otherUsers.forEach(emp => {
+list.innerHTML += `<div class="p-3 bg-white/60 dark:bg-slate-800/60 border border-white/30 dark:border-slate-700/40 rounded-xl cursor-pointer hover:bg-app-brand/10 dark:hover:bg-teal-500/10 transition-colors flex items-center justify-between" onclick="switchViewingUser(${emp.id})"><div class="flex items-center gap-3">${buildAvatarHTML(emp, 'w-10 h-10', 'text-xs')}<div class="flex flex-col"><span class="font-bold text-sm text-app-title dark:text-darkapp-title">${escapeHtml(emp.name)}</span><span class="text-[11px] text-app-sub dark:text-darkapp-sub">#: ${escapeHtml(emp.number || 'N/A')}</span></div></div><i data-lucide="chevron-right" class="w-4 h-4 text-app-sub dark:text-darkapp-sub"></i></div>`;
+});
+}
+if (window.lucide) lucide.createIcons();
+openModal('modalSwitchUser');
+}
+async function switchViewingUser(id) {
+viewingUserId = id;
+updateUIForUser();
+await precacheUserSchedules();
+closeAll();
+}
+async function clearCacheMemory() {
+document.getElementById('settingsMenu').classList.add('hidden');
+document.getElementById('overlay').classList.add('hidden');
+const confirmed = await showCustomConfirm({
+title: 'Borrar cache',
+message: 'Se limpiará la memoria , está acción no eliminará los registros realizados',
+confirmText: 'Confirmar',
+cancelText: 'Cancelar',
+confirmColor: 'red',
+cancelColor: 'green',
+icon: 'trash'
+});
+if (!confirmed) return;
+const loader = document.getElementById('ocrLoader');
+const loaderText = document.getElementById('loaderText');
+loader.classList.remove('hidden');
+loaderText.textContent = 'Limpiando memoria local...';
+try {
+for (const urlId in pendingBlobUrls) {
+URL.revokeObjectURL(pendingBlobUrls[urlId]);
+}
+pendingBlobUrls = {};
+try {
+await dbClear(STORE_CACHE);
+} catch (idbErr) {
+console.warn('[Cache] Error limpiando STORE_CACHE:', idbErr);
+}
+const keysToRemove = [];
+for (let i = 0; i < localStorage.length; i++) {
+const k = localStorage.key(i);
+if (k && k.startsWith(CACHE_PREFIX)) {
+keysToRemove.push(k);
+}
+}
+keysToRemove.forEach((k) => localStorage.removeItem(k));
+if ('caches' in window) {
+try {
+const cacheNames = await caches.keys();
+await Promise.all(cacheNames.map((name) => caches.delete(name)));
+} catch (swCacheErr) {
+console.warn('[Cache] Error limpiando CacheStorage:', swCacheErr);
+}
+}
+loaderText.textContent = 'Descargando registros de la semana actual...';
+currentWeekOffset = 0;
+employees = await fetchEmployeesFromSupabase();
+if (viewingUserId) {
+updateUIForUser();
+await loadTodayRecords();
+await loadWeeklySchedule();
+// Precargar miniaturas de los registros realizados (hoy y semana actual)
+const photoUrlsToWarm = new Set();
+todayRecords.forEach((r) => {
+if (r.photo && !r.isPending) photoUrlsToWarm.add(r.photo);
+});
+if (navigator.onLine && supabaseClient && viewingUserId) {
+const { monday, sunday } = getWeekData(0);
+const startStr = `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
+const endStr = `${sunday.getFullYear()}-${String(sunday.getMonth()+1).padStart(2,'0')}-${String(sunday.getDate()).padStart(2,'0')}`;
+try {
+const { data: weekFull } = await supabaseClient
+.from('registros')
+.select('foto_url')
+.eq('employee_id', viewingUserId)
+.gte('fecha', startStr)
+.lte('fecha', endStr);
+if (Array.isArray(weekFull)) {
+weekFull.forEach((item) => {
+if (item.foto_url) photoUrlsToWarm.add(item.foto_url);
+});
+}
+} catch (e) {
+console.warn('[Cache] Error consultando fotos de la semana:', e);
+}
+}
+if (photoUrlsToWarm.size > 0) {
+loaderText.textContent = 'Descargando miniaturas de registros...';
+await Promise.all(Array.from(photoUrlsToWarm).map((url) => new Promise((resolve) => {
+const img = new Image();
+img.crossOrigin = 'anonymous';
+img.onload = () => resolve();
+img.onerror = () => resolve();
+img.src = url;
+})));
+}
+}
+} finally {
+loader.classList.add('hidden');
+}
+}
+// ============================================================================
+// REALTIME
+// ============================================================================
+function iniciarRealtime() {
+if (realtimeInitialized || !navigator.onLine || !supabaseClient) return;
+try {
+supabaseClient
+.channel('checador-realtime')
+.on('postgres_changes', { event: '*', schema: 'public', table: 'registros' }, (payload) => {
+const affectedEmployeeId = payload.new?.employee_id || payload.old?.employee_id;
+if (affectedEmployeeId === viewingUserId) {
+loadTodayRecords();
+loadWeeklySchedule();
+}
+})
+.subscribe();
+realtimeInitialized = true;
+} catch (err) {
+console.warn('Realtime no disponible:', err);
+}
+}
+</script>
 </body>
 </html>
