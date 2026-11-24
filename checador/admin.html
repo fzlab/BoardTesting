@@ -58,7 +58,7 @@
   <style>
     ::-webkit-scrollbar { display: none; }
     body { -webkit-tap-highlight-color: transparent; user-select: none; }
-    input, select { user-select: text; }
+    input, select, textarea { user-select: text; }
     .fade-in { animation: fadeIn 0.2s ease-in-out; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .zoom-in { animation: zoomIn 0.2s ease-out; }
@@ -68,26 +68,38 @@
     .blur-overlay { backdrop-filter: blur(4px); background-color: rgba(15, 23, 42, 0.5); }
     
     .glass-modal {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
     }
     .dark .glass-modal {
-        background: rgba(15, 23, 42, 0.95);
+        background: rgba(15, 23, 42, 0.94);
+    }
+
+    .glass-dropdown {
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    .dark .glass-dropdown {
+        background: rgba(15, 23, 42, 0.96);
     }
   </style>
 </head>
 <body class="h-full bg-app-bg dark:bg-darkapp-bg text-app-title dark:text-darkapp-title font-sans overflow-hidden antialiased relative transition-colors duration-200">
 
+  <!-- Overlay transparente para cerrar menú de ajustes al tocar fuera -->
+  <div id="headerMenuBackdrop" onclick="closeHeaderMenu()" class="fixed inset-0 z-30 hidden"></div>
+
   <div class="main-content h-full flex flex-col overflow-y-auto pb-10">
     
-    <header class="px-5 py-4 flex items-center justify-between sticky top-0 bg-app-bg/95 dark:bg-darkapp-bg/95 backdrop-blur-md z-30 transition-colors">
+    <header class="px-5 py-4 flex items-center justify-between sticky top-0 bg-app-bg/95 dark:bg-darkapp-bg/95 backdrop-blur-md z-40 transition-colors">
       <div class="flex items-center space-x-3">
-        <a href="checador.html" class="p-2 -ml-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg transition-colors" title="Ir al Checador">
-          <i data-lucide="arrow-left" class="w-5 h-5"></i>
-        </a>
+        <a href="../index.html" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 rounded-lg transition-all cursor-pointer" title="Ir al Inicio">  
+          <i data-lucide="house" class="w-5 h-5"></i>  
+        </a>    
         <div>
-          <h1 class="font-bold text-[17px] leading-tight text-app-title dark:text-darkapp-title">Panel Gerencial</h1>
+          <h1 class="font-bold text-[17px] leading-tight text-app-title dark:text-darkapp-title">Gestor de Turnos</h1>
           <p class="text-[12px] text-app-sub dark:text-darkapp-sub flex items-center gap-1.5 font-medium mt-0.5">
             <span class="w-1.5 h-1.5 rounded-full bg-app-brand inline-block"></span> 
             <span id="branchNameDisplay">Gran Plaza Mérida</span>
@@ -95,7 +107,7 @@
         </div>
       </div>
       
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 relative">
         <!-- Toggle Tema -->
         <button type="button" id="btn-theme-toggle" class="h-8 w-14 rounded-full bg-slate-200 dark:bg-slate-800 relative flex items-center p-1 cursor-pointer transition-colors duration-200" title="Cambiar modo">
             <div class="absolute inset-0 flex justify-between items-center px-2 pointer-events-none">
@@ -108,10 +120,28 @@
             </div>
         </button>
 
-        <button type="button" onclick="openImportModal()" class="text-[11px] font-semibold text-app-brand dark:text-teal-400 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/10 px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5" title="Importar horarios desde Excel">
-          <i data-lucide="upload" class="w-4 h-4"></i>
-          <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+        <!-- Botón Ajustes (solo ícono cog) -->
+        <button type="button" id="btnHeaderSettings" onclick="toggleHeaderMenu(event)" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 rounded-xl transition-colors cursor-pointer" title="Ajustes" aria-label="Ajustes">
+          <i data-lucide="cog" class="w-5 h-5"></i>
         </button>
+
+        <!-- Menú Desplegable Glassmorphism -->
+        <div id="headerSettingsMenu" class="hidden fixed right-5 top-[68px] w-56 rounded-2xl glass-dropdown border border-slate-200/90 dark:border-slate-700/90 shadow-2xl py-2 z-50 fade-in">
+          <button type="button" onclick="handleMenuAction(openImportModal)" class="w-full px-4 py-2.5 text-left text-xs font-bold text-app-title dark:text-darkapp-title hover:bg-app-brand/10 dark:hover:bg-teal-500/15 hover:text-app-brand dark:hover:text-teal-400 flex items-center gap-3 transition-colors cursor-pointer">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-app-brand dark:text-teal-400 shrink-0"></i>
+            <span>Cargar horarios (Excel)</span>
+          </button>
+
+          <button type="button" onclick="handleMenuAction(openShiftEditorModal)" class="w-full px-4 py-2.5 text-left text-xs font-bold text-app-title dark:text-darkapp-title hover:bg-app-brand/10 dark:hover:bg-teal-500/15 hover:text-app-brand dark:hover:text-teal-400 flex items-center gap-3 transition-colors cursor-pointer">
+            <i data-lucide="square-pen" class="w-4 h-4 text-app-brand dark:text-teal-400 shrink-0"></i>
+            <span>Editor de turnos</span>
+          </button>
+
+          <button type="button" onclick="handleMenuAction(openOvertimeModal)" class="w-full px-4 py-2.5 text-left text-xs font-bold text-app-title dark:text-darkapp-title hover:bg-app-brand/10 dark:hover:bg-teal-500/15 hover:text-app-brand dark:hover:text-teal-400 flex items-center gap-3 transition-colors cursor-pointer">
+            <i data-lucide="clock-plus" class="w-4 h-4 text-app-brand dark:text-teal-400 shrink-0"></i>
+            <span>Horas extras</span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -165,6 +195,158 @@
       </div>
 
     </main>
+  </div>
+
+  <!-- MODAL: Editor de Turnos Específicos (Glassmorphism) -->
+  <div id="modalShiftEditor" class="fixed inset-0 z-[60] flex items-center justify-center p-4 hidden">
+    <div class="absolute inset-0 blur-overlay" onclick="closeShiftEditorModal()"></div>
+    <div class="glass-modal w-full max-w-md rounded-3xl shadow-2xl relative z-10 p-5 fade-in border border-white/40 dark:border-slate-700/60 flex flex-col max-h-[88vh]">
+      <div class="flex justify-between items-center mb-1 shrink-0">
+        <div class="flex items-center gap-2">
+          <i data-lucide="square-pen" class="w-5 h-5 text-app-brand dark:text-teal-400"></i>
+          <h3 class="text-base font-bold text-app-title dark:text-darkapp-title">Editor de turnos</h3>
+        </div>
+        <button type="button" onclick="closeShiftEditorModal()" class="p-1.5 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title bg-app-bg/80 dark:bg-slate-800/80 rounded-full transition-colors cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p class="text-xs text-app-sub dark:text-darkapp-sub mb-4 shrink-0">Crea, edita o elimina plantillas de turnos específicos.</p>
+
+      <div class="overflow-y-auto pr-1 space-y-4 flex-1">
+        <div class="bg-app-bg/70 dark:bg-slate-800/60 rounded-2xl p-3.5 border border-app-border/50 dark:border-slate-700/50 space-y-3">
+          <div class="flex items-center justify-between">
+            <span id="shiftFormModeLabel" class="text-[11px] font-bold uppercase tracking-wider text-app-brand dark:text-teal-400">Nuevo turno</span>
+            <button type="button" id="btnResetShiftForm" onclick="resetShiftTemplateForm()" class="hidden text-[11px] font-bold text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title underline cursor-pointer">
+              Limpiar selección
+            </button>
+          </div>
+
+          <div>
+            <label for="shiftTemplateTitle" class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Título del turno</label>
+            <input type="text" id="shiftTemplateTitle" placeholder="Ej. Turno Matutino / Cierre" class="w-full bg-white/90 dark:bg-slate-900/90 border border-app-border dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label for="shiftTemplateStart" class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Hora de ingreso</label>
+              <input type="time" id="shiftTemplateStart" value="09:00" class="w-full bg-white/90 dark:bg-slate-900/90 border border-app-border dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors">
+            </div>
+            <div>
+              <label for="shiftTemplateEnd" class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Hora de salida</label>
+              <input type="time" id="shiftTemplateEnd" value="18:00" class="w-full bg-white/90 dark:bg-slate-900/90 border border-app-border dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors">
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de Turnos Guardados (Ordenada de ingreso más temprano a más tarde) -->
+        <div>
+          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-2">Turnos guardados</label>
+          <div id="shiftTemplatesList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- Botones tipo ghost -->
+      <div class="flex items-center justify-end gap-2 pt-4 mt-3 border-t border-app-border/40 dark:border-slate-700/50 shrink-0">
+        <button type="button" onclick="closeShiftEditorModal()" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-slate-500/10 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button" onclick="saveShiftTemplate()" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/15 text-app-brand dark:text-teal-400 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Guardar turno
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Horas Extras (Glassmorphism) -->
+  <div id="modalOvertime" class="fixed inset-0 z-[60] flex items-center justify-center p-4 hidden">
+    <div class="absolute inset-0 blur-overlay" onclick="closeOvertimeModal()"></div>
+    <div class="glass-modal w-full max-w-md rounded-3xl shadow-2xl relative z-10 p-5 fade-in border border-white/40 dark:border-slate-700/60 flex flex-col max-h-[88vh]">
+      <div class="flex justify-between items-center mb-1 shrink-0">
+        <div class="flex items-center gap-2">
+          <i data-lucide="clock-plus" class="w-5 h-5 text-app-brand dark:text-teal-400"></i>
+          <h3 class="text-base font-bold text-app-title dark:text-darkapp-title">Horas extras</h3>
+        </div>
+        <button type="button" onclick="closeOvertimeModal()" class="p-1.5 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title bg-app-bg/80 dark:bg-slate-800/80 rounded-full transition-colors cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p class="text-xs text-app-sub dark:text-darkapp-sub mb-4 shrink-0">Agrega, edita o elimina registros de horas extras por Miniser.</p>
+
+      <div class="overflow-y-auto pr-1 space-y-4 flex-1">
+        <div class="bg-app-bg/70 dark:bg-slate-800/60 rounded-2xl p-3.5 border border-app-border/50 dark:border-slate-700/50 space-y-3">
+          <div class="flex items-center justify-between">
+            <span id="overtimeFormModeLabel" class="text-[11px] font-bold uppercase tracking-wider text-app-brand dark:text-teal-400">Nuevo registro</span>
+            <button type="button" id="btnResetOvertimeForm" onclick="resetOvertimeForm()" class="hidden text-[11px] font-bold text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title underline cursor-pointer">
+              Cancelar edición
+            </button>
+          </div>
+
+          <!-- Lista Desplegable Personalizada -->
+          <div class="relative">
+            <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Miniser</label>
+            <input type="hidden" id="overtimeEmployeeValue" value="">
+            <button type="button" id="btnOvertimeEmployeeDropdown" onclick="toggleOvertimeEmployeeDropdown(event)" class="w-full bg-white/95 dark:bg-slate-900/95 border border-app-border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-left text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors flex items-center justify-between gap-2 cursor-pointer">
+              <span id="overtimeEmployeeSelectedLabel" class="truncate text-app-sub dark:text-darkapp-sub">Selecciona un Miniser...</span>
+              <i data-lucide="chevron-down" id="overtimeEmployeeChevron" class="w-4 h-4 text-app-sub dark:text-darkapp-sub shrink-0 transition-transform duration-150"></i>
+            </button>
+
+            <div id="overtimeEmployeeMenu" class="hidden absolute left-0 right-0 mt-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl py-1.5 z-30 max-h-52 overflow-y-auto fade-in">
+              <!-- Opciones inyectadas dinámicamente -->
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label for="overtimeHoursInput" class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Horas generadas</label>
+              <input type="number" id="overtimeHoursInput" min="0.5" max="24" step="0.5" placeholder="Ej. 2.5" class="w-full bg-white/90 dark:bg-slate-900/90 border border-app-border dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors">
+            </div>
+            <div>
+              <label for="overtimeDateInput" class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Fecha</label>
+              <input type="date" id="overtimeDateInput" class="w-full bg-white/90 dark:bg-slate-900/90 border border-app-border dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors">
+            </div>
+          </div>
+
+          <div>
+            <label for="overtimeReasonInput" class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Motivo</label>
+            <input type="text" id="overtimeReasonInput" placeholder="Ej. Inventario, apoyo en piso, cierre..." class="w-full bg-white/90 dark:bg-slate-900/90 border border-app-border dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors">
+          </div>
+        </div>
+
+        <!-- Lista de Horas Extras Registradas -->
+        <div>
+          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-2">Registros de horas extras</label>
+          <div id="overtimeRecordsList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- Botones tipo ghost -->
+      <div class="flex items-center justify-end gap-2 pt-4 mt-3 border-t border-app-border/40 dark:border-slate-700/50 shrink-0">
+        <button type="button" onclick="closeOvertimeModal()" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-slate-500/10 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button" id="btnSaveOvertime" onclick="saveOvertimeRecord()" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/15 text-app-brand dark:text-teal-400 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Guardar horas extras
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Aviso / Confirmación de Horas Extras (Glassmorphism + Botones Ghost) -->
+  <div id="modalOvertimeAlert" class="fixed inset-0 z-[75] flex items-center justify-center p-4 hidden">
+    <div class="absolute inset-0 blur-overlay" onclick="closeOvertimeAlertModal(false)"></div>
+    <div class="glass-modal w-full max-w-xs rounded-3xl shadow-2xl relative z-10 p-5 fade-in border border-white/40 dark:border-slate-700/60 text-center">
+      <div id="overtimeAlertIconWrap" class="w-11 h-11 rounded-2xl bg-app-brand/10 dark:bg-teal-500/15 text-app-brand dark:text-teal-400 flex items-center justify-center mx-auto mb-3">
+        <i id="overtimeAlertIcon" data-lucide="info" class="w-5 h-5"></i>
+      </div>
+      <h4 id="overtimeAlertTitle" class="text-sm font-bold text-app-title dark:text-darkapp-title mb-1">Aviso</h4>
+      <p id="overtimeAlertMessage" class="text-xs text-app-sub dark:text-darkapp-sub leading-relaxed mb-5">--</p>
+
+      <div id="overtimeAlertActions" class="flex items-center justify-center gap-2">
+        <button type="button" onclick="closeOvertimeAlertModal(true)" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/15 text-app-brand dark:text-teal-400 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Entendido
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL: Tabla General de Horarios Semanales -->
@@ -233,24 +415,40 @@
             <i data-lucide="clock" class="w-3.5 h-3.5"></i> Turno Laboral
           </button>
           <button type="button" id="btnTypeFree" onclick="setShiftMode('LIBRE')" class="py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5">
-            <i data-lucide="coffee" class="w-3.5 h-3.5"></i> Día Libre
+            <i data-lucide="park" class="w-4 h-4"></i> Descanso
           </button>
         </div>
       </div>
 
-      <div id="workHoursContainer" class="grid grid-cols-2 gap-3 mb-5">
-        <div>
-          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Hora Ingreso</label>
-          <input type="time" id="editStartTime" class="w-full bg-app-bg dark:bg-slate-800 border border-transparent dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm font-bold text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors">
+      <div id="workHoursContainer" class="space-y-3 mb-5">
+        <!-- Lista Desplegable Personalizada de Turnos (Ordenada de ingreso más temprano a más tarde) -->
+        <div class="relative">
+          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Hora de ingreso</label>
+          <input type="hidden" id="editShiftTemplateValue" value="__CUSTOM__">
+          <button type="button" id="btnEditShiftDropdown" onclick="toggleEditShiftDropdown(event)" class="w-full bg-white/95 dark:bg-slate-900/95 border border-app-border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-left text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors flex items-center justify-between gap-2 cursor-pointer">
+            <span id="editShiftSelectedLabel" class="truncate">Turno personalizado</span>
+            <i data-lucide="chevron-down" id="editShiftChevron" class="w-4 h-4 text-app-sub dark:text-darkapp-sub shrink-0 transition-transform duration-150"></i>
+          </button>
+
+          <div id="editShiftDropdownMenu" class="hidden absolute left-0 right-0 mt-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl py-1.5 z-30 max-h-52 overflow-y-auto fade-in">
+            <!-- Opciones inyectadas dinámicamente -->
+          </div>
         </div>
-        <div>
-          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Hora Salida</label>
-          <input type="time" id="editEndTime" class="w-full bg-app-bg dark:bg-slate-800 border border-transparent dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm font-bold text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors">
+
+        <div id="customShiftHoursInputs" class="grid grid-cols-2 gap-3 pt-1">
+          <div>
+            <label for="editStartTime" class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Hora de entrada</label>
+            <input type="time" id="editStartTime" class="w-full bg-app-bg dark:bg-slate-800 border border-transparent dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm font-bold text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors">
+          </div>
+          <div>
+            <label for="editEndTime" class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Hora de salida</label>
+            <input type="time" id="editEndTime" class="w-full bg-app-bg dark:bg-slate-800 border border-transparent dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm font-bold text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors">
+          </div>
         </div>
       </div>
 
       <div id="freeDayNotice" class="hidden bg-app-bg dark:bg-slate-800 rounded-xl p-3 mb-5 text-center">
-        <p class="text-xs font-semibold text-app-sub dark:text-darkapp-sub">Este día quedará marcado como <strong>Día Libre</strong> en el sistema.</p>
+        <p class="text-xs font-semibold text-app-sub dark:text-darkapp-sub">Este día quedará marcado como <strong>Descanso</strong> en el sistema.</p>
       </div>
 
       <div class="flex gap-2">
@@ -306,7 +504,13 @@
 
   <!-- MODAL: Lightbox -->
   <div id="modalLightbox" class="fixed inset-0 z-[70] bg-black/95 flex flex-col items-center justify-center hidden fade-in">
-    <button type="button" onclick="closeLightbox()" class="absolute top-6 right-6 p-2.5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors z-10">
+    <!-- Botón Eliminar (arriba a la izquierda) -->
+    <button type="button" id="btnDeleteLightboxPhoto" onclick="openDeleteRecordConfirmModal(event)" class="absolute top-6 left-6 p-2.5 text-rose-400 hover:text-rose-300 bg-white/10 hover:bg-rose-500/20 rounded-full transition-colors z-10 cursor-pointer" title="Eliminar registro de la Nube" aria-label="Eliminar registro">
+      <i data-lucide="trash" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Botón Cerrar (arriba a la derecha) -->
+    <button type="button" onclick="closeLightbox()" class="absolute top-6 right-6 p-2.5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors z-10 cursor-pointer">
       <i data-lucide="x" class="w-6 h-6"></i>
     </button>
     
@@ -320,6 +524,29 @@
         <span>Descargar imagen original</span>
       </button>
       <p class="text-white/50 text-[11px] font-medium">Toca fuera de la imagen o la 'X' para cerrar</p>
+    </div>
+  </div>
+
+  <!-- MODAL: Confirmación Eliminar Registro de la Nube (Glassmorphism + Botones Ghost) -->
+  <div id="modalDeleteRecordConfirm" class="fixed inset-0 z-[85] flex items-center justify-center p-4 hidden">
+    <div class="absolute inset-0 blur-overlay" onclick="closeDeleteRecordConfirmModal()"></div>
+    <div class="glass-modal w-full max-w-xs rounded-3xl shadow-2xl relative z-10 p-6 fade-in border border-white/40 dark:border-slate-700/60 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-rose-500/15 text-rose-500 flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="triangle-exclamation-point" class="w-6 h-6"></i>
+      </div>
+      <h4 class="text-sm font-bold text-app-title dark:text-darkapp-title mb-1.5">Eliminar registro</h4>
+      <p class="text-xs text-app-sub dark:text-darkapp-sub leading-relaxed mb-5">
+        Se eliminará este registro de la Nube, desea continuar?. Está acción no se puede deshacer
+      </p>
+
+      <div class="flex items-center justify-center gap-2">
+        <button type="button" id="btnCancelDeleteRecord" onclick="closeDeleteRecordConfirmModal()" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-slate-500/10 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button" id="btnConfirmDeleteRecord" onclick="confirmDeleteRecordFromCloud()" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-rose-500/15 text-rose-500 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Confirmar
+        </button>
+      </div>
     </div>
   </div>
 
@@ -437,7 +664,16 @@
     let currentEditMode = 'WORK';
 
     let activePopupTrigger = null;
-    let currentLightboxData = { url: '', filename: 'registro.jpg' };
+    let currentLightboxData = { recordId: null, url: '', filename: 'registro.jpg' };
+
+    // Estado para Editor de Turnos y Horas Extras
+    const SHIFT_TEMPLATES_STORAGE_KEY = 'checador_shift_templates_v1';
+    const OVERTIME_STORAGE_KEY = 'checador_overtime_records_v1';
+    let shiftTemplates = [];
+    let editingShiftTemplateId = null;
+    let overtimeRecords = [];
+    let editingOvertimeId = null;
+    let overtimeAlertCallback = null;
 
     const CHECK_TYPES = [
       { id: 'entry', label: 'Ingreso' },
@@ -447,6 +683,594 @@
     ];
     const DAYS_OF_WEEK = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
     const NON_WORK_SHIFTS = ['LIBRE', 'VACACIONES', 'CAPAC'];
+
+    // ============================================================================
+    // ORDENAMIENTO DE TURNOS (INGRESO MÁS TEMPRANO A MÁS TARDÍO)
+    // ============================================================================
+    function parseTimeToMinutes(timeStr) {
+      if (!timeStr) return Number.MAX_SAFE_INTEGER;
+      const parts = String(timeStr).trim().split(':').map(Number);
+      if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return Number.MAX_SAFE_INTEGER;
+      return parts[0] * 60 + parts[1];
+    }
+
+    function getSortedShiftTemplates() {
+      return [...shiftTemplates].sort((a, b) => {
+        const minA = parseTimeToMinutes(a.startTime);
+        const minB = parseTimeToMinutes(b.startTime);
+        if (minA !== minB) return minA - minB;
+        return parseTimeToMinutes(a.endTime) - parseTimeToMinutes(b.endTime);
+      });
+    }
+
+    // ============================================================================
+    // MENÚ DESPLEGABLE DE AJUSTES (HEADER)
+    // ============================================================================
+    function toggleHeaderMenu(event) {
+      if (event) event.stopPropagation();
+      const menu = document.getElementById('headerSettingsMenu');
+      const backdrop = document.getElementById('headerMenuBackdrop');
+      if (!menu) return;
+
+      const isHidden = menu.classList.contains('hidden');
+      if (isHidden) {
+        menu.classList.remove('hidden');
+        if (backdrop) backdrop.classList.remove('hidden');
+        lucide.createIcons();
+      } else {
+        closeHeaderMenu();
+      }
+    }
+
+    function closeHeaderMenu() {
+      const menu = document.getElementById('headerSettingsMenu');
+      const backdrop = document.getElementById('headerMenuBackdrop');
+      if (menu) menu.classList.add('hidden');
+      if (backdrop) backdrop.classList.add('hidden');
+    }
+
+    function handleMenuAction(actionFn) {
+      closeHeaderMenu();
+      if (typeof actionFn === 'function') {
+        actionFn();
+      }
+    }
+
+    // ============================================================================
+    // EDITOR DE TURNOS ESPECÍFICOS (CREAR / EDITAR / ELIMINAR)
+    // ============================================================================
+    async function loadShiftTemplates() {
+      const cached = await getAdminCache('shift_templates');
+      if (Array.isArray(cached)) {
+        shiftTemplates = cached;
+        return;
+      }
+      try {
+        const raw = localStorage.getItem(SHIFT_TEMPLATES_STORAGE_KEY);
+        shiftTemplates = raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        shiftTemplates = [];
+      }
+    }
+
+    async function persistShiftTemplates() {
+      try {
+        localStorage.setItem(SHIFT_TEMPLATES_STORAGE_KEY, JSON.stringify(shiftTemplates));
+      } catch (e) {
+        console.warn('No se pudo guardar turnos en localStorage:', e);
+      }
+      await setAdminCache('shift_templates', shiftTemplates);
+    }
+
+    async function openShiftEditorModal() {
+      hideRecordPopup();
+      await loadShiftTemplates();
+      resetShiftTemplateForm();
+      renderShiftTemplatesList();
+      document.getElementById('modalShiftEditor').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeShiftEditorModal() {
+      document.getElementById('modalShiftEditor').classList.add('hidden');
+      editingShiftTemplateId = null;
+    }
+
+    function resetShiftTemplateForm() {
+      editingShiftTemplateId = null;
+      document.getElementById('shiftFormModeLabel').textContent = 'Nuevo turno';
+      document.getElementById('btnResetShiftForm').classList.add('hidden');
+      document.getElementById('shiftTemplateTitle').value = '';
+      document.getElementById('shiftTemplateStart').value = '09:00';
+      document.getElementById('shiftTemplateEnd').value = '18:00';
+    }
+
+    function editShiftTemplate(id) {
+      const item = shiftTemplates.find(t => String(t.id) === String(id));
+      if (!item) return;
+
+      editingShiftTemplateId = item.id;
+      document.getElementById('shiftFormModeLabel').textContent = 'Editando turno';
+      document.getElementById('btnResetShiftForm').classList.remove('hidden');
+      document.getElementById('shiftTemplateTitle').value = item.title || '';
+      document.getElementById('shiftTemplateStart').value = item.startTime || '09:00';
+      document.getElementById('shiftTemplateEnd').value = item.endTime || '18:00';
+    }
+
+    async function deleteShiftTemplate(id) {
+      if (!confirm('¿Deseas eliminar este turno específico?')) return;
+      shiftTemplates = shiftTemplates.filter(t => String(t.id) !== String(id));
+      if (String(editingShiftTemplateId) === String(id)) {
+        resetShiftTemplateForm();
+      }
+      await persistShiftTemplates();
+      renderShiftTemplatesList();
+      lucide.createIcons();
+    }
+
+    async function saveShiftTemplate() {
+      const titleInput = document.getElementById('shiftTemplateTitle');
+      const startInput = document.getElementById('shiftTemplateStart');
+      const endInput = document.getElementById('shiftTemplateEnd');
+
+      const title = (titleInput.value || '').trim();
+      const startTime = (startInput.value || '').trim();
+      const endTime = (endInput.value || '').trim();
+
+      if (!title) {
+        alert('Por favor ingresa el título del turno.');
+        titleInput.focus();
+        return;
+      }
+      if (!startTime || !endTime) {
+        alert('Por favor ingresa la hora de ingreso y la hora de salida.');
+        return;
+      }
+
+      if (editingShiftTemplateId !== null) {
+        shiftTemplates = shiftTemplates.map(t =>
+          String(t.id) === String(editingShiftTemplateId)
+            ? { ...t, title, startTime, endTime }
+            : t
+        );
+      } else {
+        shiftTemplates.unshift({
+          id: 'turno_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          title,
+          startTime,
+          endTime
+        });
+      }
+
+      await persistShiftTemplates();
+      resetShiftTemplateForm();
+      renderShiftTemplatesList();
+      lucide.createIcons();
+    }
+
+    function renderShiftTemplatesList() {
+      const container = document.getElementById('shiftTemplatesList');
+      if (!container) return;
+
+      const sortedTemplates = getSortedShiftTemplates();
+
+      if (!sortedTemplates.length) {
+        container.innerHTML = `
+          <div class="text-center py-5 text-xs text-app-sub dark:text-darkapp-sub bg-app-bg/50 dark:bg-slate-800/40 rounded-xl">
+            No hay turnos específicos creados aún.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = sortedTemplates.map(item => `
+        <div class="flex items-center justify-between gap-2 p-3 rounded-xl bg-app-bg/80 dark:bg-slate-800/70 border border-app-border/40 dark:border-slate-700/50">
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-app-title dark:text-darkapp-title truncate">${escapeHtml(item.title)}</p>
+            <p class="text-[11px] font-semibold text-app-brand dark:text-teal-400 mt-0.5">${escapeHtml(formatTime24To12Short(item.startTime))} - ${escapeHtml(formatTime24To12Short(item.endTime))}</p>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button type="button" onclick="editShiftTemplate('${escapeHtml(String(item.id))}')" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 rounded-lg transition-colors cursor-pointer" title="Editar turno">
+              <i data-lucide="square-pen" class="w-4 h-4"></i>
+            </button>
+            <button type="button" onclick="deleteShiftTemplate('${escapeHtml(String(item.id))}')" class="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer" title="Eliminar turno">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ============================================================================
+    // MODALES DE AVISO Y CONFIRMACIÓN PARA HORAS EXTRAS (ESTILO DE LA PÁGINA)
+    // ============================================================================
+    function openOvertimeNoticeModal(message, title = 'Aviso', onAfterClose = null) {
+      overtimeAlertCallback = typeof onAfterClose === 'function' ? onAfterClose : null;
+      document.getElementById('overtimeAlertTitle').textContent = title;
+      document.getElementById('overtimeAlertMessage').textContent = message;
+
+      const iconWrap = document.getElementById('overtimeAlertIconWrap');
+      iconWrap.className = 'w-11 h-11 rounded-2xl bg-app-brand/10 dark:bg-teal-500/15 text-app-brand dark:text-teal-400 flex items-center justify-center mx-auto mb-3';
+      iconWrap.innerHTML = `<i data-lucide="info" class="w-5 h-5"></i>`;
+
+      document.getElementById('overtimeAlertActions').innerHTML = `
+        <button type="button" onclick="closeOvertimeAlertModal(true)" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/15 text-app-brand dark:text-teal-400 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Aceptar
+        </button>
+      `;
+
+      document.getElementById('modalOvertimeAlert').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function openOvertimeConfirmModal(message, onConfirm, title = 'Confirmar eliminación') {
+      overtimeAlertCallback = null;
+      document.getElementById('overtimeAlertTitle').textContent = title;
+      document.getElementById('overtimeAlertMessage').textContent = message;
+
+      const iconWrap = document.getElementById('overtimeAlertIconWrap');
+      iconWrap.className = 'w-11 h-11 rounded-2xl bg-rose-500/15 text-rose-500 flex items-center justify-center mx-auto mb-3';
+      iconWrap.innerHTML = `<i data-lucide="triangle-exclamation-point" class="w-5 h-5"></i>`;
+
+      document.getElementById('overtimeAlertActions').innerHTML = `
+        <button type="button" onclick="closeOvertimeAlertModal(false)" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-slate-500/10 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button" id="btnOvertimeConfirmAction" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-rose-500/15 text-rose-500 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Confirmar
+        </button>
+      `;
+
+      document.getElementById('btnOvertimeConfirmAction').onclick = async () => {
+        closeOvertimeAlertModal(false);
+        if (typeof onConfirm === 'function') {
+          await onConfirm();
+        }
+      };
+
+      document.getElementById('modalOvertimeAlert').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeOvertimeAlertModal(runCallback = false) {
+      document.getElementById('modalOvertimeAlert').classList.add('hidden');
+      const cb = overtimeAlertCallback;
+      overtimeAlertCallback = null;
+      if (runCallback && typeof cb === 'function') {
+        cb();
+      }
+    }
+
+    // ============================================================================
+    // HORAS EXTRAS (AGREGAR / EDITAR / ELIMINAR + DROPDOWN ESTILO FOTO 1)
+    // ============================================================================
+    function toggleOvertimeEmployeeDropdown(event) {
+      if (event) event.stopPropagation();
+      const menu = document.getElementById('overtimeEmployeeMenu');
+      const chevron = document.getElementById('overtimeEmployeeChevron');
+      if (!menu) return;
+
+      const isHidden = menu.classList.contains('hidden');
+      if (isHidden) {
+        menu.classList.remove('hidden');
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+      } else {
+        closeOvertimeEmployeeDropdown();
+      }
+    }
+
+    function closeOvertimeEmployeeDropdown() {
+      const menu = document.getElementById('overtimeEmployeeMenu');
+      const chevron = document.getElementById('overtimeEmployeeChevron');
+      if (menu) menu.classList.add('hidden');
+      if (chevron) chevron.style.transform = 'rotate(0deg)';
+    }
+
+    function selectOvertimeEmployee(empId, labelText) {
+      const hiddenInput = document.getElementById('overtimeEmployeeValue');
+      const labelSpan = document.getElementById('overtimeEmployeeSelectedLabel');
+
+      hiddenInput.value = empId ? String(empId) : '';
+      if (empId) {
+        labelSpan.textContent = labelText;
+        labelSpan.classList.remove('text-app-sub', 'dark:text-darkapp-sub');
+        labelSpan.classList.add('text-app-title', 'dark:text-darkapp-title');
+      } else {
+        labelSpan.textContent = 'Selecciona un Miniser...';
+        labelSpan.classList.add('text-app-sub', 'dark:text-darkapp-sub');
+        labelSpan.classList.remove('text-app-title', 'dark:text-darkapp-title');
+      }
+
+      renderOvertimeEmployeesDropdown();
+      closeOvertimeEmployeeDropdown();
+    }
+
+    async function loadOvertimeRecords() {
+      if (navigator.onLine) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('horas_extras')
+            .select('*')
+            .order('fecha', { ascending: false });
+
+          if (!error && Array.isArray(data)) {
+            overtimeRecords = data.map(r => ({
+              id: r.id,
+              employeeId: String(r.employee_id),
+              hours: Number(r.horas),
+              date: r.fecha,
+              reason: r.motivo || ''
+            }));
+            await setAdminCache('horas_extras', overtimeRecords);
+            return;
+          }
+        } catch (err) {
+          console.warn('[Horas Extras] Tabla remota no disponible o sin red, usando respaldo local:', err);
+        }
+      }
+
+      const cached = await getAdminCache('horas_extras');
+      if (Array.isArray(cached)) {
+        overtimeRecords = cached;
+        return;
+      }
+
+      try {
+        const raw = localStorage.getItem(OVERTIME_STORAGE_KEY);
+        overtimeRecords = raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        overtimeRecords = [];
+      }
+    }
+
+    async function persistOvertimeLocal() {
+      try {
+        localStorage.setItem(OVERTIME_STORAGE_KEY, JSON.stringify(overtimeRecords));
+      } catch (e) {
+        console.warn('No se pudo guardar horas extras en localStorage:', e);
+      }
+      await setAdminCache('horas_extras', overtimeRecords);
+    }
+
+    function renderOvertimeEmployeesDropdown() {
+      const menu = document.getElementById('overtimeEmployeeMenu');
+      const currentVal = document.getElementById('overtimeEmployeeValue')?.value || '';
+      if (!menu) return;
+
+      if (!employees.length) {
+        menu.innerHTML = `<div class="px-4 py-2.5 text-xs text-app-sub dark:text-darkapp-sub">No hay empleados disponibles</div>`;
+        return;
+      }
+
+      menu.innerHTML = employees.map(emp => {
+        const empIdStr = String(emp.id);
+        const displayLabel = `${emp.name} (#${emp.number || 'N/A'})`;
+        const isSelected = currentVal === empIdStr;
+
+        return `
+          <button type="button" onclick="selectOvertimeEmployee('${escapeHtml(empIdStr)}', '${escapeHtml(displayLabel.replace(/'/g, "\\'"))}')" class="w-full px-4 py-2.5 text-left text-xs transition-colors flex items-center justify-between gap-2 cursor-pointer ${isSelected ? 'bg-app-brand/10 dark:bg-teal-500/15 font-bold text-app-brand dark:text-teal-400' : 'font-medium text-app-title dark:text-darkapp-title hover:bg-slate-100 dark:hover:bg-slate-800'}">
+            <span class="truncate">${escapeHtml(emp.name)}</span>
+            <span class="text-[10px] text-app-sub dark:text-darkapp-sub shrink-0">#${escapeHtml(emp.number || 'N/A')}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function resetOvertimeForm() {
+      editingOvertimeId = null;
+      document.getElementById('overtimeFormModeLabel').textContent = 'Nuevo registro';
+      document.getElementById('btnResetOvertimeForm').classList.add('hidden');
+      selectOvertimeEmployee('', '');
+      document.getElementById('overtimeHoursInput').value = '';
+      const today = new Date();
+      document.getElementById('overtimeDateInput').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      document.getElementById('overtimeReasonInput').value = '';
+      closeOvertimeEmployeeDropdown();
+    }
+
+    async function openOvertimeModal() {
+      hideRecordPopup();
+      if (!employees.length) {
+        employees = await syncEmployeesFromSupabase();
+      }
+      renderOvertimeEmployeesDropdown();
+      await loadOvertimeRecords();
+      resetOvertimeForm();
+      renderOvertimeRecordsList();
+      document.getElementById('modalOvertime').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeOvertimeModal() {
+      closeOvertimeEmployeeDropdown();
+      document.getElementById('modalOvertime').classList.add('hidden');
+      editingOvertimeId = null;
+    }
+
+    function editOvertimeRecord(id) {
+      const rec = overtimeRecords.find(r => String(r.id) === String(id));
+      if (!rec) return;
+
+      const emp = employees.find(e => String(e.id) === String(rec.employeeId));
+      const empLabel = emp ? `${emp.name} (#${emp.number || 'N/A'})` : `Empleado #${rec.employeeId}`;
+
+      editingOvertimeId = rec.id;
+      document.getElementById('overtimeFormModeLabel').textContent = 'Editando horas extras';
+      document.getElementById('btnResetOvertimeForm').classList.remove('hidden');
+      selectOvertimeEmployee(String(rec.employeeId), empLabel);
+      document.getElementById('overtimeHoursInput').value = rec.hours;
+      document.getElementById('overtimeDateInput').value = rec.date || '';
+      document.getElementById('overtimeReasonInput').value = rec.reason || '';
+    }
+
+    function deleteOvertimeRecord(id) {
+      openOvertimeConfirmModal(
+        '¿Deseas eliminar este registro de horas extras? Esta acción no se puede deshacer.',
+        async () => {
+          const btn = document.getElementById('btnSaveOvertime');
+          if (btn) btn.disabled = true;
+
+          try {
+            if (navigator.onLine && !String(id).startsWith('he_')) {
+              const { error } = await supabaseClient.from('horas_extras').delete().eq('id', id);
+              if (error) console.warn('Error eliminando en Supabase:', error.message);
+            }
+            overtimeRecords = overtimeRecords.filter(r => String(r.id) !== String(id));
+            await persistOvertimeLocal();
+            if (String(editingOvertimeId) === String(id)) {
+              resetOvertimeForm();
+            }
+            renderOvertimeRecordsList();
+            lucide.createIcons();
+          } finally {
+            if (btn) btn.disabled = false;
+          }
+        }
+      );
+    }
+
+    async function saveOvertimeRecord() {
+      const empHidden = document.getElementById('overtimeEmployeeValue');
+      const hoursInput = document.getElementById('overtimeHoursInput');
+      const dateInput = document.getElementById('overtimeDateInput');
+      const reasonInput = document.getElementById('overtimeReasonInput');
+
+      const employeeId = (empHidden.value || '').trim();
+      const hours = parseFloat(hoursInput.value);
+      const date = (dateInput.value || '').trim();
+      const reason = (reasonInput.value || '').trim();
+
+      if (!employeeId) {
+        openOvertimeNoticeModal('Por favor selecciona un Miniser.', 'Campo requerido', () => {
+          document.getElementById('btnOvertimeEmployeeDropdown').focus();
+        });
+        return;
+      }
+      if (isNaN(hours) || hours <= 0) {
+        openOvertimeNoticeModal('Por favor ingresa un número de horas extras válido mayor a 0.', 'Dato inválido', () => {
+          hoursInput.focus();
+        });
+        return;
+      }
+      if (!date) {
+        openOvertimeNoticeModal('Por favor selecciona la fecha en que se generaron las horas extras.', 'Campo requerido', () => {
+          dateInput.focus();
+        });
+        return;
+      }
+      if (!reason) {
+        openOvertimeNoticeModal('Por favor ingresa el motivo de las horas extras.', 'Campo requerido', () => {
+          reasonInput.focus();
+        });
+        return;
+      }
+
+      const btn = document.getElementById('btnSaveOvertime');
+      const originalText = btn.textContent;
+      btn.textContent = 'Guardando...';
+      btn.disabled = true;
+
+      try {
+        if (editingOvertimeId !== null) {
+          if (navigator.onLine && !String(editingOvertimeId).startsWith('he_')) {
+            const { error } = await supabaseClient
+              .from('horas_extras')
+              .update({
+                employee_id: Number(employeeId) || employeeId,
+                horas: hours,
+                fecha: date,
+                motivo: reason
+              })
+              .eq('id', editingOvertimeId);
+            if (error) console.warn('Error actualizando en Supabase:', error.message);
+          }
+
+          overtimeRecords = overtimeRecords.map(r =>
+            String(r.id) === String(editingOvertimeId)
+              ? { ...r, employeeId: String(employeeId), hours, date, reason }
+              : r
+          );
+        } else {
+          let createdId = 'he_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+
+          if (navigator.onLine) {
+            const { data, error } = await supabaseClient
+              .from('horas_extras')
+              .insert([{
+                employee_id: Number(employeeId) || employeeId,
+                horas: hours,
+                fecha: date,
+                motivo: reason
+              }])
+              .select()
+              .single();
+
+            if (!error && data && data.id != null) {
+              createdId = data.id;
+            } else if (error) {
+              console.warn('Error insertando en Supabase, guardando localmente:', error.message);
+            }
+          }
+
+          overtimeRecords.unshift({
+            id: createdId,
+            employeeId: String(employeeId),
+            hours,
+            date,
+            reason
+          });
+        }
+
+        await persistOvertimeLocal();
+        resetOvertimeForm();
+        renderOvertimeRecordsList();
+        lucide.createIcons();
+        openOvertimeNoticeModal('El registro de horas extras se guardó correctamente.', 'Guardado');
+      } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    function renderOvertimeRecordsList() {
+      const container = document.getElementById('overtimeRecordsList');
+      if (!container) return;
+
+      if (!overtimeRecords.length) {
+        container.innerHTML = `
+          <div class="text-center py-5 text-xs text-app-sub dark:text-darkapp-sub bg-app-bg/50 dark:bg-slate-800/40 rounded-xl">
+            No hay registros de horas extras.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = overtimeRecords.map(rec => {
+        const emp = employees.find(e => String(e.id) === String(rec.employeeId));
+        const empName = emp ? emp.name : `Empleado #${rec.employeeId}`;
+
+        return `
+          <div class="flex items-start justify-between gap-2 p-3 rounded-xl bg-app-bg/80 dark:bg-slate-800/70 border border-app-border/40 dark:border-slate-700/50">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-bold text-app-title dark:text-darkapp-title truncate">${escapeHtml(empName)}</span>
+                <span class="text-[10px] font-extrabold text-app-brand dark:text-teal-400 bg-app-brand/10 dark:bg-teal-500/15 px-2 py-0.5 rounded-md">${escapeHtml(String(rec.hours))} hrs</span>
+                <span class="text-[10px] font-medium text-app-sub dark:text-darkapp-sub">${escapeHtml(rec.date || '')}</span>
+              </div>
+              <p class="text-[11px] text-app-sub dark:text-darkapp-sub mt-1 break-words">${escapeHtml(rec.reason || '')}</p>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button type="button" onclick="editOvertimeRecord('${escapeHtml(String(rec.id))}')" class="p-2 text-app-sub dark:text-darkapp-sub hover:text-app-brand dark:hover:text-teal-400 hover:bg-app-brand/10 dark:hover:bg-teal-500/10 rounded-lg transition-colors cursor-pointer" title="Editar registro">
+                <i data-lucide="square-pen" class="w-4 h-4"></i>
+              </button>
+              <button type="button" onclick="deleteOvertimeRecord('${escapeHtml(String(rec.id))}')" class="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer" title="Eliminar registro">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
 
     function updateOfflineBanner(isUsingCache = false) {
         const banner = document.getElementById('offlineBanner');
@@ -481,10 +1305,16 @@
         updateOfflineBanner(true);
       });
       
-      // Cierre del popup flotante al tocar fuera o hacer scroll
+      // Cierre del popup flotante y dropdowns al tocar fuera o hacer scroll
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.record-chip-clickable')) {
           hideRecordPopup();
+        }
+        if (!e.target.closest('#btnOvertimeEmployeeDropdown') && !e.target.closest('#overtimeEmployeeMenu')) {
+          closeOvertimeEmployeeDropdown();
+        }
+        if (!e.target.closest('#btnEditShiftDropdown') && !e.target.closest('#editShiftDropdownMenu')) {
+          closeEditShiftDropdown();
         }
       });
       const mainScrollContainer = document.querySelector('.main-content');
@@ -506,6 +1336,7 @@
         }
       }
 
+      await loadShiftTemplates();
       await loadData();
     });
 
@@ -517,7 +1348,6 @@
       const target = event.currentTarget;
       const popup = document.getElementById('recordExactPopup');
 
-      // Si se vuelve a tocar el mismo registro, se cierra
       if (activePopupTrigger === target && !popup.classList.contains('hidden')) {
         hideRecordPopup();
         return;
@@ -535,7 +1365,6 @@
       let top = rect.top - popupRect.height - 8;
       let left = rect.left + (rect.width / 2) - (popupRect.width / 2);
 
-      // Evitar que se salga de los bordes laterales de la pantalla
       const padding = 10;
       if (left < padding) left = padding;
       if (left + popupRect.width > window.innerWidth - padding) {
@@ -621,7 +1450,6 @@
     }
 
     function renderWeeklyScheduleTable() {
-      // Usa currentWeekOffset para mostrar exactamente la semana seleccionada en el panel
       const { monday, sunday } = getWeekData(currentWeekOffset);
       const rangeOptions = { day: 'numeric', month: 'short' };
       
@@ -741,7 +1569,6 @@
       btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Generando...</span>`;
       lucide.createIcons();
 
-      // Forzar temporalmente ancho completo y quitar desbordamiento para que html2canvas capture todo (lunes a domingo)
       const originalOverflow = tableWrapper.style.overflow;
       const originalMaxWidth = tableWrapper.style.maxWidth;
       const originalWidth = tableWrapper.style.width;
@@ -752,7 +1579,7 @@
 
       try {
         const canvas = await html2canvas(tableWrapper, {
-          scale: 2, // Alta resolución
+          scale: 2,
           useCORS: true,
           backgroundColor: '#ffffff',
           windowWidth: tableWrapper.scrollWidth + 100
@@ -769,7 +1596,6 @@
         console.error('Error al generar la imagen:', err);
         alert('No se pudo generar la imagen de la tabla.');
       } finally {
-        // Restaurar estilos originales
         tableWrapper.style.overflow = originalOverflow;
         tableWrapper.style.maxWidth = originalMaxWidth;
         tableWrapper.style.width = originalWidth;
@@ -958,7 +1784,6 @@
 
           let cellsHTML = '';
 
-          // Si el día está programado como LIBRE (Descanso) y no hay registros, no se muestran los "--:--"
           if (!isFutureDay && !(isLibreDay && dayRecords.length === 0)) {
             cellsHTML = CHECK_TYPES.map((type) => {
               const rec = dayRecords.find(r => r.type === type.id);
@@ -1145,7 +1970,7 @@
     }
 
     // ============================================================================
-    // EDICIÓN DE TURNOS
+    // EDICIÓN DE TURNOS (DROPDOWN PERSONALIZADO ORDENADO + TURNO PERSONALIZADO)
     // ============================================================================
     function formatTo24HInput(timeStr) {
       if (!timeStr) return '';
@@ -1154,7 +1979,113 @@
       return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
     }
 
-    function openEditShiftModal(empId, dateStr, dayName) {
+    function toggleEditShiftDropdown(event) {
+      if (event) event.stopPropagation();
+      const menu = document.getElementById('editShiftDropdownMenu');
+      const chevron = document.getElementById('editShiftChevron');
+      if (!menu) return;
+
+      const isHidden = menu.classList.contains('hidden');
+      if (isHidden) {
+        menu.classList.remove('hidden');
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+      } else {
+        closeEditShiftDropdown();
+      }
+    }
+
+    function closeEditShiftDropdown() {
+      const menu = document.getElementById('editShiftDropdownMenu');
+      const chevron = document.getElementById('editShiftChevron');
+      if (menu) menu.classList.add('hidden');
+      if (chevron) chevron.style.transform = 'rotate(0deg)';
+    }
+
+    function selectEditShiftOption(value, labelText) {
+      document.getElementById('editShiftTemplateValue').value = value;
+      document.getElementById('editShiftSelectedLabel').textContent = labelText;
+      renderEditShiftDropdownMenu();
+      closeEditShiftDropdown();
+      handleEditShiftTemplateChange();
+    }
+
+    function renderEditShiftDropdownMenu() {
+      const menu = document.getElementById('editShiftDropdownMenu');
+      const currentVal = document.getElementById('editShiftTemplateValue')?.value || '__CUSTOM__';
+      if (!menu) return;
+
+      const sortedTemplates = getSortedShiftTemplates();
+
+      const templateItemsHTML = sortedTemplates.map(t => {
+        const tStart = formatTo24HInput(t.startTime);
+        const tEnd = formatTo24HInput(t.endTime);
+        const start12 = formatTime24To12Short(tStart);
+        const end12 = formatTime24To12Short(tEnd);
+        const label = `${start12} - ${end12} (${t.title})`;
+        const idStr = String(t.id);
+        const isSelected = currentVal === idStr;
+
+        return `
+          <button type="button" onclick="selectEditShiftOption('${escapeHtml(idStr)}', '${escapeHtml(label.replace(/'/g, "\\'"))}')" class="w-full px-4 py-2.5 text-left text-xs transition-colors flex items-center justify-between gap-2 cursor-pointer ${isSelected ? 'bg-app-brand/10 dark:bg-teal-500/15 font-bold text-app-brand dark:text-teal-400' : 'font-medium text-app-title dark:text-darkapp-title hover:bg-slate-100 dark:hover:bg-slate-800'}">
+            <span class="truncate">${escapeHtml(start12)} - ${escapeHtml(end12)}</span>
+            <span class="text-[10px] text-app-sub dark:text-darkapp-sub truncate">${escapeHtml(t.title)}</span>
+          </button>
+        `;
+      }).join('');
+
+      const isCustomSelected = currentVal === '__CUSTOM__';
+      const customItemHTML = `
+        <button type="button" onclick="selectEditShiftOption('__CUSTOM__', 'Turno personalizado')" class="w-full px-4 py-2.5 text-left text-xs transition-colors flex items-center justify-between gap-2 cursor-pointer ${isCustomSelected ? 'bg-app-brand/10 dark:bg-teal-500/15 font-bold text-app-brand dark:text-teal-400' : 'font-medium text-app-title dark:text-darkapp-title hover:bg-slate-100 dark:hover:bg-slate-800'}">
+          <span>Turno personalizado</span>
+        </button>
+      `;
+
+      menu.innerHTML = `${templateItemsHTML}${customItemHTML}`;
+    }
+
+    function populateEditShiftTemplateSelect(currentStart, currentEnd) {
+      const normStart = formatTo24HInput(currentStart);
+      const normEnd = formatTo24HInput(currentEnd);
+      const sortedTemplates = getSortedShiftTemplates();
+
+      const matchedTemplate = sortedTemplates.find(t =>
+        formatTo24HInput(t.startTime) === normStart &&
+        formatTo24HInput(t.endTime) === normEnd
+      );
+
+      if (matchedTemplate) {
+        const start12 = formatTime24To12Short(formatTo24HInput(matchedTemplate.startTime));
+        const end12 = formatTime24To12Short(formatTo24HInput(matchedTemplate.endTime));
+        document.getElementById('editShiftTemplateValue').value = String(matchedTemplate.id);
+        document.getElementById('editShiftSelectedLabel').textContent = `${start12} - ${end12} (${matchedTemplate.title})`;
+      } else {
+        document.getElementById('editShiftTemplateValue').value = '__CUSTOM__';
+        document.getElementById('editShiftSelectedLabel').textContent = 'Turno personalizado';
+      }
+
+      renderEditShiftDropdownMenu();
+      handleEditShiftTemplateChange();
+    }
+
+    function handleEditShiftTemplateChange() {
+      const val = document.getElementById('editShiftTemplateValue')?.value || '__CUSTOM__';
+      const customInputs = document.getElementById('customShiftHoursInputs');
+      const startInput = document.getElementById('editStartTime');
+      const endInput = document.getElementById('editEndTime');
+
+      if (val === '__CUSTOM__') {
+        if (customInputs) customInputs.classList.remove('hidden');
+      } else {
+        const chosen = shiftTemplates.find(t => String(t.id) === String(val));
+        if (chosen) {
+          startInput.value = formatTo24HInput(chosen.startTime);
+          endInput.value = formatTo24HInput(chosen.endTime);
+        }
+        if (customInputs) customInputs.classList.add('hidden');
+      }
+    }
+
+    async function openEditShiftModal(empId, dateStr, dayName) {
       hideRecordPopup();
       if (!navigator.onLine) {
         alert('Necesitas conexión a internet para editar turnos en la nube.');
@@ -1163,6 +2094,8 @@
 
       const emp = employees.find(e => e.id === empId);
       if (!emp) return;
+
+      await loadShiftTemplates();
 
       editingEmpId = empId;
       editingDateStr = dateStr;
@@ -1173,25 +2106,32 @@
 
       const sched = (emp.turnos && emp.turnos[dateStr]) ? emp.turnos[dateStr] : null;
 
+      let initialStart = '09:00';
+      let initialEnd = '18:00';
+
       if (sched && String(sched.startTime).toUpperCase() === 'LIBRE') {
         setShiftMode('LIBRE');
-        document.getElementById('editStartTime').value = '09:00';
-        document.getElementById('editEndTime').value = '18:00';
       } else {
         setShiftMode('WORK');
-        document.getElementById('editStartTime').value = sched && sched.startTime && !NON_WORK_SHIFTS.includes(String(sched.startTime).toUpperCase())
-          ? formatTo24HInput(sched.startTime)
-          : '09:00';
-        document.getElementById('editEndTime').value = sched && sched.endTime
-          ? formatTo24HInput(sched.endTime)
-          : '18:00';
+        if (sched && sched.startTime && !NON_WORK_SHIFTS.includes(String(sched.startTime).toUpperCase())) {
+          initialStart = formatTo24HInput(sched.startTime) || '09:00';
+        }
+        if (sched && sched.endTime) {
+          initialEnd = formatTo24HInput(sched.endTime) || '18:00';
+        }
       }
+
+      closeEditShiftDropdown();
+      document.getElementById('editStartTime').value = initialStart;
+      document.getElementById('editEndTime').value = initialEnd;
+      populateEditShiftTemplateSelect(initialStart, initialEnd);
 
       document.getElementById('modalEditShift').classList.remove('hidden');
       lucide.createIcons();
     }
 
     function closeEditShiftModal() {
+      closeEditShiftDropdown();
       document.getElementById('modalEditShift').classList.add('hidden');
       editingEmpId = null;
       editingDateStr = null;
@@ -1238,11 +2178,23 @@
         if (currentEditMode === 'LIBRE') {
           updatedShiftData = { startTime: 'LIBRE', endTime: null };
         } else {
-          const startVal = document.getElementById('editStartTime').value;
-          const endVal = document.getElementById('editEndTime').value;
+          const selectedVal = document.getElementById('editShiftTemplateValue')?.value || '__CUSTOM__';
+          let startVal = '';
+          let endVal = '';
+
+          if (selectedVal !== '__CUSTOM__') {
+            const chosen = shiftTemplates.find(t => String(t.id) === String(selectedVal));
+            if (chosen) {
+              startVal = formatTo24HInput(chosen.startTime);
+              endVal = formatTo24HInput(chosen.endTime);
+            }
+          } else {
+            startVal = document.getElementById('editStartTime').value;
+            endVal = document.getElementById('editEndTime').value;
+          }
 
           if (!startVal) {
-            alert('Por favor ingresa una hora de ingreso válida.');
+            alert('Por favor ingresa o selecciona una hora de ingreso válida.');
             btnSave.textContent = originalText;
             btnSave.disabled = false;
             return;
@@ -1279,8 +2231,23 @@
     }
 
     // ============================================================================
-    // GALERÍA DE FOTOS Y DESCARGA ORIGINAL
+    // GALERÍA DE FOTOS, DESCARGA ORIGINAL Y ELIMINACIÓN EN NUBE
     // ============================================================================
+    function extractStorageBucketAndPath(photoUrl) {
+      if (!photoUrl || typeof photoUrl !== 'string') return null;
+      try {
+        const parsedUrl = new URL(photoUrl);
+        const match = parsedUrl.pathname.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/([^/]+)\/(.+)$/);
+        if (!match) return null;
+        return {
+          bucket: decodeURIComponent(match[1]),
+          path: decodeURIComponent(match[2])
+        };
+      } catch (e) {
+        return null;
+      }
+    }
+
     function openEmployeePhotos(empId) {
       hideRecordPopup();
       const emp = employees.find(e => e.id === empId);
@@ -1333,7 +2300,7 @@
                   <span class="text-app-sub dark:text-darkapp-sub uppercase truncate flex-1 min-w-0">${escapeHtml(typeLabel)}</span>
                   <span class="text-app-brand dark:text-teal-400 shrink-0 text-right">${escapeHtml(timeStr)}</span>
                 </div>
-                <img src="${safePhotoUrl}" data-photo="${safePhotoUrl}" data-filename="${escapeHtml(downloadName)}" onerror="this.alt='Imagen no disponible sin conexión'; this.classList.add('opacity-40');" class="photo-thumb w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" title="Toca para ver en tamaño completo">
+                <img src="${safePhotoUrl}" data-record-id="${escapeHtml(String(rec.id))}" data-photo="${safePhotoUrl}" data-filename="${escapeHtml(downloadName)}" onerror="this.alt='Imagen no disponible sin conexión'; this.classList.add('opacity-40');" class="photo-thumb w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity bg-slate-200 dark:bg-slate-700" title="Toca para ver en tamaño completo">
               </div>
             `;
           });
@@ -1349,7 +2316,11 @@
       photosContentEl.onclick = (e) => {
           const img = e.target.closest('.photo-thumb');
           if (img) {
-              openLightbox(img.getAttribute('data-photo'), img.getAttribute('data-filename'));
+              openLightbox(
+                img.getAttribute('data-photo'),
+                img.getAttribute('data-filename'),
+                img.getAttribute('data-record-id')
+              );
           }
       };
 
@@ -1360,16 +2331,90 @@
       document.getElementById('modalPhotos').classList.add('hidden');
     }
 
-    function openLightbox(src, filename = 'registro.jpg') {
-      currentLightboxData = { url: src, filename };
+    function openLightbox(src, filename = 'registro.jpg', recordId = null) {
+      currentLightboxData = { recordId, url: src, filename };
       document.getElementById('lightboxImage').src = src;
       document.getElementById('modalLightbox').classList.remove('hidden');
       lucide.createIcons();
     }
     
     function closeLightbox() {
+      closeDeleteRecordConfirmModal();
       document.getElementById('modalLightbox').classList.add('hidden');
       setTimeout(() => { document.getElementById('lightboxImage').src = ''; }, 200);
+    }
+
+    function openDeleteRecordConfirmModal(event) {
+      if (event) event.stopPropagation();
+      document.getElementById('modalDeleteRecordConfirm').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeDeleteRecordConfirmModal() {
+      document.getElementById('modalDeleteRecordConfirm').classList.add('hidden');
+    }
+
+    async function confirmDeleteRecordFromCloud() {
+      const { recordId, url } = currentLightboxData;
+      if (!navigator.onLine) {
+        alert('Necesitas conexión a internet para eliminar registros de la Nube.');
+        return;
+      }
+
+      const btnConfirm = document.getElementById('btnConfirmDeleteRecord');
+      const btnCancel = document.getElementById('btnCancelDeleteRecord');
+      const originalText = btnConfirm.textContent;
+      btnConfirm.textContent = 'Eliminando...';
+      btnConfirm.disabled = true;
+      btnCancel.disabled = true;
+
+      try {
+        const storageInfo = extractStorageBucketAndPath(url);
+        if (storageInfo) {
+          const { error: storageError } = await supabaseClient
+            .storage
+            .from(storageInfo.bucket)
+            .remove([storageInfo.path]);
+          if (storageError) {
+            throw new Error(storageError.message || 'No se pudo eliminar la imagen del bucket.');
+          }
+        }
+
+        if (recordId != null && String(recordId).trim() !== '') {
+          const parsedId = isNaN(Number(recordId)) ? recordId : Number(recordId);
+          const { error: dbError } = await supabaseClient
+            .from('registros')
+            .delete()
+            .eq('id', parsedId);
+          if (dbError) {
+            throw new Error(dbError.message || 'No se pudo eliminar el registro de la tabla.');
+          }
+        } else if (url) {
+          const { error: dbErrorByUrl } = await supabaseClient
+            .from('registros')
+            .delete()
+            .eq('foto_url', url);
+          if (dbErrorByUrl) {
+            throw new Error(dbErrorByUrl.message || 'No se pudo eliminar el registro de la tabla.');
+          }
+        }
+
+        const currentEmpId = allRecords.find(r => String(r.id) === String(recordId) || r.photo === url)?.employeeId;
+
+        closeDeleteRecordConfirmModal();
+        closeLightbox();
+        await loadData();
+
+        if (currentEmpId != null && !document.getElementById('modalPhotos').classList.contains('hidden')) {
+          openEmployeePhotos(currentEmpId);
+        }
+      } catch (err) {
+        alert('Error al eliminar el registro: ' + err.message);
+      } finally {
+        btnConfirm.textContent = originalText;
+        btnConfirm.disabled = false;
+        btnCancel.disabled = false;
+      }
     }
 
     async function downloadLightboxPhoto() {
@@ -1382,7 +2427,6 @@
       btn.innerHTML = `<span>Descargando...</span>`;
 
       try {
-        // Obtiene el archivo binario original sin recompresión desde Supabase
         const response = await fetch(url, { mode: 'cors', cache: 'no-store' });
         if (!response.ok) throw new Error('No se pudo obtener el archivo original');
         
@@ -1424,6 +2468,7 @@
       }
       document.getElementById('importStatus').innerHTML = '';
       document.getElementById('modalImport').classList.remove('hidden');
+      lucide.createIcons();
     }
     
     function closeImportModal() {
