@@ -254,7 +254,7 @@
         }
 
         const ROLE_PERMISSIONS = {
-            gerencial: ['ventas_diarias', 'corte_cajas', 'consultor_fases', 'consultor_existencias', 'gestor_tickets', 'notas', 'checks','minisers','checador'],
+            gerencial: ['ventas_diarias', 'corte_cajas', 'consultor_fases', 'consultor_existencias', 'gestor_tickets', 'notas', 'checks','minisers','turnos','checador'],
             promotor: ['consultor_fases', 'consultor_existencias']
         };
         let currentUserRole = null;
@@ -262,15 +262,16 @@
 
         // FIX #5: eliminado el campo `category` (nunca se usaba)
         const PREDEFINED_CATALOG = [
-             { id: 'checador',       title: 'Checador',           url: 'checador/checador.html',     icon: 'clock-check',            desc: 'Registra tus Checadas diarias.' },
-            { id: 'ventas_diarias',       title: 'Ventas Diarias',           url: 'ventas/',     icon: 'banknote',            desc: 'Seguimiento a las metas diarias y semanales.' },
+             { id: 'ventas_diarias',       title: 'Ventas Diarias',           url: 'ventas/',     icon: 'banknote',            desc: 'Seguimiento a las metas diarias y semanales.' },            
+             { id: 'turnos',       title: 'Turnos',           url: 'checador/admin.html',     icon: 'clock-check',            desc: 'Administra los turnos del equipo.' },
             { id: 'corte_cajas',          title: 'Corte de Cajas',           url: 'corte/',      icon: 'circle-dollar-sign',  desc: 'Corte de cajas que se realiza al cierre de tienda.' },
+             { id: 'minisers',               title: 'Minisers',           url: 'minisers/',     icon: 'users',          desc: 'Gestion de Minisers de la sucursal.' },
             { id: 'consultor_fases',      title: 'Consultor de Fases',       url: 'fases/',      icon: 'numbers',        desc: 'Consulta las Fases, Fases SALE y los articulos en cada una de ellas.' },
             { id: 'consultor_existencias',title: 'Consultor de Existencias', url: 'existencias/',icon: 'package-search',              desc: 'Búsqueda rápida de stock mediante CB o SKU.' },
             { id: 'gestor_tickets',       title: 'Gestor de Tickets',        url: 'tickets/',    icon: 'ticket',              desc: 'Seguimiento a los Tickets generados por Mesa de Control' },
             { id: 'notas',                title: 'Notas y Pendientes',       url: 'notas/',      icon: 'notebook-pen',        desc: 'Anotaciones operativas y pendientes del turno' },
             { id: 'checks',               title: 'Checks Remotos',           url: 'checks/',     icon: 'copy-check',          desc: 'Registro de los Checks realizados a esta sucursal.' },
-                        { id: 'minisers',               title: 'Minisers',           url: 'minisers/',     icon: 'users',          desc: 'Gestion de Minisers de la sucursal.' }
+                        { id: 'checador',               title: 'Checador',           url: 'checador/checador.html',     icon: 'clock',          desc: 'Registra tus checadas diarias.' }
         ];
 
         let projects = JSON.parse(localStorage.getItem('fzboard_projects'));
