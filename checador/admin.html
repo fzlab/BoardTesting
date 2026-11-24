@@ -250,7 +250,7 @@
         <button type="button" onclick="closeShiftEditorModal()" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-slate-500/10 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title font-bold rounded-xl text-xs transition-colors cursor-pointer">
           Cancelar
         </button>
-        <button type="button" onclick="saveShiftTemplate()" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/15 text-app-brand dark:text-teal-400 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+        <button type="button" id="btnSaveShiftTemplate" onclick="saveShiftTemplate()" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/15 text-app-brand dark:text-teal-400 font-bold rounded-xl text-xs transition-colors cursor-pointer">
           Guardar turno
         </button>
       </div>
@@ -423,7 +423,7 @@
       <div id="workHoursContainer" class="space-y-3 mb-5">
         <!-- Lista Desplegable Personalizada de Turnos (Ordenada de ingreso más temprano a más tarde) -->
         <div class="relative">
-          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Hora de ingreso</label>
+          <label class="text-[11px] font-bold text-app-sub dark:text-darkapp-sub uppercase tracking-wider block mb-1">Turno específico</label>
           <input type="hidden" id="editShiftTemplateValue" value="__CUSTOM__">
           <button type="button" id="btnEditShiftDropdown" onclick="toggleEditShiftDropdown(event)" class="w-full bg-white/95 dark:bg-slate-900/95 border border-app-border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-left text-app-title dark:text-darkapp-title focus:outline-none focus:border-app-brand transition-colors flex items-center justify-between gap-2 cursor-pointer">
             <span id="editShiftSelectedLabel" class="truncate">Turno personalizado</span>
@@ -667,6 +667,7 @@
     let currentLightboxData = { recordId: null, url: '', filename: 'registro.jpg' };
 
     // Estado para Editor de Turnos y Horas Extras
+    const SHIFT_TEMPLATES_TABLE = 'turnos_especificos';
     const SHIFT_TEMPLATES_STORAGE_KEY = 'checador_shift_templates_v1';
     const OVERTIME_STORAGE_KEY = 'checador_overtime_records_v1';
     let shiftTemplates = [];
@@ -737,23 +738,63 @@
     }
 
     // ============================================================================
-    // EDITOR DE TURNOS ESPECÍFICOS (CREAR / EDITAR / ELIMINAR)
+    // EDITOR DE TURNOS ESPECÍFICOS (CREAR / EDITAR / ELIMINAR EN SUPABASE)
     // ============================================================================
+    function normalizeDbTimeToHHMM(timeVal) {
+      if (!timeVal) return '';
+      const str = String(timeVal).trim();
+      const match = str.match(/^(\d{1,2}):(\d{2})/);
+      if (!match) return str;
+      return `${match[1].padStart(2, '0')}:${match[2]}`;
+    }
+
+    function mapDbShiftTemplate(row) {
+      return {
+        id: String(row.id),
+        title: row.titulo || '',
+        startTime: normalizeDbTimeToHHMM(row.hora_ingreso),
+        endTime: normalizeDbTimeToHHMM(row.hora_salida)
+      };
+    }
+
     async function loadShiftTemplates() {
+      if (navigator.onLine) {
+        try {
+          const { data, error } = await supabaseClient
+            .from(SHIFT_TEMPLATES_TABLE)
+            .select('id, titulo, hora_ingreso, hora_salida')
+            .order('hora_ingreso', { ascending: true })
+            .order('hora_salida', { ascending: true });
+
+          if (!error && Array.isArray(data)) {
+            shiftTemplates = data.map(mapDbShiftTemplate);
+            await persistShiftTemplatesLocal();
+            return shiftTemplates;
+          }
+          if (error) {
+            console.warn('[Turnos Específicos] Error consultando Supabase:', error.message);
+          }
+        } catch (err) {
+          console.warn('[Turnos Específicos] Fallo de red consultando Supabase:', err);
+        }
+      }
+
       const cached = await getAdminCache('shift_templates');
       if (Array.isArray(cached)) {
         shiftTemplates = cached;
-        return;
+        return shiftTemplates;
       }
+
       try {
         const raw = localStorage.getItem(SHIFT_TEMPLATES_STORAGE_KEY);
         shiftTemplates = raw ? JSON.parse(raw) : [];
       } catch (e) {
         shiftTemplates = [];
       }
+      return shiftTemplates;
     }
 
-    async function persistShiftTemplates() {
+    async function persistShiftTemplatesLocal() {
       try {
         localStorage.setItem(SHIFT_TEMPLATES_STORAGE_KEY, JSON.stringify(shiftTemplates));
       } catch (e) {
@@ -789,23 +830,42 @@
       const item = shiftTemplates.find(t => String(t.id) === String(id));
       if (!item) return;
 
-      editingShiftTemplateId = item.id;
+      editingShiftTemplateId = String(item.id);
       document.getElementById('shiftFormModeLabel').textContent = 'Editando turno';
       document.getElementById('btnResetShiftForm').classList.remove('hidden');
       document.getElementById('shiftTemplateTitle').value = item.title || '';
-      document.getElementById('shiftTemplateStart').value = item.startTime || '09:00';
-      document.getElementById('shiftTemplateEnd').value = item.endTime || '18:00';
+      document.getElementById('shiftTemplateStart').value = formatTo24HInput(item.startTime) || '09:00';
+      document.getElementById('shiftTemplateEnd').value = formatTo24HInput(item.endTime) || '18:00';
     }
 
     async function deleteShiftTemplate(id) {
-      if (!confirm('¿Deseas eliminar este turno específico?')) return;
-      shiftTemplates = shiftTemplates.filter(t => String(t.id) !== String(id));
-      if (String(editingShiftTemplateId) === String(id)) {
-        resetShiftTemplateForm();
+      if (!navigator.onLine) {
+        alert('Necesitas conexión a internet para eliminar turnos en la base de datos.');
+        return;
       }
-      await persistShiftTemplates();
-      renderShiftTemplatesList();
-      lucide.createIcons();
+      if (!confirm('¿Deseas eliminar este turno específico de la base de datos?')) return;
+
+      try {
+        const { error } = await supabaseClient
+          .from(SHIFT_TEMPLATES_TABLE)
+          .delete()
+          .eq('id', id);
+
+        if (error) {
+          throw new Error(error.message || 'No se pudo eliminar el turno.');
+        }
+
+        shiftTemplates = shiftTemplates.filter(t => String(t.id) !== String(id));
+        if (String(editingShiftTemplateId) === String(id)) {
+          resetShiftTemplateForm();
+        }
+        await persistShiftTemplatesLocal();
+        renderShiftTemplatesList();
+        renderEditShiftDropdownMenu();
+        lucide.createIcons();
+      } catch (err) {
+        alert('Error al eliminar turno: ' + err.message);
+      }
     }
 
     async function saveShiftTemplate() {
@@ -814,8 +874,8 @@
       const endInput = document.getElementById('shiftTemplateEnd');
 
       const title = (titleInput.value || '').trim();
-      const startTime = (startInput.value || '').trim();
-      const endTime = (endInput.value || '').trim();
+      const startTime = formatTo24HInput((startInput.value || '').trim());
+      const endTime = formatTo24HInput((endInput.value || '').trim());
 
       if (!title) {
         alert('Por favor ingresa el título del turno.');
@@ -826,26 +886,78 @@
         alert('Por favor ingresa la hora de ingreso y la hora de salida.');
         return;
       }
-
-      if (editingShiftTemplateId !== null) {
-        shiftTemplates = shiftTemplates.map(t =>
-          String(t.id) === String(editingShiftTemplateId)
-            ? { ...t, title, startTime, endTime }
-            : t
-        );
-      } else {
-        shiftTemplates.unshift({
-          id: 'turno_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-          title,
-          startTime,
-          endTime
-        });
+      if (!navigator.onLine) {
+        alert('Necesitas conexión a internet para guardar turnos en la base de datos.');
+        return;
       }
 
-      await persistShiftTemplates();
-      resetShiftTemplateForm();
-      renderShiftTemplatesList();
-      lucide.createIcons();
+      const btnSave = document.getElementById('btnSaveShiftTemplate');
+      const originalText = btnSave ? btnSave.textContent : 'Guardar turno';
+      if (btnSave) {
+        btnSave.textContent = 'Guardando...';
+        btnSave.disabled = true;
+      }
+
+      try {
+        if (editingShiftTemplateId !== null) {
+          const { data, error } = await supabaseClient
+            .from(SHIFT_TEMPLATES_TABLE)
+            .update({
+              titulo: title,
+              hora_ingreso: startTime,
+              hora_salida: endTime
+            })
+            .eq('id', editingShiftTemplateId)
+            .select('id, titulo, hora_ingreso, hora_salida')
+            .single();
+
+          if (error) {
+            throw new Error(error.message || 'No se pudo actualizar el turno.');
+          }
+
+          const updatedItem = data ? mapDbShiftTemplate(data) : {
+            id: String(editingShiftTemplateId),
+            title,
+            startTime,
+            endTime
+          };
+
+          shiftTemplates = shiftTemplates.map(t =>
+            String(t.id) === String(editingShiftTemplateId) ? updatedItem : t
+          );
+        } else {
+          const { data, error } = await supabaseClient
+            .from(SHIFT_TEMPLATES_TABLE)
+            .insert([{
+              titulo: title,
+              hora_ingreso: startTime,
+              hora_salida: endTime
+            }])
+            .select('id, titulo, hora_ingreso, hora_salida')
+            .single();
+
+          if (error) {
+            throw new Error(error.message || 'No se pudo crear el turno.');
+          }
+
+          if (data) {
+            shiftTemplates.push(mapDbShiftTemplate(data));
+          }
+        }
+
+        await loadShiftTemplates();
+        resetShiftTemplateForm();
+        renderShiftTemplatesList();
+        renderEditShiftDropdownMenu();
+        lucide.createIcons();
+      } catch (err) {
+        alert('Error al guardar turno: ' + err.message);
+      } finally {
+        if (btnSave) {
+          btnSave.textContent = originalText;
+          btnSave.disabled = false;
+        }
+      }
     }
 
     function renderShiftTemplatesList() {
@@ -1298,6 +1410,7 @@
 
       window.addEventListener('online', async () => {
         updateOfflineBanner(false);
+        await loadShiftTemplates();
         await loadData();
       });
 
@@ -1403,7 +1516,8 @@
 
     function formatTime24To12Short(time24) {
       if (!time24) return '';
-      const parts = String(time24).trim().split(':');
+      const normalized = normalizeDbTimeToHHMM(time24);
+      const parts = String(normalized).trim().split(':');
       if (parts.length < 2) return String(time24).trim();
       const h = parseInt(parts[0], 10);
       const m = parseInt(parts[1], 10);
@@ -1974,8 +2088,9 @@
     // ============================================================================
     function formatTo24HInput(timeStr) {
       if (!timeStr) return '';
-      const parts = timeStr.split(':');
-      if (parts.length !== 2) return '';
+      const normalized = normalizeDbTimeToHHMM(timeStr);
+      const parts = normalized.split(':');
+      if (parts.length < 2) return '';
       return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
     }
 
@@ -2189,8 +2304,8 @@
               endVal = formatTo24HInput(chosen.endTime);
             }
           } else {
-            startVal = document.getElementById('editStartTime').value;
-            endVal = document.getElementById('editEndTime').value;
+            startVal = formatTo24HInput(document.getElementById('editStartTime').value);
+            endVal = formatTo24HInput(document.getElementById('editEndTime').value);
           }
 
           if (!startVal) {
