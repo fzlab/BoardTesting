@@ -257,6 +257,24 @@
     </div>
   </div>
 
+  <!-- MODAL: Aviso / Confirmación de Editor de Turnos (Glassmorphism + Botones Ghost) -->
+  <div id="modalShiftEditorAlert" class="fixed inset-0 z-[75] flex items-center justify-center p-4 hidden">
+    <div class="absolute inset-0 blur-overlay" onclick="closeShiftEditorAlertModal(false)"></div>
+    <div class="glass-modal w-full max-w-xs rounded-3xl shadow-2xl relative z-10 p-5 fade-in border border-white/40 dark:border-slate-700/60 text-center">
+      <div id="shiftEditorAlertIconWrap" class="w-11 h-11 rounded-2xl bg-app-brand/10 dark:bg-teal-500/15 text-app-brand dark:text-teal-400 flex items-center justify-center mx-auto mb-3">
+        <i id="shiftEditorAlertIcon" data-lucide="info" class="w-5 h-5"></i>
+      </div>
+      <h4 id="shiftEditorAlertTitle" class="text-sm font-bold text-app-title dark:text-darkapp-title mb-1">Aviso</h4>
+      <p id="shiftEditorAlertMessage" class="text-xs text-app-sub dark:text-darkapp-sub leading-relaxed mb-5">--</p>
+
+      <div id="shiftEditorAlertActions" class="flex items-center justify-center gap-2">
+        <button type="button" onclick="closeShiftEditorAlertModal(true)" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/15 text-app-brand dark:text-teal-400 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Aceptar
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: Horas Extras (Glassmorphism) -->
   <div id="modalOvertime" class="fixed inset-0 z-[60] flex items-center justify-center p-4 hidden">
     <div class="absolute inset-0 blur-overlay" onclick="closeOvertimeModal()"></div>
@@ -672,6 +690,7 @@
     const OVERTIME_STORAGE_KEY = 'checador_overtime_records_v1';
     let shiftTemplates = [];
     let editingShiftTemplateId = null;
+    let shiftEditorAlertCallback = null;
     let overtimeRecords = [];
     let editingOvertimeId = null;
     let overtimeAlertCallback = null;
@@ -734,6 +753,66 @@
       closeHeaderMenu();
       if (typeof actionFn === 'function') {
         actionFn();
+      }
+    }
+
+    // ============================================================================
+    // MODALES DE AVISO Y CONFIRMACIÓN PARA EDITOR DE TURNOS (GLASSMORPHISM + GHOST)
+    // ============================================================================
+    function openShiftEditorNoticeModal(message, title = 'Aviso', onAfterClose = null) {
+      shiftEditorAlertCallback = typeof onAfterClose === 'function' ? onAfterClose : null;
+      document.getElementById('shiftEditorAlertTitle').textContent = title;
+      document.getElementById('shiftEditorAlertMessage').textContent = message;
+
+      const iconWrap = document.getElementById('shiftEditorAlertIconWrap');
+      iconWrap.className = 'w-11 h-11 rounded-2xl bg-app-brand/10 dark:bg-teal-500/15 text-app-brand dark:text-teal-400 flex items-center justify-center mx-auto mb-3';
+      iconWrap.innerHTML = `<i data-lucide="info" class="w-5 h-5"></i>`;
+
+      document.getElementById('shiftEditorAlertActions').innerHTML = `
+        <button type="button" onclick="closeShiftEditorAlertModal(true)" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-app-brand/10 dark:hover:bg-teal-500/15 text-app-brand dark:text-teal-400 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Aceptar
+        </button>
+      `;
+
+      document.getElementById('modalShiftEditorAlert').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function openShiftEditorConfirmModal(message, onConfirm, title = 'Confirmar eliminación') {
+      shiftEditorAlertCallback = null;
+      document.getElementById('shiftEditorAlertTitle').textContent = title;
+      document.getElementById('shiftEditorAlertMessage').textContent = message;
+
+      const iconWrap = document.getElementById('shiftEditorAlertIconWrap');
+      iconWrap.className = 'w-11 h-11 rounded-2xl bg-rose-500/15 text-rose-500 flex items-center justify-center mx-auto mb-3';
+      iconWrap.innerHTML = `<i data-lucide="triangle-exclamation-point" class="w-5 h-5"></i>`;
+
+      document.getElementById('shiftEditorAlertActions').innerHTML = `
+        <button type="button" onclick="closeShiftEditorAlertModal(false)" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-slate-500/10 text-app-sub dark:text-darkapp-sub hover:text-app-title dark:hover:text-darkapp-title font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button" id="btnShiftEditorConfirmAction" class="flex-1 py-2.5 px-4 bg-transparent hover:bg-rose-500/15 text-rose-500 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+          Confirmar
+        </button>
+      `;
+
+      document.getElementById('btnShiftEditorConfirmAction').onclick = async () => {
+        closeShiftEditorAlertModal(false);
+        if (typeof onConfirm === 'function') {
+          await onConfirm();
+        }
+      };
+
+      document.getElementById('modalShiftEditorAlert').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeShiftEditorAlertModal(runCallback = false) {
+      document.getElementById('modalShiftEditorAlert').classList.add('hidden');
+      const cb = shiftEditorAlertCallback;
+      shiftEditorAlertCallback = null;
+      if (runCallback && typeof cb === 'function') {
+        cb();
       }
     }
 
@@ -840,32 +919,36 @@
 
     async function deleteShiftTemplate(id) {
       if (!navigator.onLine) {
-        alert('Necesitas conexión a internet para eliminar turnos en la base de datos.');
+        openShiftEditorNoticeModal('Necesitas conexión a internet para eliminar turnos en la base de datos.', 'Sin conexión');
         return;
       }
-      if (!confirm('¿Deseas eliminar este turno específico de la base de datos?')) return;
 
-      try {
-        const { error } = await supabaseClient
-          .from(SHIFT_TEMPLATES_TABLE)
-          .delete()
-          .eq('id', id);
+      openShiftEditorConfirmModal(
+        '¿Deseas eliminar este turno específico de la base de datos? Esta acción no se puede deshacer.',
+        async () => {
+          try {
+            const { error } = await supabaseClient
+              .from(SHIFT_TEMPLATES_TABLE)
+              .delete()
+              .eq('id', id);
 
-        if (error) {
-          throw new Error(error.message || 'No se pudo eliminar el turno.');
+            if (error) {
+              throw new Error(error.message || 'No se pudo eliminar el turno.');
+            }
+
+            shiftTemplates = shiftTemplates.filter(t => String(t.id) !== String(id));
+            if (String(editingShiftTemplateId) === String(id)) {
+              resetShiftTemplateForm();
+            }
+            await persistShiftTemplatesLocal();
+            renderShiftTemplatesList();
+            renderEditShiftDropdownMenu();
+            lucide.createIcons();
+          } catch (err) {
+            openShiftEditorNoticeModal('Error al eliminar turno: ' + err.message, 'Error');
+          }
         }
-
-        shiftTemplates = shiftTemplates.filter(t => String(t.id) !== String(id));
-        if (String(editingShiftTemplateId) === String(id)) {
-          resetShiftTemplateForm();
-        }
-        await persistShiftTemplatesLocal();
-        renderShiftTemplatesList();
-        renderEditShiftDropdownMenu();
-        lucide.createIcons();
-      } catch (err) {
-        alert('Error al eliminar turno: ' + err.message);
-      }
+      );
     }
 
     async function saveShiftTemplate() {
@@ -878,16 +961,17 @@
       const endTime = formatTo24HInput((endInput.value || '').trim());
 
       if (!title) {
-        alert('Por favor ingresa el título del turno.');
-        titleInput.focus();
+        openShiftEditorNoticeModal('Por favor ingresa el título del turno.', 'Campo requerido', () => {
+          titleInput.focus();
+        });
         return;
       }
       if (!startTime || !endTime) {
-        alert('Por favor ingresa la hora de ingreso y la hora de salida.');
+        openShiftEditorNoticeModal('Por favor ingresa la hora de ingreso y la hora de salida.', 'Campo requerido');
         return;
       }
       if (!navigator.onLine) {
-        alert('Necesitas conexión a internet para guardar turnos en la base de datos.');
+        openShiftEditorNoticeModal('Necesitas conexión a internet para guardar turnos en la base de datos.', 'Sin conexión');
         return;
       }
 
@@ -951,7 +1035,7 @@
         renderEditShiftDropdownMenu();
         lucide.createIcons();
       } catch (err) {
-        alert('Error al guardar turno: ' + err.message);
+        openShiftEditorNoticeModal('Error al guardar turno: ' + err.message, 'Error');
       } finally {
         if (btnSave) {
           btnSave.textContent = originalText;
